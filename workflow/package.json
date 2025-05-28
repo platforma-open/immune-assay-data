@@ -9,7 +9,10 @@
     "format": "/usr/bin/env emacs --script ./format.el"
   },
   "dependencies": {
-    "@platforma-sdk/workflow-tengo": "catalog:"
+    "@platforma-sdk/workflow-tengo": "catalog:",
+    "@platforma-open/milaboratories.immune-assay-data.prepare-fasta": "workspace:*",
+    "@platforma-open/milaboratories.immune-assay-data.add-header": "workspace:*",
+    "@platforma-open/soedinglab.software-mmseqs2": "catalog:"
   },
   "devDependencies": {
     "@platforma-sdk/tengo-builder": "catalog:",

@@ -1,17 +1,225 @@
-// "hello world"
+// light block with no workflow
 wf := import("@platforma-sdk/workflow-tengo:workflow")
+file := import("@platforma-sdk/workflow-tengo:file")
 exec := import("@platforma-sdk/workflow-tengo:exec")
 assets:= import("@platforma-sdk/workflow-tengo:assets")
+xsv := import("@platforma-sdk/workflow-tengo:pframes.xsv")
+pframes := import("@platforma-sdk/workflow-tengo:pframes")
+slices := import("@platforma-sdk/workflow-tengo:slices")
+pt := import("@platforma-sdk/workflow-tengo:pt")
 
-wf.body(func(args) {
-	tengoMessage := "Hello from Tengo, " + args.name + "!"
+prepareFastaSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.prepare-fasta:main")
+mmseqsSw := assets.importSoftware("@platforma-open/soedinglab.software-mmseqs2:main")
+addHeaderSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.add-header:main")
 
+wf.prepare(func(args){
+	bundleBuilder := wf.createPBundleBuilder()
+	bundleBuilder.addAnchor("main", args.datasetRef) 
+	bundleBuilder.addSingle(args.targetRef)
 	return {
-		outputs: {
-			tengoMessage: tengoMessage
-		},
-
-		exports: {}
+		columns: bundleBuilder.build()
 	}
 })
 
+prepareAssayTsv := func(args, file) {
+	// assign ids to assay sequences
+	ptw := pt.workflow()
+	df := ptw.frame({
+		file: file,
+		xsvType: "tsv" // @TODO 
+	})
+	df.addColumns(
+		pt.col(args.sequenceColumnHeader).hash("sha256", "base64_alphanumeric", 120).alias("seqId")
+	)
+	df.addColumns(
+		pt.col(args.sequenceColumnHeader).alias("sequence")
+	)
+	df.save("output.tsv")
+	
+	return ptw.run().getFile("output.tsv")
+}
+
+prepareClonesTsv := func(args, file) {
+	columns := args.columns
+	datasetSpec := columns.getSpec(args.datasetRef)
+
+	cloneTable := pframes.tsvFileBuilder()
+	
+	cloneTable.setAxisHeader(datasetSpec.axesSpec[1].name, "seqId")
+	cloneTable.add(columns.getColumn(args.targetRef), {header: "sequence"})
+
+	return cloneTable.build()
+}
+
+prepareFasta := func(fileTsv) {
+	return exec.builder().
+		software(prepareFastaSw).
+		addFile("input.tsv", fileTsv).
+		arg("-i").arg("input.tsv").
+		arg("-o").arg("output.fasta").
+		arg("--seq_col").arg("sequence").
+		arg("--id_col").arg("seqId").
+		saveFile("output.fasta").
+		run().
+		getFile("output.fasta")
+}
+
+// saveMmseqsDb := func(execBuilder, name) {
+// 	execBuilder.saveFile(name)
+// 	execBuilder.saveFile(name + "_h")
+// 	execBuilder.saveFile(name + "_h.dbtype")
+// 	execBuilder.saveFile(name + "_h.index")
+// 	execBuilder.saveFile(name + ".dbtype")
+// 	execBuilder.saveFile(name + ".index")
+// 	execBuilder.saveFile(name + ".lookup")
+// 	execBuilder.saveFile(name + ".source")
+// 	return execBuilder
+// }
+// getMmseqsDbFiles := func(execBuilder, name) {
+// 	db := {
+// 		db: execBuilder.getFile(name),
+// 		db_h: execBuilder.getFile(name + "_h"),
+// 		db_h_dbtype: execBuilder.getFile(name + "_h.dbtype"),
+// 		db_h_index: execBuilder.getFile(name + "_h.index"),
+// 		db_dbtype: execBuilder.getFile(name + ".dbtype"),
+// 		db_index: execBuilder.getFile(name + ".index"),
+// 		db_lookup: execBuilder.getFile(name + ".lookup"),
+// 		db_source: execBuilder.getFile(name + ".source")
+// 	}
+// 	return db
+// }
+
+// addMmseqsDbToWd := func(execBuilder, db, name) {
+// 	for n, file in db {
+// 		execBuilder.addFile(name + n[2:], file)
+// 	}
+// 	return execBuilder
+// }
+
+// buildMmseqsDb := func(fastaFile) {
+// 	mmseqs := exec.builder().
+// 		software(mmseqsSw).
+// 		dontSaveStdoutOrStderr(). // important to avoid CID conflict problems coming from different stdout output on same datasets
+// 		arg("createdb").
+// 		arg("input.fasta").
+// 		arg("db").
+// 		addFile("input.fasta", fastaFile)
+	
+// 	saveMmseqsDb(mmseqs, "db")
+// 	return getMmseqsDbFiles(mmseqs.run(), "db")
+// }
+
+wf.body(func(args) {
+	importFile := file.importFile(args.fileHandle)
+
+	assayTsv := prepareAssayTsv(args, importFile.file)
+	clonesTsv := prepareClonesTsv(args, importFile.file)
+
+
+	// prepare fasta file
+	assayFasta := prepareFasta(assayTsv)
+	clonesFasta := prepareFasta(clonesTsv)
+
+	// // build mmseqs dbs
+	// assayDb := buildMmseqsDb(assayFasta)
+	// clonesDb := buildMmseqsDb(clonesFasta)
+
+	// run search
+	mmseqs := exec.builder().
+		software(mmseqsSw).
+		dontSaveStdoutOrStderr(). // important to avoid CID conflict problems coming from different stdout output on same datasets
+		arg("easy-search").
+		arg("clones.fasta").
+		arg("assay.fasta").
+		arg("results.tsv").
+		arg("tmp").
+		addFile("clones.fasta", clonesFasta).
+		addFile("assay.fasta", assayFasta).
+		saveFile("results.tsv").
+		run()
+
+	// mmseqs := exec.builder().
+	// 	software(mmseqsSw).
+	// 	dontSaveStdoutOrStderr(). // important to avoid CID conflict problems coming from different stdout output on same datasets
+	// 	arg("search").
+	// 	arg("assay_db").
+	// 	arg("clones_db").
+	// 	arg("result_db").
+	// 	arg("tmp")
+
+	// addMmseqsDbToWd(mmseqs, assayDb, "assay_db")
+	// addMmseqsDbToWd(mmseqs, clonesDb, "clones_db")
+	// saveMmseqsDb(mmseqs, "result_db")
+	// resultDb := getMmseqsDbFiles(mmseqs.run(), "result_db")
+
+	// // convert mmseqs result to tsv
+	// mmseqs = exec.builder().
+	// 	software(mmseqsSw).
+	// 	dontSaveStdoutOrStderr(). // important to avoid CID conflict problems coming from different stdout output on same datasets
+	// 	arg("convertalis").
+	// 	arg("assay_db").
+	// 	arg("clones_db").
+	// 	arg("result_db").
+	// 	arg("results.tsv")
+
+	// addMmseqsDbToWd(mmseqs, assayDb, "assay_db")
+	// addMmseqsDbToWd(mmseqs, clonesDb, "clones_db")
+	// addMmseqsDbToWd(mmseqs, resultDb, "result_db")
+
+	// @TODO remove header stuff and replace with pt when available (!)
+	resultTsv := exec.builder().
+		software(addHeaderSw).
+		arg("-i").arg("results.tsv").
+		arg("-o").arg("results_with_header.tsv").
+		addFile("results.tsv", mmseqs.getFile("results.tsv")).
+		saveFile("results_with_header.tsv").
+		run().
+		getFile("results_with_header.tsv")
+
+	results := xsv.importFile(resultTsv, "tsv", {
+		axes: [
+			{
+				column: "query",
+				spec: {
+					name: "query",
+					type: "String",
+					annotations: {
+						"pl7.app/label": "Clone Sequence"
+					}
+				}
+			},
+			{
+				column: "target",
+				spec: {
+					name: "target",
+					type: "String",
+					annotations: {
+						"pl7.app/label": "Assay Sequence"
+					}
+				}
+			}
+		],
+		columns: [
+			{
+				column: "pident",
+				allowNA: true,
+				spec: {
+					name: "pident",
+					valueType: "Double",
+					annotations: {
+						"pl7.app/label": "Identity"
+					}
+				}
+			}
+		]
+	})
+
+	
+	return {
+		outputs: {
+			dataImportHandle: importFile.handle,
+			table: pframes.exportFrame(results)
+		},
+		exports: {}
+	}
+})

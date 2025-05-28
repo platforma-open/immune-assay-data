@@ -2,18 +2,15 @@
   "name": "@platforma-open/milaboratories.immune-assay-data",
   "version": "1.0.0",
   "scripts": {
-    "pretty": "prettier --write \"./**/*.{js,jsx,mjs,cjs,ts,tsx,json,vue}\"",
-    "build": "rm -rf ./block-pack && block-tools pack",
+    "build": "rm -rf block-pack/* && block-tools pack",
     "mark-stable": "block-tools mark-stable -r 's3://milab-euce1-prod-pkgs-s3-block-registry/pub/releases/?region=eu-central-1'",
-    "prepublishOnly": "block-tools pack && block-tools publish -r 's3://milab-euce1-prod-pkgs-s3-block-registry/pub/releases/?region=eu-central-1'",
-    "do-pack": "rm -f *.tgz && block-tools pack && pnpm pack && mv *.tgz package.tgz"
+    "prepublishOnly": "block-tools pack && block-tools publish -r 's3://milab-euce1-prod-pkgs-s3-block-registry/pub/releases/?region=eu-central-1'"
   },
   "files": [
     "index.d.ts",
     "index.js"
   ],
   "dependencies": {
-    "@platforma-sdk/model": "catalog:",
     "@platforma-open/milaboratories.immune-assay-data.workflow": "workspace:*",
     "@platforma-open/milaboratories.immune-assay-data.model": "workspace:*",
     "@platforma-open/milaboratories.immune-assay-data.ui": "workspace:*"
@@ -27,12 +24,17 @@
     "meta": {
       "title": "Immune Assay Data",
       "logo": "file:../logos/block-logo.png",
-      "url": "https://github.com/platforma-open/milaboratories.immune-assay-data",
+      "url": "https://github.com/milaboratory/platforma-top-antibodies",
+      "docs": "https://github.com/milaboratory/platforma-top-antibodies/docs",
       "support": "mailto:support@milaboratories.com",
-      "description": "Simple Hello World block that can be used as a boilerplate for newly created blocks.",
+      "description": "Import immune assay data.",
       "longDescription": "file:../docs/description.md",
       "changelog": "file:../CHANGELOG.md",
-      "tags": ["tutorial"],
+      "tags": [
+        "airr",
+        "downstream",
+        "assay"
+      ],
       "organization": {
         "name": "MiLaboratories Inc",
         "url": "https://milaboratories.com/",

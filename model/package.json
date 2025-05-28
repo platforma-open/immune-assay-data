@@ -11,14 +11,16 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@platforma-sdk/model": "catalog:"
+    "@platforma-sdk/model": "catalog:",
+    "@milaboratories/graph-maker": "catalog:"
   },
   "devDependencies": {
     "@platforma-sdk/block-tools": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
     "tsup": "catalog:",
-    "@platforma-sdk/eslint-config": "catalog:"
+    "@platforma-sdk/eslint-config": "catalog:",
+    "@platforma-sdk/ui-vue": "catalog:"
   },
   "tsup": {
     "entry": [
