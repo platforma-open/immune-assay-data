@@ -5,6 +5,7 @@ exec := import("@platforma-sdk/workflow-tengo:exec")
 assets:= import("@platforma-sdk/workflow-tengo:assets")
 xsv := import("@platforma-sdk/workflow-tengo:pframes.xsv")
 pframes := import("@platforma-sdk/workflow-tengo:pframes")
+pSpec := import("@platforma-sdk/workflow-tengo:pframes.spec")
 slices := import("@platforma-sdk/workflow-tengo:slices")
 pt := import("@platforma-sdk/workflow-tengo:pt")
 
@@ -26,12 +27,36 @@ prepareAssayTsv := func(args, file) {
 	ptw := pt.workflow()
 	df := ptw.frame({
 		file: file,
-		xsvType: "tsv" // @TODO 
+		xsvType: "tsv" // @TODO (!!!)
 	})
-	df.addColumns(
+
+	//////// calculate sequence id ////////
+	df = df.addColumns(
 		pt.col(args.sequenceColumnHeader).hash("sha256", "base64_alphanumeric", 120).alias("seqId")
 	)
-	df.addColumns(
+	//////// add label to ids ////////
+	df = df.withColumns(
+        pt.col("seqId").
+            strReplace("\\d", "", { replaceAll: true }).
+            strSlice(0, 5).               // Take first 5 characters
+            strToUpper().                 // Convert to uppercase
+            alias("tmpLabel")
+    )
+	df = df.withColumns(
+        pt.rank(pt.col("seqId")).  // Rank based on clonotypeKeyCol (default ascending)
+            over(pt.col("tmpLabel")).   // Partition by prefixTempCol
+            alias("rank")
+    )
+	df = df.withColumns(
+        pt.when(pt.col("rank").gt(pt.lit(1))).
+            then(pt.concatStr([pt.lit("A"), pt.col("tmpLabel"), pt.col("rank").cast("String")], { delimiter: "-" })).
+            otherwise(pt.concatStr([pt.lit("A"), pt.col("tmpLabel")], { delimiter: "-" })).
+            alias("seqIdLabel")
+    )
+	df = df.withoutColumns("rank", "tmpLabel")
+
+	//////// add sequence column ////////
+	df = df.addColumns(
 		pt.col(args.sequenceColumnHeader).alias("sequence")
 	)
 	df.save("output.tsv")
@@ -64,54 +89,8 @@ prepareFasta := func(fileTsv) {
 		getFile("output.fasta")
 }
 
-// saveMmseqsDb := func(execBuilder, name) {
-// 	execBuilder.saveFile(name)
-// 	execBuilder.saveFile(name + "_h")
-// 	execBuilder.saveFile(name + "_h.dbtype")
-// 	execBuilder.saveFile(name + "_h.index")
-// 	execBuilder.saveFile(name + ".dbtype")
-// 	execBuilder.saveFile(name + ".index")
-// 	execBuilder.saveFile(name + ".lookup")
-// 	execBuilder.saveFile(name + ".source")
-// 	return execBuilder
-// }
-// getMmseqsDbFiles := func(execBuilder, name) {
-// 	db := {
-// 		db: execBuilder.getFile(name),
-// 		db_h: execBuilder.getFile(name + "_h"),
-// 		db_h_dbtype: execBuilder.getFile(name + "_h.dbtype"),
-// 		db_h_index: execBuilder.getFile(name + "_h.index"),
-// 		db_dbtype: execBuilder.getFile(name + ".dbtype"),
-// 		db_index: execBuilder.getFile(name + ".index"),
-// 		db_lookup: execBuilder.getFile(name + ".lookup"),
-// 		db_source: execBuilder.getFile(name + ".source")
-// 	}
-// 	return db
-// }
-
-// addMmseqsDbToWd := func(execBuilder, db, name) {
-// 	for n, file in db {
-// 		execBuilder.addFile(name + n[2:], file)
-// 	}
-// 	return execBuilder
-// }
-
-// buildMmseqsDb := func(fastaFile) {
-// 	mmseqs := exec.builder().
-// 		software(mmseqsSw).
-// 		dontSaveStdoutOrStderr(). // important to avoid CID conflict problems coming from different stdout output on same datasets
-// 		arg("createdb").
-// 		arg("input.fasta").
-// 		arg("db").
-// 		addFile("input.fasta", fastaFile)
-	
-// 	saveMmseqsDb(mmseqs, "db")
-// 	return getMmseqsDbFiles(mmseqs.run(), "db")
-// }
-
 wf.body(func(args) {
 	importFile := file.importFile(args.fileHandle)
-
 	assayTsv := prepareAssayTsv(args, importFile.file)
 	clonesTsv := prepareClonesTsv(args, importFile.file)
 
@@ -119,10 +98,6 @@ wf.body(func(args) {
 	// prepare fasta file
 	assayFasta := prepareFasta(assayTsv)
 	clonesFasta := prepareFasta(clonesTsv)
-
-	// // build mmseqs dbs
-	// assayDb := buildMmseqsDb(assayFasta)
-	// clonesDb := buildMmseqsDb(clonesFasta)
 
 	// run search
 	mmseqs := exec.builder().
@@ -138,88 +113,236 @@ wf.body(func(args) {
 		saveFile("results.tsv").
 		run()
 
-	// mmseqs := exec.builder().
-	// 	software(mmseqsSw).
-	// 	dontSaveStdoutOrStderr(). // important to avoid CID conflict problems coming from different stdout output on same datasets
-	// 	arg("search").
-	// 	arg("assay_db").
-	// 	arg("clones_db").
-	// 	arg("result_db").
-	// 	arg("tmp")
-
-	// addMmseqsDbToWd(mmseqs, assayDb, "assay_db")
-	// addMmseqsDbToWd(mmseqs, clonesDb, "clones_db")
-	// saveMmseqsDb(mmseqs, "result_db")
-	// resultDb := getMmseqsDbFiles(mmseqs.run(), "result_db")
-
-	// // convert mmseqs result to tsv
-	// mmseqs = exec.builder().
-	// 	software(mmseqsSw).
-	// 	dontSaveStdoutOrStderr(). // important to avoid CID conflict problems coming from different stdout output on same datasets
-	// 	arg("convertalis").
-	// 	arg("assay_db").
-	// 	arg("clones_db").
-	// 	arg("result_db").
-	// 	arg("results.tsv")
-
-	// addMmseqsDbToWd(mmseqs, assayDb, "assay_db")
-	// addMmseqsDbToWd(mmseqs, clonesDb, "clones_db")
-	// addMmseqsDbToWd(mmseqs, resultDb, "result_db")
-
+	mmseqsOutput := mmseqs.getFile("results.tsv")
 	// @TODO remove header stuff and replace with pt when available (!)
-	resultTsv := exec.builder().
+	mmseqsResultTsv := exec.builder().
 		software(addHeaderSw).
 		arg("-i").arg("results.tsv").
 		arg("-o").arg("results_with_header.tsv").
-		addFile("results.tsv", mmseqs.getFile("results.tsv")).
+		addFile("results.tsv", mmseqsOutput).
 		saveFile("results_with_header.tsv").
 		run().
 		getFile("results_with_header.tsv")
 
-	results := xsv.importFile(resultTsv, "tsv", {
-		axes: [
-			{
-				column: "query",
-				spec: {
-					name: "query",
-					type: "String",
-					annotations: {
-						"pl7.app/label": "Clone Sequence"
-					}
-				}
-			},
-			{
-				column: "target",
-				spec: {
-					name: "target",
-					type: "String",
-					annotations: {
-						"pl7.app/label": "Assay Sequence"
-					}
-				}
-			}
-		],
-		columns: [
-			{
-				column: "pident",
-				allowNA: true,
-				spec: {
-					name: "pident",
-					valueType: "Double",
-					annotations: {
-						"pl7.app/label": "Identity"
-					}
-				}
-			}
-		]
+
+	//////// Process tables ////////
+
+	ptw := pt.workflow()
+	df := ptw.frame({
+		file: mmseqsResultTsv,
+		xsvType: "tsv"
 	})
 
+	cols := []
+	for _, col in ["bits", "evalue", "target", "pident", "alnlen", "mismatch", "gapopen", "qstart", "qend", "tstart", "tend"] {
+		cols = append(cols,
+					  pt.col(col).maxBy(
+							pt.col("evalue").multiply(-1),
+							pt.col("bits")
+					  	).alias(col)
+					  )
+	}
+	
+	df = df.groupBy("query").agg(cols...)
+	df.save("results.tsv")
+
+	// assay data import summary
+	assayDf := ptw.frame({
+		file: assayTsv,
+		xsvType: "tsv"
+	})
+	// import how many matches per assay sequence found
+	assayDf = assayDf.join(
+		df.groupBy("target").agg(
+			pt.col("query").count().alias("queryCount")
+		),
+		{
+			how: "left",
+			leftOn: "seqId",
+			rightOn: "target"
+		}
+	)
+	assayDf.save("assayData.tsv")
+
+	// clones 
+	clonesDf := df.join(assayDf,
+		{
+			how: "left",
+			leftOn: "target",
+			rightOn: "seqId"
+		}
+	)
+
+	clonesDf.save("clonesData.tsv")
+	ptw = ptw.run()
+	
+	//////// Building outputs & exports ////////
+	blockId := wf.blockId().getDataAsJson()
+
+	assayColumns := [
+		{
+			column: "seqIdLabel",
+			spec: {
+				name: "pl7.app/label",
+				valueType: "String",
+				annotations: {
+					"pl7.app/label": "Sequence Id",
+					"pl7.app/table/fontFamily": "monospace"
+				}
+			}
+		},	
+		{
+			column: "queryCount",
+			spec: {
+				name: "pl7.app/vdj/assay/queryCount",
+				valueType: "Int",
+				annotations: {
+					"pl7.app/label": "Matched Clones",
+					"pl7.app/table/orderPriority": "9000"
+				}
+			}
+	}]
+	for h in args.headers {
+		assayColumns = append(assayColumns, {
+			column: h,
+			spec: {
+				name: h,
+				valueType: "String",
+				annotations: {	
+					"pl7.app/label": h,
+					"pl7.app/table/orderPriority": h == args.sequenceColumnHeader ? "10000" : "1000"
+				}
+			}
+		})
+	}
+
+	assayImportResults := xsv.importFile(ptw.getFile("assayData.tsv"), "tsv", {
+		axes: [{
+			column: "seqId",
+			spec: {
+				name: "pl7.app/vdj/assay/sequenceId",
+				type: "String",
+				domain: {
+					"pl7.app/blockId": blockId
+				},
+				annotations: {
+					"pl7.app/label": "Sequence Id",
+					"pl7.app/table/fontFamily": "monospace"
+				}
+			}
+		}],
+		columns: assayColumns,
+		annotations: {
+			"pl7.app/isAnchor": "true"
+		}
+	})
+
+    // "bits", "evalue", "pident"
+	cloneColumns := [
+	{
+		column: "target",
+		spec: {
+			name: "pl7.app/vdj/assay/sequenceId",
+			valueType: "String",
+			domain: {
+				"pl7.app/blockId": blockId
+			},
+			annotations: {
+				"pl7.app/label": "Assay Sequence Id",
+				"pl7.app/table/defaultVisibility": "optional"
+			}
+		}
+	},
+	{
+		column: "bits",
+		spec: {
+			name: "pl7.app/alignment/bitScore",
+			valueType: "Float",
+			domain: {
+				"pl7.app/blockId": blockId
+			},
+			annotations: {
+				"pl7.app/label": "Bit Score",
+				"pl7.app/table/defaultVisibility": "optional"
+			}
+		}
+	},
+	{
+		column: "evalue",
+		spec: {
+			name: "pl7.app/alignment/evalue",
+			valueType: "Float",
+			domain: {
+				"pl7.app/blockId": blockId
+			},
+			annotations: {
+				"pl7.app/label": "E-value",
+				"pl7.app/table/defaultVisibility": "optional"
+			}
+		}
+	},
+	{
+		column: "pident",
+		spec: {
+			name: "pl7.app/alignment/pident",
+			valueType: "Float",
+			domain: {
+				"pl7.app/blockId": blockId
+			},
+			annotations: {
+				"pl7.app/label": "Percentage of identical matches",
+				"pl7.app/table/defaultVisibility": "optional"
+			}
+		}
+	}]
+
+	for h in args.headers {
+		cloneColumns = append(cloneColumns, {
+			column: h,
+			spec: {
+				name: h,
+				valueType: "String",
+				annotations: {	
+					"pl7.app/label": h,
+					"pl7.app/table/defaultVisibility": h == args.sequenceColumnHeader ? "optional" : "default"
+				}
+			}
+		})
+	}
+
+    datasetSpec := args.columns.getSpec(args.datasetRef)
+	cloneImportResults := xsv.importFile(
+		ptw.getFile("clonesData.tsv"), "tsv", {
+			axes: [{
+				column: "query",
+				spec: datasetSpec.axesSpec[1]
+			}],
+			columns: cloneColumns
+		},
+		{ splitDataAndSpec: true }
+	)
+
+	trace := pSpec.makeTrace(datasetSpec,
+        {
+            type: "milaboratories.clonotype-enrichment",
+            importance: 30,
+            label: "Clonotype enrichment"
+        })
+
+	epf := pframes.pFrameBuilder()
+	for k, v in cloneImportResults {
+		epf.add(k, trace.inject(v.spec), v.data)
+	}
+	epf = epf.build()
 	
 	return {
 		outputs: {
 			dataImportHandle: importFile.handle,
-			table: pframes.exportFrame(results)
+			table: pframes.exportFrame(assayImportResults),
+			mmseqsOutput: mmseqsOutput // @TODO tmp fix to resolve CID conflicts
 		},
-		exports: {}
+		exports: {
+			epf: epf
+		}
 	}
 })

@@ -32,6 +32,7 @@ export type BlockArgs = {
   datasetRef?: PlRef;
   targetRef?: SUniversalPColumnId;
   fileHandle?: ImportFileHandle;
+  headers?: string[];
   sequenceColumnHeader?: string;
   settings: Settings;
 };
@@ -39,7 +40,6 @@ export type BlockArgs = {
 export type UiState = {
   title: string;
   tableState: PlDataTableState;
-  headers?: string[];
 };
 
 export const model = BlockModel.create()
@@ -65,6 +65,7 @@ export const model = BlockModel.create()
   .argsValid((ctx) =>
     ctx.args.datasetRef !== undefined
     && ctx.args.fileHandle !== undefined
+    && ctx.args.headers !== undefined
     && ctx.args.sequenceColumnHeader !== undefined
     && ctx.args.targetRef !== undefined,
   )

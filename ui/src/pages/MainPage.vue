@@ -75,13 +75,13 @@ const setFile = async (file: ImportFileHandle | undefined) => {
 
   const header = rawData[0];
   if (header) {
-    app.model.ui.headers = header as string[];
+    app.model.args.headers = header as string[];
     // @TODO check there are not duplicate headers
   }
 };
 
 const sequenceColumnOptions = computed(() => {
-  return app.model.ui.headers?.map((header) => ({
+  return app.model.args.headers?.map((header) => ({
     label: header,
     value: header,
   }));
