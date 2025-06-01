@@ -3,7 +3,6 @@ on:
   workflow_dispatch: {}
 jobs:
   init:
-    if: github.repository != 'milaboratory/platforma-Immune Assay Data'
     runs-on: ubuntu-latest
     steps:
       - uses: milaboratory/github-ci/actions/context/init@v4
@@ -11,7 +10,6 @@ jobs:
           version-canonize: false
           branch-versioning: main
   run:
-    if: github.repository != 'milaboratory/platforma-Immune Assay Data'
     needs:
       - init
     uses: milaboratory/github-ci/.github/workflows/block-mark-stable.yaml@v4

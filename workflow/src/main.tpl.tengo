@@ -1,8 +1,10 @@
 // light block with no workflow
 wf := import("@platforma-sdk/workflow-tengo:workflow")
+ll := import("@platforma-sdk/workflow-tengo:ll")
 file := import("@platforma-sdk/workflow-tengo:file")
 exec := import("@platforma-sdk/workflow-tengo:exec")
 assets:= import("@platforma-sdk/workflow-tengo:assets")
+maps:= import("@platforma-sdk/workflow-tengo:maps")
 xsv := import("@platforma-sdk/workflow-tengo:pframes.xsv")
 pframes := import("@platforma-sdk/workflow-tengo:pframes")
 pSpec := import("@platforma-sdk/workflow-tengo:pframes.spec")
@@ -64,7 +66,7 @@ prepareAssayTsv := func(args, file) {
 	return ptw.run().getFile("output.tsv")
 }
 
-prepareClonesTsv := func(args, file) {
+prepareClonesTsv := func(args) {
 	columns := args.columns
 	datasetSpec := columns.getSpec(args.datasetRef)
 
@@ -76,29 +78,71 @@ prepareClonesTsv := func(args, file) {
 	return cloneTable.build()
 }
 
-prepareFasta := func(fileTsv) {
-	return exec.builder().
+/**
+ * Convert tsv file to fasta file
+ * @param fileTsv - tsv file
+ * @return fasta file
+ */
+tsv2Fasta := func(fileTsv) {
+	e := exec.builder().
 		software(prepareFastaSw).
 		addFile("input.tsv", fileTsv).
 		arg("-i").arg("input.tsv").
 		arg("-o").arg("output.fasta").
 		arg("--seq_col").arg("sequence").
 		arg("--id_col").arg("seqId").
-		saveFile("output.fasta").
-		run().
-		getFile("output.fasta")
+		saveFile("output.fasta")
+
+	return e.run().getFile("output.fasta")
 }
 
 wf.body(func(args) {
 	importFile := file.importFile(args.fileHandle)
+	datasetSpec := args.columns.getSpec(args.datasetRef)
+	targetSpec := args.columns.getSpec(args.targetRef)
+	
+	// aminoacid or nucleotide
+	sequenceColumnInfo := undefined
+	for col in args.importColumns {
+		if col.header == args.sequenceColumnHeader {
+			sequenceColumnInfo = col
+			break
+		}
+	}
+
+	// aminoacid or nucleotide
+	targetSequenceType := targetSpec.domain["pl7.app/alphabet"]
+	assaySequenceType := sequenceColumnInfo.sequenceType
+
+	if targetSequenceType == undefined {
+		ll.panic("Target sequence type is undefined")
+	}
+	
+	if assaySequenceType == undefined {
+		ll.panic("Assay sequence type is undefined")
+	}
+
 	assayTsv := prepareAssayTsv(args, importFile.file)
-	clonesTsv := prepareClonesTsv(args, importFile.file)
+	clonesTsv := prepareClonesTsv(args)
 
-
-	// prepare fasta file
-	assayFasta := prepareFasta(assayTsv)
-	clonesFasta := prepareFasta(clonesTsv)
-
+	// prepare fasta
+	clonesFasta := tsv2Fasta(clonesTsv)
+	assayFasta := tsv2Fasta(assayTsv)
+	
+	mmseqsSearchType := "0"
+	if targetSequenceType == "aminoacid" && assaySequenceType == "aminoacid" {
+		//1: amino acid
+		mmseqsSearchType = "1"
+	} else if targetSequenceType == "nucleotide" && assaySequenceType == "nucleotide" {
+		// 3: nucleotide
+		mmseqsSearchType = "3"
+	} else if targetSequenceType == "nucleotide" && assaySequenceType == "aminoacid" {
+		// 4: translated nucleotide alignment
+		mmseqsSearchType = "4"
+	} else if targetSequenceType == "aminoacid" && assaySequenceType == "nucleotide"  {
+		// 2: nucleotide
+		mmseqsSearchType = "2"
+	}
 	// run search
 	mmseqs := exec.builder().
 		software(mmseqsSw).
@@ -108,6 +152,9 @@ wf.body(func(args) {
 		arg("assay.fasta").
 		arg("results.tsv").
 		arg("tmp").
+		arg("--search-type").arg(mmseqsSearchType).
+		arg("--cov-mode").arg(string(args.settings.coverageMode)).
+		arg("-c").arg(string(args.settings.coverageThreshold)).
 		addFile("clones.fasta", clonesFasta).
 		addFile("assay.fasta", assayFasta).
 		saveFile("results.tsv").
@@ -201,16 +248,35 @@ wf.body(func(args) {
 					"pl7.app/table/orderPriority": "9000"
 				}
 			}
-	}]
-	for h in args.headers {
-		assayColumns = append(assayColumns, {
-			column: h,
+		},	
+		{
+			column: sequenceColumnInfo.header,
 			spec: {
-				name: h,
+				name: "pl7.app/vdj/sequence",
 				valueType: "String",
+				domain: {
+					"pl7.app/alphabet": assaySequenceType
+				},
+				annotations: {
+					"pl7.app/label": sequenceColumnInfo.header,
+					"pl7.app/table/fontFamily": "monospace",
+					"pl7.app/table/orderPriority": "10000"
+				}
+			}
+		}
+	]
+	for h in args.importColumns {
+		if h.header == args.sequenceColumnHeader {
+			continue
+		}
+		assayColumns = append(assayColumns, {
+			column: h.header,
+			spec: {
+				name: h.header,
+				valueType: h.type,
 				annotations: {	
-					"pl7.app/label": h,
-					"pl7.app/table/orderPriority": h == args.sequenceColumnHeader ? "10000" : "1000"
+					"pl7.app/label": h.header,
+					"pl7.app/table/orderPriority": "1000"
 				}
 			}
 		})
@@ -244,9 +310,6 @@ wf.body(func(args) {
 		spec: {
 			name: "pl7.app/vdj/assay/sequenceId",
 			valueType: "String",
-			domain: {
-				"pl7.app/blockId": blockId
-			},
 			annotations: {
 				"pl7.app/label": "Assay Sequence Id",
 				"pl7.app/table/defaultVisibility": "optional"
@@ -258,9 +321,6 @@ wf.body(func(args) {
 		spec: {
 			name: "pl7.app/alignment/bitScore",
 			valueType: "Float",
-			domain: {
-				"pl7.app/blockId": blockId
-			},
 			annotations: {
 				"pl7.app/label": "Bit Score",
 				"pl7.app/table/defaultVisibility": "optional"
@@ -272,9 +332,6 @@ wf.body(func(args) {
 		spec: {
 			name: "pl7.app/alignment/evalue",
 			valueType: "Float",
-			domain: {
-				"pl7.app/blockId": blockId
-			},
 			annotations: {
 				"pl7.app/label": "E-value",
 				"pl7.app/table/defaultVisibility": "optional"
@@ -286,9 +343,6 @@ wf.body(func(args) {
 		spec: {
 			name: "pl7.app/alignment/pident",
 			valueType: "Float",
-			domain: {
-				"pl7.app/blockId": blockId
-			},
 			annotations: {
 				"pl7.app/label": "Percentage of identical matches",
 				"pl7.app/table/defaultVisibility": "optional"
@@ -296,22 +350,28 @@ wf.body(func(args) {
 		}
 	}]
 
-	for h in args.headers {
+	for h in args.importColumns {
 		cloneColumns = append(cloneColumns, {
-			column: h,
+			column: h.header,
 			spec: {
-				name: h,
-				valueType: "String",
+				name: h.header,
+				valueType: h.type,
 				annotations: {	
-					"pl7.app/label": h,
-					"pl7.app/table/defaultVisibility": h == args.sequenceColumnHeader ? "optional" : "default"
+					"pl7.app/label": h.header,
+					"pl7.app/table/defaultVisibility": h.header == args.sequenceColumnHeader ? "optional" : "default"
 				}
 			}
 		})
 	}
 
-    datasetSpec := args.columns.getSpec(args.datasetRef)
-	cloneImportResults := xsv.importFile(
+	// insert domain
+	for col in cloneColumns {
+		col.spec.domain = maps.deepMerge(col.spec.domain, {
+			"pl7.app/blockId": blockId
+		})
+	}
+
+    cloneImportResults := xsv.importFile(
 		ptw.getFile("clonesData.tsv"), "tsv", {
 			axes: [{
 				column: "query",
@@ -324,9 +384,9 @@ wf.body(func(args) {
 
 	trace := pSpec.makeTrace(datasetSpec,
         {
-            type: "milaboratories.clonotype-enrichment",
+            type: "milaboratories.immune-assay-data",
             importance: 30,
-            label: "Clonotype enrichment"
+            label: "Assay Data"
         })
 
 	epf := pframes.pFrameBuilder()

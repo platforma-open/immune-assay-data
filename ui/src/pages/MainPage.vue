@@ -5,7 +5,6 @@ import type {
   PlRef,
 } from '@platforma-sdk/model';
 import {
-  getRawPlatformaInstance,
   plRefsEqual,
 } from '@platforma-sdk/model';
 import type {
@@ -16,7 +15,6 @@ import {
   PlAgDataTableV2,
   PlBlockPage,
   PlBtnGhost,
-  PlBtnGroup,
   PlDropdown,
   PlDropdownRef,
   PlFileInput,
@@ -33,11 +31,7 @@ import {
   useApp,
 } from '../app';
 
-import * as XLSX from 'xlsx';
-
-// Define a more specific type for raw Excel data
-type ExcelRow = (string | number | boolean | Date | null)[];
-type ExcelData = ExcelRow[];
+import { importFile } from '../importFile';
 
 const app = useApp();
 
@@ -51,82 +45,49 @@ function setDataset(ref: PlRef | undefined) {
 }
 const settingsOpen = ref(app.model.args.datasetRef === undefined);
 
-const tableSettings = computed<PlAgDataTableSettings>(() => (
-  app.model.outputs.table
-    ? {
-        sourceType: 'ptable',
-        model: app.model.outputs.table,
-      }
-    : undefined
-));
+const tableSettings = computed<PlAgDataTableSettings>(() => {
+  const pTable = app.model.outputs.table;
+
+  if (pTable === undefined && !app.model.outputs.isRunning) {
+    // special case: when block is not yet started at all (no table calculated)
+    return undefined;
+  }
+
+  return {
+    sourceType: 'ptable',
+    model: pTable,
+  };
+});
 
 const setFile = async (file: ImportFileHandle | undefined) => {
   if (!file) {
     return;
   }
-
-  app.model.args.fileHandle = file;
-
-  const localFile = file as LocalImportFileHandle;
-  const data = await getRawPlatformaInstance().lsDriver.getLocalFileContent(localFile);
-  const wb = XLSX.read(data);
-  const worksheet = wb.Sheets[wb.SheetNames[0]];
-  const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as ExcelData;
-
-  const header = rawData[0];
-  if (header) {
-    app.model.args.headers = header as string[];
-    // @TODO check there are not duplicate headers
-  }
+  importFile(file as LocalImportFileHandle);
 };
 
 const sequenceColumnOptions = computed(() => {
-  return app.model.args.headers?.map((header) => ({
-    label: header,
-    value: header,
-  }));
+  return app.model.args.importColumns
+    ?.filter((c) => c.sequenceType !== undefined)
+    ?.map((c) => ({
+      label: c.header,
+      value: c.header,
+    }));
 });
 
-const alphabetOptions = computed(() => [
-  {
-    label: 'Amino acid',
-    value: 'aminoacid',
-  },
-  {
-    label: 'Nucleotide',
-    value: 'nucleotide',
-  },
-]);
+const similarityTypeOptions = [
+  { label: 'Alignment Score', value: 'alignment-score' },
+  { label: 'Sequence Identity', value: 'sequence-identity' },
+];
 
-const searchLayoutOptions = computed(() => [
-  {
-    label: 'Global',
-    value: 'global',
-  },
-  {
-    label: 'Local',
-    value: 'local',
-  },
-  {
-    label: 'Semi-local (target)',
-    value: 'semilocal-target',
-  },
-  {
-    label: 'Semi-local (query)',
-    value: 'semilocal-query',
-  },
-]);
-
-const matchingCriteriaOptions = computed(() => [
-  {
-    label: 'Max penalty',
-    value: 'max-penalty',
-  },
-  {
-    label: 'Minimal identity',
-    value: 'minimal-identity',
-  },
-]);
+const coverageModeOptions = [
+  { label: 'Coverage of clone and assay sequences', value: 0 },
+  { label: 'Coverage of assay sequence', value: 1 },
+  { label: 'Coverage of clone sequence', value: 2 },
+  { label: 'Target length ≥ x% of clone length', value: 3 },
+  { label: 'Query length ≥ x% of assay sequence length', value: 4 },
+  { label: 'Shorter sequence ≥ x% of longer', value: 5 },
+];
 </script>
 
 <template>
@@ -163,7 +124,7 @@ const matchingCriteriaOptions = computed(() => [
       <PlDropdownRef
         :model-value="app.model.args.datasetRef"
         :options="app.model.outputs.datasetOptions"
-        label="Select dataset"
+        label="Dataset"
         clearable
         required
         @update:model-value="setDataset"
@@ -171,56 +132,60 @@ const matchingCriteriaOptions = computed(() => [
       <PlDropdown
         v-model="app.model.args.targetRef"
         :options="app.model.outputs.targetOptions"
-        label="Select target sequence to match"
+        label="Clonotype sequence to match"
         clearable
         required
-      />
+      >
+        <template #tooltip>
+          Select the sequence column used to match the assay data sequence with. If you select amino acid sequence and
+          the assay data sequence is nucleotide, the assay data sequence will be converted to amino acid sequence automatically.
+        </template>
+      </PlDropdown>
       <PlFileInput
         v-model="app.model.args.fileHandle"
-        label="Select assay data to import"
+        label="Assay data to import"
         placeholder="Assay data table"
-        :extensions="['.csv', '.xlsx', '.tsv']"
+        :extensions="['.csv', '.xlsx', '.xls', '.tsv']"
+        :error="app.model.ui.fileImportError"
+        required
         @update:model-value="setFile"
       />
+      <!-- @TODO: delete this after bug with not working error message in PlFileInput is fixed -->
+      <span v-if="app.model.ui.fileImportError" style="color: red;">
+        {{ app.model.ui.fileImportError }}
+      </span>
+
       <PlDropdown
         v-model="app.model.args.sequenceColumnHeader"
         :options="sequenceColumnOptions"
-        label="Select sequence column"
+        label="Assay sequence column"
         placeholder="Sequence column"
         clearable
         required
       />
+
       <PlSectionSeparator>Matching parameters</PlSectionSeparator>
-      <PlBtnGroup
-        v-model="app.model.args.settings.alphabet"
-        :options="alphabetOptions"
-        label="Assay data alphabet"
-        required
-      />
       <PlDropdown
-        v-model="app.model.args.settings.searchLayout"
-        :options="searchLayoutOptions"
-        label="Search layout"
-        required
-      />
-      <PlDropdown
-        v-model="app.model.args.settings.matchingCriteria.type"
-        :options="matchingCriteriaOptions"
-        label="Matching criteria"
-        required
-      />
+        v-model="app.model.args.settings.coverageMode"
+        :options="coverageModeOptions"
+        label="Coverage Mode"
+      >
+        <template #tooltip>
+          How to calculate the coverage between sequences for the coverage threshold.
+        </template>
+      </PlDropdown>
+
       <PlNumberField
-        v-if="app.model.args.settings.matchingCriteria.type === 'minimal-identity'"
-        v-model="app.model.args.settings.matchingCriteria.minIdentity"
-        label="Minimal identity"
-        required
-      />
-      <PlNumberField
-        v-if="app.model.args.settings.matchingCriteria.type === 'minimal-similarity'"
-        v-model="app.model.args.settings.matchingCriteria.minSimilarity"
-        label="Minimal similarity"
-        required
-      />
+        v-model="app.model.args.settings.coverageThreshold"
+        label="Coverage Threshold"
+        :minValue="0.1"
+        :step="0.1"
+        :maxValue="1.0"
+      >
+        <template #tooltip>
+          Select min fraction of aligned (covered) residues of clonotypes in the cluster.
+        </template>
+      </PlNumberField>
     </PlSlideModal>
   </PlBlockPage>
 </template>
