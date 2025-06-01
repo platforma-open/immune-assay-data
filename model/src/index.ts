@@ -10,35 +10,31 @@ import {
   createPlDataTableV2,
 } from '@platforma-sdk/model';
 
-type MatchCriteriaMaxPenalty = {
-  type: 'minimal-similarity';
-  minSimilarity: number;
-};
-
-type MatchCriteriaMinimalIdentity = {
-  type: 'minimal-identity';
-  minIdentity: number;
-};
-
-type MatchCriteria = MatchCriteriaMaxPenalty | MatchCriteriaMinimalIdentity;
-
 type Settings = {
-  alphabet: 'nucleotide' | 'aminoacid';
-  searchLayout: 'global' | 'semilocal-target' | 'semilocal-query' | 'local';
-  matchingCriteria: MatchCriteria;
+  coverageThreshold: number; // fraction of aligned residues required
+  coverageMode: 0 | 1 | 2 | 3 | 4 | 5; // MMseqs2 coverage modes
+};
+
+export type ImportColumnInfo = {
+  header: string;
+  type: 'Int' | 'Double' | 'String';
+  /** If this column is a sequence column, the type of the sequence */
+  sequenceType?: 'nucleotide' | 'aminoacid';
 };
 
 export type BlockArgs = {
   datasetRef?: PlRef;
   targetRef?: SUniversalPColumnId;
   fileHandle?: ImportFileHandle;
-  headers?: string[];
+  fileExtension?: string;
+  importColumns?: ImportColumnInfo[];
   sequenceColumnHeader?: string;
   settings: Settings;
 };
 
 export type UiState = {
   title: string;
+  fileImportError?: string;
   tableState: PlDataTableState;
 };
 
@@ -46,12 +42,8 @@ export const model = BlockModel.create()
 
   .withArgs<BlockArgs>({
     settings: {
-      alphabet: 'aminoacid',
-      searchLayout: 'local',
-      matchingCriteria: {
-        type: 'minimal-identity',
-        minIdentity: 0.9,
-      },
+      coverageMode: 2, // default to coverage of clone,
+      coverageThreshold: 0.95, // default value matching MMseqs2 default
     },
   })
 
@@ -65,9 +57,10 @@ export const model = BlockModel.create()
   .argsValid((ctx) =>
     ctx.args.datasetRef !== undefined
     && ctx.args.fileHandle !== undefined
-    && ctx.args.headers !== undefined
+    && ctx.args.importColumns !== undefined
     && ctx.args.sequenceColumnHeader !== undefined
-    && ctx.args.targetRef !== undefined,
+    && ctx.args.targetRef !== undefined
+    && ctx.uiState.fileImportError === undefined,
   )
 
   .output('datasetOptions', (ctx) =>
@@ -147,7 +140,7 @@ export const model = BlockModel.create()
 
   .output('isRunning', (ctx) => ctx.outputs?.getIsReadyOrError() === false)
 
-  .title((ctx) => ctx.uiState.title ?? 'Antibody/TCR Leads')
+  .title((ctx) => ctx.uiState.title)
 
   .sections((_ctx) => ([
     { type: 'link', href: '/', label: 'Main' },
