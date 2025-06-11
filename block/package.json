@@ -24,8 +24,8 @@
     "meta": {
       "title": "Immune Assay Data",
       "logo": "file:../logos/block-logo.png",
-      "url": "https://github.com/milaboratory/platforma-top-antibodies",
-      "docs": "https://github.com/milaboratory/platforma-top-antibodies/docs",
+      "url": "https://github.com/milaboratory/platforma-immune-assay-data",
+      "docs": "https://github.com/milaboratory/platforma-immune-assay-data/docs",
       "support": "mailto:support@milaboratories.com",
       "description": "Import immune assay data.",
       "longDescription": "file:../docs/description.md",
