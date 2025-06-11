@@ -10,6 +10,8 @@ pframes := import("@platforma-sdk/workflow-tengo:pframes")
 pSpec := import("@platforma-sdk/workflow-tengo:pframes.spec")
 slices := import("@platforma-sdk/workflow-tengo:slices")
 pt := import("@platforma-sdk/workflow-tengo:pt")
+path := import("@platforma-sdk/workflow-tengo:path")
+json := import("json")
 
 prepareFastaSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.prepare-fasta:main")
 mmseqsSw := assets.importSoftware("@platforma-open/soedinglab.software-mmseqs2:main")
@@ -24,12 +26,12 @@ wf.prepare(func(args){
 	}
 })
 
-prepareAssayTsv := func(args, file) {
+prepareAssayFile := func(args, file, xsvType) {
 	// assign ids to assay sequences
 	ptw := pt.workflow()
 	df := ptw.frame({
 		file: file,
-		xsvType: "tsv" // @TODO (!!!)
+		xsvType: xsvType
 	})
 
 	//////// calculate sequence id ////////
@@ -122,7 +124,26 @@ wf.body(func(args) {
 		ll.panic("Assay sequence type is undefined")
 	}
 
-	assayTsv := prepareAssayTsv(args, importFile.file)
+	handleUrl := ll.parseUrl(args.fileHandle)
+	jsonPayload := handleUrl.Path[1:]
+	fileInfo := json.decode(jsonPayload)
+
+	fileName := ""
+	if fileInfo.localPath != undefined {
+		fileName = fileInfo.localPath
+	} else if fileInfo.path != undefined {
+		fileName = fileInfo.path
+	} else {
+		ll.panic("Could not determine filename from file handle: ", args.fileHandle)
+	}
+
+	fileNameParts := path.split(fileName, ".")
+	xsvType := "tsv"
+	if len(fileNameParts) > 1 {
+		xsvType = fileNameParts[len(fileNameParts)-1]
+	}
+
+	assayTsv := prepareAssayFile(args, importFile.file, xsvType)
 	clonesTsv := prepareClonesTsv(args)
 
 	// prepare fasta
