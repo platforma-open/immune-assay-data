@@ -306,12 +306,13 @@ wf.body(func(args) {
     // "bits", "evalue", "pident"
 	cloneColumns := [
 	{
-		column: "target",
+		column: "seqIdLabel",
 		spec: {
-			name: "pl7.app/vdj/assay/sequenceId",
+			name: "pl7.app/vdj/assay/sequenceIdLabel",
 			valueType: "String",
 			annotations: {
 				"pl7.app/label": "Assay Sequence Id",
+				"pl7.app/table/fontFamily": "monospace",
 				"pl7.app/table/visibility": "optional"
 			}
 		}
