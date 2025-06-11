@@ -312,7 +312,7 @@ wf.body(func(args) {
 			valueType: "String",
 			annotations: {
 				"pl7.app/label": "Assay Sequence Id",
-				"pl7.app/table/defaultVisibility": "optional"
+				"pl7.app/table/visibility": "optional"
 			}
 		}
 	},
@@ -323,7 +323,7 @@ wf.body(func(args) {
 			valueType: "Float",
 			annotations: {
 				"pl7.app/label": "Bit Score",
-				"pl7.app/table/defaultVisibility": "optional"
+				"pl7.app/table/visibility": "optional"
 			}
 		}
 	},
@@ -334,7 +334,7 @@ wf.body(func(args) {
 			valueType: "Float",
 			annotations: {
 				"pl7.app/label": "E-value",
-				"pl7.app/table/defaultVisibility": "optional"
+				"pl7.app/table/visibility": "optional"
 			}
 		}
 	},
@@ -345,7 +345,7 @@ wf.body(func(args) {
 			valueType: "Float",
 			annotations: {
 				"pl7.app/label": "Percentage of identical matches",
-				"pl7.app/table/defaultVisibility": "optional"
+				"pl7.app/table/visibility": "optional"
 			}
 		}
 	}]
@@ -358,7 +358,7 @@ wf.body(func(args) {
 				valueType: h.type,
 				annotations: {	
 					"pl7.app/label": h.header,
-					"pl7.app/table/defaultVisibility": h.header == args.sequenceColumnHeader ? "optional" : "default"
+					"pl7.app/table/visibility": h.header == args.sequenceColumnHeader ? "optional" : "default"
 				}
 			}
 		})
