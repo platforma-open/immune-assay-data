@@ -68,11 +68,27 @@ function inferColumnType(values: unknown[]): 'Int' | 'Double' | 'String' {
 function inferSequenceType(values: unknown[]): 'nucleotide' | 'aminoacid' | undefined {
   const validSequences = values
     .filter((v) => v !== null && v !== undefined && String(v).trim() !== '')
-    .map((v) => String(v).trim())
-    .filter((v) => v.length >= 3) // Only consider sequences of meaningful length
-    .slice(0, 1000); // Check only first 1000 sequences
+    .map((v) => String(v).trim());
 
-  if (validSequences.length === 0) return undefined;
+  if (validSequences.length === 0) {
+    return undefined;
+  }
+
+  // Cardinality check: if there are very few unique values relative to the total number of rows,
+  // it's likely a categorical column, not a sequence column.
+  const uniqueValues = new Set(validSequences);
+  const uniqueRatio = uniqueValues.size / validSequences.length;
+
+  // Heuristic: if a column has very few unique values, it's likely categorical.
+  // - Handles Yes/No cases (size=2) in even small-ish files.
+  // - Handles other low-cardinality data if the ratio is low in larger files.
+  if ((uniqueValues.size <= 2 && validSequences.length > 5) || (uniqueRatio < 0.2 && validSequences.length > 10)) {
+    return undefined;
+  }
+
+  const checkSequences = validSequences.slice(0, 1000); // Check only a sample for performance
+
+  if (checkSequences.length === 0) return undefined;
 
   // Count characters across all sequences
   let nucleotideCharCount = 0;
@@ -84,7 +100,7 @@ function inferSequenceType(values: unknown[]): 'nucleotide' | 'aminoacid' | unde
   // Standard 20 amino acids plus X and * (excluding nucleotide overlap)
   const aminoAcidOnlyChars = new Set(['R', 'D', 'E', 'Q', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'W', 'Y', 'V', 'X', '*']);
 
-  for (const sequence of validSequences) {
+  for (const sequence of checkSequences) {
     const upperSeq = sequence.toUpperCase();
     for (const char of upperSeq) {
       if (char === '-') {
