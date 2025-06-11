@@ -75,10 +75,10 @@ const sequenceColumnOptions = computed(() => {
     }));
 });
 
-const similarityTypeOptions = [
-  { label: 'Alignment Score', value: 'alignment-score' },
-  { label: 'Sequence Identity', value: 'sequence-identity' },
-];
+// const similarityTypeOptions = [
+//   { label: 'Alignment Score', value: 'alignment-score' },
+//   { label: 'Sequence Identity', value: 'sequence-identity' },
+// ];
 
 const coverageModeOptions = [
   { label: 'Coverage of clone and assay sequences', value: 0 },
@@ -145,11 +145,15 @@ const coverageModeOptions = [
         v-model="app.model.args.fileHandle"
         label="Assay data to import"
         placeholder="Assay data table"
-        :extensions="['.csv', '.xlsx', '.xls', '.tsv']"
+        :extensions="['.csv', '.tsv']"
         :error="app.model.ui.fileImportError"
         required
         @update:model-value="setFile"
-      />
+      >
+        <template #tooltip>
+          Upload a comma-separated (.csv) or tab-separated (.tsv) file containing assay data.
+        </template>
+      </PlFileInput>
       <!-- @TODO: delete this after bug with not working error message in PlFileInput is fixed -->
       <span v-if="app.model.ui.fileImportError" style="color: red;">
         {{ app.model.ui.fileImportError }}

@@ -143,15 +143,9 @@ export async function importFile(file: LocalImportFileHandle) {
   // clear state
   app.model.args.importColumns = undefined;
   app.model.ui.fileImportError = undefined;
-
   const fileName = getFileNameFromHandle(file);
   const extension = fileName.split('.').pop();
   app.model.args.fileExtension = extension;
-
-  if (extension === 'xlsx' || extension === 'xls') {
-    app.model.ui.fileImportError = 'XLS import is not yet available; use CSV instead';
-    return;
-  }
 
   const data = await getRawPlatformaInstance().lsDriver.getLocalFileContent(file);
   const wb = XLSX.read(data);
