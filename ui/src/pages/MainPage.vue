@@ -5,6 +5,7 @@ import type {
   PlRef,
 } from '@platforma-sdk/model';
 import {
+  getRawPlatformaInstance,
   plRefsEqual,
 } from '@platforma-sdk/model';
 import type {
@@ -21,17 +22,18 @@ import {
   PlFileInput,
   PlMaskIcon24,
   PlNumberField,
-  PlRow,
   PlSectionSeparator,
   PlSlideModal,
 } from '@platforma-sdk/ui-vue';
 import {
   computed,
   ref,
+  watch,
 } from 'vue';
 import {
   useApp,
 } from '../app';
+import * as XLSX from 'xlsx';
 
 import { importFile } from '../importFile';
 
@@ -67,6 +69,53 @@ const setFile = async (file: ImportFileHandle | undefined) => {
   }
   importFile(file as LocalImportFileHandle);
 };
+
+// Watch for when the file is removed to reset dependent fields
+watch(
+  () => app.model.args.fileHandle,
+  (newFileHandle) => {
+    if (!newFileHandle) {
+      app.model.args.sequenceColumnHeader = undefined;
+      app.model.args.selectedColumns = [];
+    }
+  },
+);
+
+// Watch for when the user selects a sequence column to validate it
+watch(
+  () => app.model.args.sequenceColumnHeader,
+  async (newHeader) => {
+    if (!newHeader || !app.model.args.fileHandle) {
+      app.model.ui.fileImportError = undefined;
+      return;
+    }
+
+    try {
+      const data = await getRawPlatformaInstance().lsDriver.getLocalFileContent(
+        app.model.args.fileHandle as LocalImportFileHandle,
+      );
+      const wb = XLSX.read(data);
+      const worksheet = wb.Sheets[wb.SheetNames[0]];
+      const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: true, blankrows: false }) as string[][];
+
+      const headerRow = rawData[0];
+      const colIndex = headerRow.indexOf(newHeader);
+      if (colIndex === -1) return;
+
+      const sequences = rawData.slice(1).map((row) => row[colIndex]).filter(Boolean);
+      const uniqueSequences = new Set(sequences);
+
+      if (sequences.length !== uniqueSequences.size) {
+        app.model.ui.fileImportError = `The selected sequence column '${newHeader}' contains duplicate values.`;
+      } else {
+        app.model.ui.fileImportError = undefined;
+      }
+    } catch (e) {
+      console.error('Failed to validate sequence uniqueness:', e);
+      app.model.ui.fileImportError = 'Could not read file to validate sequence uniqueness.';
+    }
+  },
+);
 
 const sequenceColumnOptions = computed(() => {
   return app.model.args.importColumns
