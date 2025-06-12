@@ -30,6 +30,7 @@ export type BlockArgs = {
   fileExtension?: string;
   importColumns?: ImportColumnInfo[];
   sequenceColumnHeader?: string;
+  selectedColumns: string[];
   settings: Settings;
 };
 
@@ -47,6 +48,7 @@ export const model = BlockModel.create()
       identity: 0.9,
       similarityType: 'alignment-score',
     },
+    selectedColumns: [],
   })
 
   .withUiState<UiState>({

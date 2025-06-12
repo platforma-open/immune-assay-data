@@ -16,6 +16,7 @@ import {
   PlBlockPage,
   PlBtnGhost,
   PlDropdown,
+  PlDropdownMulti,
   PlDropdownRef,
   PlFileInput,
   PlMaskIcon24,
@@ -70,6 +71,15 @@ const setFile = async (file: ImportFileHandle | undefined) => {
 const sequenceColumnOptions = computed(() => {
   return app.model.args.importColumns
     ?.filter((c) => c.sequenceType !== undefined)
+    ?.map((c) => ({
+      label: c.header,
+      value: c.header,
+    }));
+});
+
+const otherColumnOptions = computed(() => {
+  return app.model.args.importColumns
+    ?.filter((c) => c.header !== app.model.args.sequenceColumnHeader)
     ?.map((c) => ({
       label: c.header,
       value: c.header,
@@ -139,8 +149,23 @@ const similarityTypeOptions = [
         {{ app.model.ui.fileImportError }}
       </span>
 
-      <PlDropdown v-model="app.model.args.sequenceColumnHeader" :options="sequenceColumnOptions"
-        label="Assay sequence column" placeholder="Sequence column" clearable required />
+      <PlDropdown
+        v-model="app.model.args.sequenceColumnHeader"
+        :options="sequenceColumnOptions"
+        label="Assay sequence column"
+        placeholder="Sequence column"
+        clearable
+        required
+      />
+
+      <PlDropdownMulti
+        v-model="app.model.args.selectedColumns"
+        :options="otherColumnOptions"
+        label="Assay data columns to import"
+        placeholder="All columns"
+        multiple
+        clearable
+      />
 
       <PlSectionSeparator>Matching parameters</PlSectionSeparator>
       <PlDropdown v-model="app.model.args.settings.similarityType" :options="similarityTypeOptions"
@@ -151,15 +176,22 @@ const similarityTypeOptions = [
         </template>
       </PlDropdown>
 
-      <PlNumberField v-model="app.model.args.settings.identity" label="Score threshold" :min-value="0.1" :step="0.1"
-        :max-value="1.0">
+      <PlNumberField
+        v-model="app.model.args.settings.identity"
+        label="Score threshold" :min-value="0.1" :step="0.1" :max-value="1.0"
+      >
         <template #tooltip>
           Sets the lowest percentage of identical residues required for a match.
         </template>
       </PlNumberField>
 
-      <PlNumberField v-model="app.model.args.settings.coverageThreshold" label="Coverage threshold" :min-value="0.1"
-        :step="0.1" :max-value="1.0">
+      <PlNumberField
+        v-model="app.model.args.settings.coverageThreshold"
+        label="Coverage threshold"
+        :min-value="0.1"
+        :step="0.1"
+        :max-value="1.0"
+      >
         <template #tooltip>
           Select min fraction of aligned (covered) residues of clonotypes in the cluster.
         </template>

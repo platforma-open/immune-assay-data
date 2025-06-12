@@ -346,7 +346,25 @@ wf.body(func(args) {
 			}
 		}
 	]
-	for h in args.importColumns {
+	
+	columnsToImport := args.importColumns
+	if args.selectedColumns != undefined && len(args.selectedColumns) > 0 {
+		selectedHeaders := {}
+		for header in args.selectedColumns {
+			selectedHeaders[header] = true
+		}
+		
+		filteredColumns := []
+		for col in args.importColumns {
+			// Always include the main sequence column
+			if col.header == args.sequenceColumnHeader || selectedHeaders[col.header] {
+				filteredColumns = append(filteredColumns, col)
+			}
+		}
+		columnsToImport = filteredColumns
+	}
+
+	for h in columnsToImport {
 		if h.header == args.sequenceColumnHeader {
 			continue
 		}
@@ -432,7 +450,7 @@ wf.body(func(args) {
 		}
 	}]
 
-	for h in args.importColumns {
+	for h in columnsToImport {
 		cloneColumns = append(cloneColumns, {
 			column: h.header,
 			spec: {
