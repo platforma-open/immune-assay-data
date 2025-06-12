@@ -149,7 +149,59 @@ wf.body(func(args) {
 	// prepare fasta
 	clonesFasta := tsv2Fasta(clonesTsv)
 	assayFasta := tsv2Fasta(assayTsv)
-	
+
+	// Dynamically determine coverage mode by comparing average sequence lengths
+	getFastaStats := func(fastaContent) {
+		totalLength := 0
+		sequenceCount := 0
+		currentLine := ""
+		isSequenceLine := false
+
+		processLine := func() {
+			if len(currentLine) > 0 {
+				if isSequenceLine {
+					totalLength += len(currentLine)
+				}
+				currentLine = ""
+			}
+		}
+
+		for char in fastaContent {
+			if char == '\n' {
+				processLine()
+				isSequenceLine = false
+			} else {
+				if len(currentLine) == 0 {
+					if char == '>' {
+						sequenceCount += 1
+						isSequenceLine = false
+					} else {
+						isSequenceLine = true
+					}
+				}
+				if isSequenceLine {
+					currentLine += char
+				}
+			}
+		}
+		processLine() // process last line
+
+		if sequenceCount == 0 {
+			return {average: 0, count: 0}
+		}
+		return {average: totalLength / sequenceCount, count: sequenceCount}
+	}
+
+	clonesStats := getFastaStats(clonesFasta)
+	assayStats := getFastaStats(assayFasta)
+
+	covMode := "2" // default to coverage of query
+	if clonesStats.count > 0 && assayStats.count > 0 {
+		if assayStats.average < clonesStats.average {
+			covMode = "1" // switch to coverage of target if target sequences are shorter
+		}
+	}
+
 	mmseqsSearchType := "0"
 	if targetSequenceType == "aminoacid" && assaySequenceType == "aminoacid" {
 		//1: amino acid
@@ -174,14 +226,22 @@ wf.body(func(args) {
 		arg("results.tsv").
 		arg("tmp").
 		arg("--search-type").arg(mmseqsSearchType).
-		arg("--cov-mode").arg(string(args.settings.coverageMode)).
+		arg("--cov-mode").arg(covMode).
 		arg("-c").arg(string(args.settings.coverageThreshold)).
+		arg("--min-seq-id").arg(string(args.settings.identity))
+
+	if args.settings.similarityType == "sequence-identity" {
+		mmseqs = mmseqs.arg("--alignment-mode").arg("3")
+	}
+
+	mmseqs = mmseqs.
 		addFile("clones.fasta", clonesFasta).
 		addFile("assay.fasta", assayFasta).
 		saveFile("results.tsv").
 		run()
 
 	mmseqsOutput := mmseqs.getFile("results.tsv")
+
 	// @TODO remove header stuff and replace with pt when available (!)
 	mmseqsResultTsv := exec.builder().
 		software(addHeaderSw).

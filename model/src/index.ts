@@ -12,7 +12,8 @@ import {
 
 type Settings = {
   coverageThreshold: number; // fraction of aligned residues required
-  coverageMode: 0 | 1 | 2 | 3 | 4 | 5; // MMseqs2 coverage modes
+  identity: number;
+  similarityType: 'sequence-identity' | 'alignment-score';
 };
 
 export type ImportColumnInfo = {
@@ -42,8 +43,9 @@ export const model = BlockModel.create()
 
   .withArgs<BlockArgs>({
     settings: {
-      coverageMode: 2, // default to coverage of clone,
       coverageThreshold: 0.95, // default value matching MMseqs2 default
+      identity: 0.9,
+      similarityType: 'alignment-score',
     },
   })
 

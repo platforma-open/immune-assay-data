@@ -20,6 +20,7 @@ import {
   PlFileInput,
   PlMaskIcon24,
   PlNumberField,
+  PlRow,
   PlSectionSeparator,
   PlSlideModal,
 } from '@platforma-sdk/ui-vue';
@@ -75,19 +76,19 @@ const sequenceColumnOptions = computed(() => {
     }));
 });
 
-// const similarityTypeOptions = [
-//   { label: 'Alignment Score', value: 'alignment-score' },
-//   { label: 'Sequence Identity', value: 'sequence-identity' },
-// ];
-
-const coverageModeOptions = [
-  { label: 'Coverage of clone and assay sequences', value: 0 },
-  { label: 'Coverage of assay sequence', value: 1 },
-  { label: 'Coverage of clone sequence', value: 2 },
-  { label: 'Target length ≥ x% of clone length', value: 3 },
-  { label: 'Query length ≥ x% of assay sequence length', value: 4 },
-  { label: 'Shorter sequence ≥ x% of longer', value: 5 },
+const similarityTypeOptions = [
+  { label: 'BLOSUM', value: 'alignment-score' },
+  { label: 'Exact Match', value: 'sequence-identity' },
 ];
+
+// const coverageModeOptions = [
+//   { label: 'Coverage of clone and assay sequences', value: 0 },
+//   { label: 'Coverage of assay sequence', value: 1 },
+//   { label: 'Coverage of clone sequence', value: 2 },
+//   { label: 'Target length ≥ x% of clone length', value: 3 },
+//   { label: 'Query length ≥ x% of assay sequence length', value: 4 },
+//   { label: 'Shorter sequence ≥ x% of longer', value: 5 },
+// ];
 </script>
 
 <template>
@@ -113,43 +114,22 @@ const coverageModeOptions = [
         </template>
       </PlBtnGhost>
     </template>
-    <PlAgDataTableV2
-      v-model="app.model.ui.tableState"
-      :settings="tableSettings"
-      show-columns-panel
-      show-export-button
-    />
+    <PlAgDataTableV2 v-model="app.model.ui.tableState" :settings="tableSettings" show-columns-panel
+      show-export-button />
     <PlSlideModal v-model="settingsOpen" :close-on-outside-click="false">
       <template #title>Settings</template>
-      <PlDropdownRef
-        :model-value="app.model.args.datasetRef"
-        :options="app.model.outputs.datasetOptions"
-        label="Dataset"
-        clearable
-        required
-        @update:model-value="setDataset"
-      />
-      <PlDropdown
-        v-model="app.model.args.targetRef"
-        :options="app.model.outputs.targetOptions"
-        label="Clonotype sequence to match"
-        clearable
-        required
-      >
+      <PlDropdownRef :model-value="app.model.args.datasetRef" :options="app.model.outputs.datasetOptions"
+        label="Dataset" clearable required @update:model-value="setDataset" />
+      <PlDropdown v-model="app.model.args.targetRef" :options="app.model.outputs.targetOptions"
+        label="Clonotype sequence to match" clearable required>
         <template #tooltip>
           Select the sequence column used to match the assay data sequence with. If you select amino acid sequence and
-          the assay data sequence is nucleotide, the assay data sequence will be converted to amino acid sequence automatically.
+          the assay data sequence is nucleotide, the assay data sequence will be converted to amino acid sequence
+          automatically.
         </template>
       </PlDropdown>
-      <PlFileInput
-        v-model="app.model.args.fileHandle"
-        label="Assay data to import"
-        placeholder="Assay data table"
-        :extensions="['.csv', '.tsv']"
-        :error="app.model.ui.fileImportError"
-        required
-        @update:model-value="setFile"
-      >
+      <PlFileInput v-model="app.model.args.fileHandle" label="Assay data to import" placeholder="Assay data table"
+        :extensions="['.csv', '.tsv']" :error="app.model.ui.fileImportError" required @update:model-value="setFile">
         <template #tooltip>
           Upload a comma-separated (.csv) or tab-separated (.tsv) file containing assay data.
         </template>
@@ -159,33 +139,27 @@ const coverageModeOptions = [
         {{ app.model.ui.fileImportError }}
       </span>
 
-      <PlDropdown
-        v-model="app.model.args.sequenceColumnHeader"
-        :options="sequenceColumnOptions"
-        label="Assay sequence column"
-        placeholder="Sequence column"
-        clearable
-        required
-      />
+      <PlDropdown v-model="app.model.args.sequenceColumnHeader" :options="sequenceColumnOptions"
+        label="Assay sequence column" placeholder="Sequence column" clearable required />
 
       <PlSectionSeparator>Matching parameters</PlSectionSeparator>
-      <PlDropdown
-        v-model="app.model.args.settings.coverageMode"
-        :options="coverageModeOptions"
-        label="Coverage Mode"
-      >
+      <PlDropdown v-model="app.model.args.settings.similarityType" :options="similarityTypeOptions"
+        label="Alignment Score">
         <template #tooltip>
-          How to calculate the coverage between sequences for the coverage threshold.
+          Select the similarity metric used for matching thresholds. BLOSUM considers biochemical similarity while Exact
+          Match counts only identical residues.
         </template>
       </PlDropdown>
 
-      <PlNumberField
-        v-model="app.model.args.settings.coverageThreshold"
-        label="Coverage Threshold"
-        :minValue="0.1"
-        :step="0.1"
-        :maxValue="1.0"
-      >
+      <PlNumberField v-model="app.model.args.settings.identity" label="Score threshold" :min-value="0.1" :step="0.1"
+        :max-value="1.0">
+        <template #tooltip>
+          Sets the lowest percentage of identical residues required for a match.
+        </template>
+      </PlNumberField>
+
+      <PlNumberField v-model="app.model.args.settings.coverageThreshold" label="Coverage threshold" :min-value="0.1"
+        :step="0.1" :max-value="1.0">
         <template #tooltip>
           Select min fraction of aligned (covered) residues of clonotypes in the cluster.
         </template>
