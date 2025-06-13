@@ -130,6 +130,9 @@ export const model = BlockModel.create()
   )
 
   .output('table', (ctx) => {
+    if (ctx.outputs?.resolve('emptyResults')?.getDataAsJson<boolean>()) {
+      return undefined;
+    }
     const cols = ctx.outputs?.resolve('table')?.getPColumns();
     if (cols === undefined)
       return undefined;
