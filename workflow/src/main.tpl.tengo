@@ -84,9 +84,9 @@ prepareClonesTsv := func(args) {
 /**
  * Convert tsv file to fasta file
  * @param fileTsv - tsv file
- * @return fasta file
+ * @return fasta file run result
  */
-tsv2Fasta := func(fileTsv) {
+runTsvToFasta := func(fileTsv) {
 	e := exec.builder().
 		software(prepareFastaSw).
 		addFile("input.tsv", fileTsv).
@@ -96,7 +96,7 @@ tsv2Fasta := func(fileTsv) {
 		arg("--id_col").arg("seqId").
 		saveFile("output.fasta")
 
-	return e.run().getFile("output.fasta")
+	return e.run()
 }
 
 wf.body(func(args) {
@@ -148,8 +148,10 @@ wf.body(func(args) {
 	clonesTsv := prepareClonesTsv(args)
 
 	// prepare fasta
-	clonesFasta := tsv2Fasta(clonesTsv)
-	assayFasta := tsv2Fasta(assayTsv)
+	clonesFastaRun := runTsvToFasta(clonesTsv)
+	assayFastaRun := runTsvToFasta(assayTsv)
+	clonesFasta := clonesFastaRun.getFile("output.fasta")
+	assayFasta := assayFastaRun.getFile("output.fasta")
 
 	// Dynamically determine coverage mode by comparing average sequence lengths
 	getFastaStats := func(fastaContent) {
@@ -193,8 +195,8 @@ wf.body(func(args) {
 		return {average: totalLength / sequenceCount, count: sequenceCount}
 	}
 
-	clonesStats := getFastaStats(clonesFasta)
-	assayStats := getFastaStats(assayFasta)
+	clonesStats := getFastaStats(string(clonesFastaRun.getFileContent("output.fasta")))
+	assayStats := getFastaStats(string(assayFastaRun.getFileContent("output.fasta")))
 
 	covMode := "2" // default to coverage of query
 	if clonesStats.count > 0 && assayStats.count > 0 {
