@@ -13,10 +13,13 @@ path := import("@platforma-sdk/workflow-tengo:path")
 json := import("json")
 strings := import("@platforma-sdk/workflow-tengo:strings")
 text := import("text")
+render := import("@platforma-sdk/workflow-tengo:render")
+runAlignmentTpl := assets.importTemplate(":run-alignment")
 
 prepareFastaSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.prepare-fasta:main")
 mmseqsSw := assets.importSoftware("@platforma-open/soedinglab.software-mmseqs2:main")
 addHeaderSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.add-header:main")
+covModeCalcSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.coverage-mode-calc:main")
 
 wf.prepare(func(args){
 	bundleBuilder := wf.createPBundleBuilder()
@@ -154,56 +157,17 @@ wf.body(func(args) {
 	assayFasta := assayFastaRun.getFile("output.fasta")
 
 	// Dynamically determine coverage mode by comparing average sequence lengths
-	getFastaStats := func(fastaContent) {
-		totalLength := 0
-		sequenceCount := 0
-		currentLine := ""
-		isSequenceLine := false
+	coverageMode := exec.builder().
+		software(covModeCalcSw).
+		addFile("clones.fasta", clonesFasta).
+		addFile("assay.fasta", assayFasta).
+		arg("--clones-fasta").arg("clones.fasta").
+		arg("--assay-fasta").arg("assay.fasta").
+		arg("--output").arg("coverage_mode.txt").
+		saveFileContent("coverage_mode.txt").
+		run()
 
-		processLine := func() {
-			if len(currentLine) > 0 {
-				if isSequenceLine {
-					totalLength += len(currentLine)
-				}
-				currentLine = ""
-			}
-		}
-
-		for char in fastaContent {
-			if char == '\n' {
-				processLine()
-				isSequenceLine = false
-			} else {
-				if len(currentLine) == 0 {
-					if char == '>' {
-						sequenceCount += 1
-						isSequenceLine = false
-					} else {
-						isSequenceLine = true
-					}
-				}
-				if isSequenceLine {
-					currentLine += char
-				}
-			}
-		}
-		processLine() // process last line
-
-		if sequenceCount == 0 {
-			return {average: 0, count: 0}
-		}
-		return {average: totalLength / sequenceCount, count: sequenceCount}
-	}
-
-	clonesStats := getFastaStats(string(clonesFastaRun.getFileContent("output.fasta")))
-	assayStats := getFastaStats(string(assayFastaRun.getFileContent("output.fasta")))
-
-	covMode := "2" // default to coverage of query
-	if clonesStats.count > 0 && assayStats.count > 0 {
-		if assayStats.average < clonesStats.average {
-			covMode = "1" // switch to coverage of target if target sequences are shorter
-		}
-	}
+	covMode := coverageMode.getFileContent("coverage_mode.txt")
 
 	mmseqsSearchType := "0"
 	if targetSequenceType == "aminoacid" && assaySequenceType == "aminoacid" {
@@ -219,31 +183,18 @@ wf.body(func(args) {
 		// 2: nucleotide
 		mmseqsSearchType = "2"
 	}
-	// run search
-	mmseqs := exec.builder().
-		software(mmseqsSw).
-		dontSaveStdoutOrStderr(). // important to avoid CID conflict problems coming from different stdout output on same datasets
-		arg("easy-search").
-		arg("clones.fasta").
-		arg("assay.fasta").
-		arg("results.tsv").
-		arg("tmp").
-		arg("--search-type").arg(mmseqsSearchType).
-		arg("--cov-mode").arg(covMode).
-		arg("-c").arg(string(args.settings.coverageThreshold)).
-		arg("--min-seq-id").arg(string(args.settings.identity))
 
-	if args.settings.similarityType == "sequence-identity" {
-		mmseqs = mmseqs.arg("--alignment-mode").arg("3")
-	}
+	runMmseqs := render.create(runAlignmentTpl, {
+		covMode: covMode,
+		mmseqsSearchType: mmseqsSearchType,
+		coverageThreshold: args.settings.coverageThreshold,
+		identityThreshold: args.settings.identity,
+		similarityType: args.settings.similarityType,
+		clonesFasta: clonesFasta,
+		assayFasta: assayFasta
+	})
 
-	mmseqs = mmseqs.
-		addFile("clones.fasta", clonesFasta).
-		addFile("assay.fasta", assayFasta).
-		saveFile("results.tsv").
-		run()
-
-	mmseqsOutput := mmseqs.getFile("results.tsv")
+	mmseqsOutput := runMmseqs.output("mmseqsOutput")
 
 	// @TODO remove header stuff and replace with pt when available (!)
 	addHeaderRunResult := exec.builder().
