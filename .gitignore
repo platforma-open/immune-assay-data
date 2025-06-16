@@ -7,8 +7,8 @@ work/
 log/
 .turbo
 vite.config.*.timestamp-*
-software/**/*.sw.json
-software/*.tgz
+software/**/**/*.sw.json
+software/**/*.tgz
 .DS_Store
 .vscode/sftp.json
 test-dry-run.json
