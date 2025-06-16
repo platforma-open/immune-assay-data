@@ -1,0 +1,47 @@
+self := import("@platforma-sdk/workflow-tengo:tpl")
+ll := import("@platforma-sdk/workflow-tengo:ll")
+exec := import("@platforma-sdk/workflow-tengo:exec")
+assets:= import("@platforma-sdk/workflow-tengo:assets")
+mmseqsSw := assets.importSoftware("@platforma-open/soedinglab.software-mmseqs2:main")
+
+self.defineOutputs("mmseqsOutput")
+
+self.body(func(args) {
+
+    covMode := args.covMode.getDataAsJson()
+    mmseqsSearchType := args.mmseqsSearchType
+    coverageThreshold := args.coverageThreshold
+    identityThreshold := args.identityThreshold
+    similarityType := string(args.similarityType)
+    clonesFasta := args.clonesFasta
+    assayFasta := args.assayFasta
+
+	mmseqs := exec.builder().
+		software(mmseqsSw).
+		dontSaveStdoutOrStderr(). // important to avoid CID conflict problems coming from different stdout output on same datasets
+		arg("easy-search").
+		arg("clones.fasta").
+		arg("assay.fasta").
+		arg("results.tsv").
+		arg("tmp").
+		arg("--search-type").arg(mmseqsSearchType).
+		arg("--cov-mode").arg(string(covMode)).
+		arg("-c").arg(string(coverageThreshold)).
+		arg("--min-seq-id").arg(string(identityThreshold))
+
+	if similarityType == "sequence-identity" {
+		mmseqs = mmseqs.arg("--alignment-mode").arg("3")
+	}
+
+	mmseqs = mmseqs.
+		addFile("clones.fasta", clonesFasta).
+		addFile("assay.fasta", assayFasta).
+		saveFile("results.tsv").
+		run()
+
+    mmseqsOutput := mmseqs.getFile("results.tsv")
+
+    return {
+        mmseqsOutput: mmseqsOutput
+    }
+})

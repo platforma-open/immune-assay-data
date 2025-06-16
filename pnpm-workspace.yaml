@@ -1,6 +1,7 @@
 packages:
   - software/prepare-fasta
   - software/add-header
+  - software/coverage-mode-calc
   - workflow
   - model
   - ui

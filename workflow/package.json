@@ -12,6 +12,7 @@
     "@platforma-sdk/workflow-tengo": "catalog:",
     "@platforma-open/milaboratories.immune-assay-data.prepare-fasta": "workspace:*",
     "@platforma-open/milaboratories.immune-assay-data.add-header": "workspace:*",
+    "@platforma-open/milaboratories.immune-assay-data.coverage-mode-calc": "workspace:*",
     "@platforma-open/soedinglab.software-mmseqs2": "catalog:"
   },
   "devDependencies": {

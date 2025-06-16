@@ -143,6 +143,15 @@ importers:
         specifier: 'catalog:'
         version: 2.16.0
 
+  software/coverage-mode-calc:
+    devDependencies:
+      '@platforma-open/milaboratories.runenv-python-3':
+        specifier: 'catalog:'
+        version: 1.1.14
+      '@platforma-sdk/package-builder':
+        specifier: 'catalog:'
+        version: 2.16.0
+
   software/prepare-fasta:
     devDependencies:
       '@platforma-open/milaboratories.runenv-python-3':
@@ -203,6 +212,9 @@ importers:
       '@platforma-open/milaboratories.immune-assay-data.add-header':
         specifier: workspace:*
         version: link:../software/add-header
+      '@platforma-open/milaboratories.immune-assay-data.coverage-mode-calc':
+        specifier: workspace:*
+        version: link:../software/coverage-mode-calc
       '@platforma-open/milaboratories.immune-assay-data.prepare-fasta':
         specifier: workspace:*
         version: link:../software/prepare-fasta
