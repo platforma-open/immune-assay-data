@@ -81,6 +81,8 @@ prepareClonesTsv := func(args) {
 	cloneTable.setAxisHeader(datasetSpec.axesSpec[1].name, "seqId")
 	cloneTable.add(columns.getColumn(args.targetRef), {header: "sequence"})
 
+	cloneTable.mem("16GiB")
+	cloneTable.cpu(1)
 	return cloneTable.build()
 }
 
@@ -92,6 +94,8 @@ prepareClonesTsv := func(args) {
 runTsvToFasta := func(fileTsv) {
 	e := exec.builder().
 		software(prepareFastaSw).
+		mem("16GiB").
+		cpu(1).
 		addFile("input.tsv", fileTsv).
 		arg("-i").arg("input.tsv").
 		arg("-o").arg("output.fasta").
@@ -159,6 +163,8 @@ wf.body(func(args) {
 	// Dynamically determine coverage mode by comparing average sequence lengths
 	coverageMode := exec.builder().
 		software(covModeCalcSw).
+		mem("16GiB").
+		cpu(1).
 		addFile("clones.fasta", clonesFasta).
 		addFile("assay.fasta", assayFasta).
 		arg("--clones-fasta").arg("clones.fasta").
@@ -199,6 +205,8 @@ wf.body(func(args) {
 	// @TODO remove header stuff and replace with pt when available (!)
 	addHeaderRunResult := exec.builder().
 		software(addHeaderSw).
+		mem("16GiB").
+		cpu(1).
 		arg("-i").arg("results.tsv").
 		arg("-o").arg("results_with_header.tsv").
 		addFile("results.tsv", mmseqsOutput).
@@ -368,7 +376,7 @@ wf.body(func(args) {
 			annotations: {
 				"pl7.app/isAnchor": "true"
 			}
-		})
+		}, {cpu: 1, mem: "16GiB"})
 
 		// "bits", "evalue", "pident"
 		cloneColumns := [
@@ -447,7 +455,7 @@ wf.body(func(args) {
 				}],
 				columns: cloneColumns
 			},
-			{ splitDataAndSpec: true }
+			{ splitDataAndSpec: true, cpu: 1, mem: "16GiB" }
 		)
 
 		trace := pSpec.makeTrace(datasetSpec,
