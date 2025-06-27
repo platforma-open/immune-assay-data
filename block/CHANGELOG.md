@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data
 
+## 1.2.0
+
+### Minor Changes
+
+- e2e7ebe: Update dependencies
+
 ## 1.1.0
 
 ### Minor Changes
