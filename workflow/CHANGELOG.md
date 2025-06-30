@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.workflow
 
+## 1.2.0
+
+### Minor Changes
+
+- bd219bf: Update SDK and bugfixes
+
 ## 1.1.0
 
 ### Minor Changes
