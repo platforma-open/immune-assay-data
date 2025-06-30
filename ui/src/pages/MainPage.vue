@@ -8,9 +8,6 @@ import {
   getRawPlatformaInstance,
   plRefsEqual,
 } from '@platforma-sdk/model';
-import type {
-  PlAgDataTableSettings,
-} from '@platforma-sdk/ui-vue';
 import {
   PlAgDataTableToolsPanel,
   PlAgDataTableV2,
@@ -24,16 +21,17 @@ import {
   PlNumberField,
   PlSectionSeparator,
   PlSlideModal,
+  usePlDataTableSettingsV2,
 } from '@platforma-sdk/ui-vue';
 import {
   computed,
   ref,
   watch,
 } from 'vue';
+import * as XLSX from 'xlsx';
 import {
   useApp,
 } from '../app';
-import * as XLSX from 'xlsx';
 
 import { importFile } from '../importFile';
 
@@ -49,18 +47,8 @@ function setDataset(ref: PlRef | undefined) {
 }
 const settingsOpen = ref(app.model.args.datasetRef === undefined);
 
-const tableSettings = computed<PlAgDataTableSettings>(() => {
-  const pTable = app.model.outputs.table;
-
-  if (pTable === undefined && !app.model.outputs.isRunning) {
-    // special case: when block is not yet started at all (no table calculated)
-    return undefined;
-  }
-
-  return {
-    sourceType: 'ptable',
-    model: pTable,
-  };
+const tableSettings = usePlDataTableSettingsV2({
+  model: () => app.model.outputs.table,
 });
 
 const setFile = async (file: ImportFileHandle | undefined) => {
@@ -173,22 +161,33 @@ const similarityTypeOptions = [
         </template>
       </PlBtnGhost>
     </template>
-    <PlAgDataTableV2 v-model="app.model.ui.tableState" :settings="tableSettings" show-columns-panel
-      show-export-button />
+    <PlAgDataTableV2
+      v-model="app.model.ui.tableState"
+      :settings="tableSettings"
+      show-columns-panel
+      not-ready-text="Data is not computed"
+      show-export-button
+    />
     <PlSlideModal v-model="settingsOpen" :close-on-outside-click="false">
       <template #title>Settings</template>
-      <PlDropdownRef :model-value="app.model.args.datasetRef" :options="app.model.outputs.datasetOptions"
-        label="Dataset" clearable required @update:model-value="setDataset" />
-      <PlDropdown v-model="app.model.args.targetRef" :options="app.model.outputs.targetOptions"
-        label="Clonotype sequence to match" clearable required>
+      <PlDropdownRef
+        :model-value="app.model.args.datasetRef" :options="app.model.outputs.datasetOptions"
+        label="Dataset" clearable required @update:model-value="setDataset"
+      />
+      <PlDropdown
+        v-model="app.model.args.targetRef" :options="app.model.outputs.targetOptions"
+        label="Clonotype sequence to match" clearable required
+      >
         <template #tooltip>
           Select the sequence column used to match the assay data sequence with. If you select amino acid sequence and
           the assay data sequence is nucleotide, the assay data sequence will be converted to amino acid sequence
           automatically.
         </template>
       </PlDropdown>
-      <PlFileInput v-model="app.model.args.fileHandle" label="Assay data to import" placeholder="Assay data table"
-        :extensions="['.csv', '.tsv']" :error="app.model.ui.fileImportError" required @update:model-value="setFile">
+      <PlFileInput
+        v-model="app.model.args.fileHandle" label="Assay data to import" placeholder="Assay data table"
+        :extensions="['.csv', '.tsv']" :error="app.model.ui.fileImportError" required @update:model-value="setFile"
+      >
         <template #tooltip>
           Upload a comma-separated (.csv) or tab-separated (.tsv) file containing assay data.
         </template>
@@ -217,8 +216,10 @@ const similarityTypeOptions = [
       />
 
       <PlSectionSeparator>Matching parameters</PlSectionSeparator>
-      <PlDropdown v-model="app.model.args.settings.similarityType" :options="similarityTypeOptions"
-        label="Alignment Score">
+      <PlDropdown
+        v-model="app.model.args.settings.similarityType" :options="similarityTypeOptions"
+        label="Alignment Score"
+      >
         <template #tooltip>
           Select the similarity metric used for matching thresholds. BLOSUM considers biochemical similarity while Exact
           Match counts only identical residues.

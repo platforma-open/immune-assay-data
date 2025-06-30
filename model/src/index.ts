@@ -1,12 +1,13 @@
 import type {
   ImportFileHandle,
   InferOutputsType,
-  PlDataTableState,
+  PlDataTableStateV2,
   PlRef,
-  SUniversalPColumnId,
+  SUniversalPColumnId
 } from '@platforma-sdk/model';
 import {
   BlockModel,
+  createPlDataTableStateV2,
   createPlDataTableV2,
 } from '@platforma-sdk/model';
 
@@ -37,7 +38,7 @@ export type BlockArgs = {
 export type UiState = {
   title: string;
   fileImportError?: string;
-  tableState: PlDataTableState;
+  tableState: PlDataTableStateV2;
 };
 
 export const model = BlockModel.create()
@@ -53,9 +54,7 @@ export const model = BlockModel.create()
 
   .withUiState<UiState>({
     title: 'Immune Assay Data',
-    tableState: {
-      gridState: {},
-    },
+    tableState: createPlDataTableStateV2(),
   })
 
   .argsValid((ctx) =>
@@ -140,7 +139,6 @@ export const model = BlockModel.create()
     return createPlDataTableV2(
       ctx,
       cols,
-      (_) => true,
       ctx.uiState.tableState,
     );
   })
