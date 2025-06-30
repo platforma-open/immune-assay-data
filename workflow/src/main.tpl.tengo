@@ -7,17 +7,15 @@ maps:= import("@platforma-sdk/workflow-tengo:maps")
 xsv := import("@platforma-sdk/workflow-tengo:pframes.xsv")
 pframes := import("@platforma-sdk/workflow-tengo:pframes")
 pSpec := import("@platforma-sdk/workflow-tengo:pframes.spec")
-slices := import("@platforma-sdk/workflow-tengo:slices")
 pt := import("@platforma-sdk/workflow-tengo:pt")
 path := import("@platforma-sdk/workflow-tengo:path")
 json := import("json")
-strings := import("@platforma-sdk/workflow-tengo:strings")
 text := import("text")
 render := import("@platforma-sdk/workflow-tengo:render")
+strings := import("@platforma-sdk/workflow-tengo:strings")
 runAlignmentTpl := assets.importTemplate(":run-alignment")
 
 prepareFastaSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.prepare-fasta:main")
-mmseqsSw := assets.importSoftware("@platforma-open/soedinglab.software-mmseqs2:main")
 addHeaderSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.add-header:main")
 covModeCalcSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.coverage-mode-calc:main")
 
@@ -104,6 +102,10 @@ runTsvToFasta := func(fileTsv) {
 		saveFile("output.fasta")
 
 	return e.run()
+}
+
+assayColumnName := func(header) {
+	return "pl7.app/vdj/assay-data/" + strings.substituteSpecialCharacters(header)
 }
 
 wf.body(func(args) {
@@ -308,6 +310,7 @@ wf.body(func(args) {
 			},	
 			{
 				column: sequenceColumnInfo.header,
+				id: strings.substituteSpecialCharacters(sequenceColumnInfo.header),
 				spec: {
 					name: "pl7.app/vdj/sequence",
 					valueType: "String",
@@ -346,8 +349,9 @@ wf.body(func(args) {
 			}
 			assayColumns = append(assayColumns, {
 				column: h.header,
+				id: strings.substituteSpecialCharacters(h.header),
 				spec: {
-					name: h.header,
+					name: assayColumnName(h.header),
 					valueType: h.type,
 					annotations: {	
 						"pl7.app/label": h.header,
@@ -429,8 +433,9 @@ wf.body(func(args) {
 		for h in columnsToImport {
 			cloneColumns = append(cloneColumns, {
 				column: h.header,
+				id: strings.substituteSpecialCharacters(h.header),
 				spec: {
-					name: h.header,
+					name: assayColumnName(h.header),
 					valueType: h.type,
 					annotations: {	
 						"pl7.app/label": h.header,
