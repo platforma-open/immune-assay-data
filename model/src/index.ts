@@ -89,27 +89,26 @@ export const model = BlockModel.create()
 
     const isSingleCell = ctx.resultPool.getPColumnSpecByRef(ref)?.axesSpec[1].name === 'pl7.app/vdj/scClonotypeKey';
     const sequenceMatchers = [];
-    const allowedFeatures = ['CDR1', 'CDR2', 'CDR3', 'FR1', 'FR2',
-      'FR3', 'FR4', 'VDJRegion'];
-    for (const feature of allowedFeatures) {
-      if (isSingleCell) {
-        sequenceMatchers.push({
-          axes: [{ anchor: 'main', idx: 1 }],
-          name: 'pl7.app/vdj/sequence',
-          domain: {
-            'pl7.app/vdj/feature': feature,
-            'pl7.app/vdj/scClonotypeChain/index': 'primary',
-          },
-        });
-      } else {
-        sequenceMatchers.push({
-          axes: [{ anchor: 'main', idx: 1 }],
-          name: 'pl7.app/vdj/sequence',
-          domain: {
-            'pl7.app/vdj/feature': feature,
-          },
-        });
-      }
+    // const allowedFeatures = ['CDR1', 'CDR2', 'CDR3', 'FR1', 'FR2',
+    //   'FR3', 'FR4', 'VDJRegion'];
+    // for (const feature of allowedFeatures) {
+    if (isSingleCell) {
+      sequenceMatchers.push({
+        axes: [{ anchor: 'main', idx: 1 }],
+        name: 'pl7.app/vdj/sequence',
+        domain: {
+          // 'pl7.app/vdj/feature': feature,
+          'pl7.app/vdj/scClonotypeChain/index': 'primary',
+        },
+      });
+    } else {
+      sequenceMatchers.push({
+        axes: [{ anchor: 'main', idx: 1 }],
+        name: 'pl7.app/vdj/sequence',
+        domain: {
+          // 'pl7.app/vdj/feature': feature,
+        },
+      });
     }
 
     return ctx.resultPool.getCanonicalOptions(
