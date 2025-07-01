@@ -37,14 +37,14 @@ catalogs:
       specifier: ^2.1.11
       version: 2.1.11
     '@platforma-sdk/test':
-      specifier: ^1.37.8
-      version: 1.37.8
+      specifier: ^1.37.9
+      version: 1.37.9
     '@platforma-sdk/ui-vue':
       specifier: ^1.37.7
       version: 1.37.7
     '@platforma-sdk/workflow-tengo':
-      specifier: ^4.9.0
-      version: 4.9.0
+      specifier: 4.8.0
+      version: 4.8.0
     '@vitejs/plugin-vue':
       specifier: ^5.2.1
       version: 5.2.4
@@ -223,14 +223,14 @@ importers:
         version: 1.17.0
       '@platforma-sdk/workflow-tengo':
         specifier: 'catalog:'
-        version: 4.9.0
+        version: 4.8.0
     devDependencies:
       '@platforma-sdk/tengo-builder':
         specifier: 'catalog:'
         version: 2.1.11
       '@platforma-sdk/test':
         specifier: 'catalog:'
-        version: 1.37.8(@types/node@22.15.21)(sass-embedded@1.89.0)
+        version: 1.37.9(@types/node@22.15.21)(sass-embedded@1.89.0)
       vitest:
         specifier: 'catalog:'
         version: 2.1.9(@types/node@22.15.21)(sass-embedded@1.89.0)
@@ -1158,8 +1158,8 @@ packages:
   '@milaboratories/pl-http@1.1.4':
     resolution: {integrity: sha512-u8V5ie9fcAtQ2OcADuI2vr22m0EJcynA9xpziOVMcu8CUK3gdUOt/Ec9kEHDilWKbHg+1SGKDEisuL4HFqsZLQ==}
 
-  '@milaboratories/pl-middle-layer@1.37.92':
-    resolution: {integrity: sha512-Xewgz1tjPCNkNOJmUBf90XhJ2e4NmCXXxr0zGRq7t9k5O+/yz0T3e779tY45QO1Y1SQcS9UxSG4Y4b1RRwluAA==}
+  '@milaboratories/pl-middle-layer@1.37.93':
+    resolution: {integrity: sha512-xOWP8RqIUdbcOSuXlHkW+n7RfZrLFWnKPivJyrQP+vvvW5ENv/bQBWuXhiw8jvDGhl1ViN8qlVK5J6cO2K9DUQ==}
     engines: {node: '>=20.16.0'}
 
   '@milaboratories/pl-model-backend@1.1.1':
@@ -1295,14 +1295,17 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  '@platforma-sdk/test@1.37.8':
-    resolution: {integrity: sha512-zrNVC0Tbg/aAXsRk8s01+qP9E3DWBAk2CO2Rs6M8XMihwGL5B/cGh3gOfs7YE56vxNX2m4jJaa3diHqDCavaVw==}
+  '@platforma-sdk/test@1.37.9':
+    resolution: {integrity: sha512-DSUP5luGUjaTxZhjx0IqVQ+FL5h9jWJHGZgyJFWBLGpext7CcgNwuBWxwuSXGI8zaSR5Dotg3hwoLfVF7/50lg==}
 
   '@platforma-sdk/ui-vue@1.37.7':
     resolution: {integrity: sha512-THhHpvBWsBYyVxU7AW16XTnozNjjkDdsz5xcuIWrpegfktqq0JIC37aom7Xxq4xFX1AVYbYVIRzp/lHT8eHo2w==}
 
-  '@platforma-sdk/workflow-tengo@4.9.0':
-    resolution: {integrity: sha512-QZ7bc3ENj1dfG2VvrruvdqYX++iMGBBuCxiiRnu8amTrNKHLTgWF4sqhhxo9RPo7LFLbMShMAzdCiP8c1swfdA==}
+  '@platforma-sdk/workflow-tengo@4.8.0':
+    resolution: {integrity: sha512-jo3Y2MWLdcoZLn4fk2O5jjxj4YvTkunzMyw7Xi8Ntwu5QAY1mzNOrjRCUOszRUI1EnPd0DkHvwCAUZV/oARoBw==}
+
+  '@platforma-sdk/workflow-tengo@4.9.1':
+    resolution: {integrity: sha512-Ao2m3GsZypXIdBcNFwyqHSJ8tePrTfM7zgos1XLC+e4tTo8d/7ZSk/cHJl2bzzLcqXhlrjgXIlVZ4pBQJDYBvA==}
 
   '@protobuf-ts/grpc-transport@2.11.0':
     resolution: {integrity: sha512-D/VjzZCaYj1UD29eu+sNnnjZPw6DIIzEymV+dwAJ4kg8LeE5xos86OED2A8lL56wdWafWwufazTlv/M+/eVrOQ==}
@@ -6787,7 +6790,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@milaboratories/pl-middle-layer@1.37.92':
+  '@milaboratories/pl-middle-layer@1.37.93':
     dependencies:
       '@milaboratories/computable': 2.5.1
       '@milaboratories/pframes-rs-node': 1.0.47(@milaboratories/pl-model-common@1.15.7)
@@ -6805,7 +6808,7 @@ snapshots:
       '@milaboratories/ts-helpers': 1.4.1
       '@platforma-sdk/block-tools': 2.5.59
       '@platforma-sdk/model': 1.37.2
-      '@platforma-sdk/workflow-tengo': 4.9.0
+      '@platforma-sdk/workflow-tengo': 4.9.1
       canonicalize: 2.1.0
       denque: 2.1.0
       lru-cache: 11.1.0
@@ -7032,11 +7035,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@platforma-sdk/test@1.37.8(@types/node@22.15.21)(sass-embedded@1.89.0)':
+  '@platforma-sdk/test@1.37.9(@types/node@22.15.21)(sass-embedded@1.89.0)':
     dependencies:
       '@milaboratories/computable': 2.5.1
       '@milaboratories/pl-client': 2.11.2
-      '@milaboratories/pl-middle-layer': 1.37.92
+      '@milaboratories/pl-middle-layer': 1.37.93
       '@milaboratories/pl-tree': 1.6.11
       '@milaboratories/ts-helpers': 1.4.1
       '@platforma-sdk/model': 1.37.2
@@ -7101,7 +7104,13 @@ snapshots:
       - typescript
       - universal-cookie
 
-  '@platforma-sdk/workflow-tengo@4.9.0':
+  '@platforma-sdk/workflow-tengo@4.8.0':
+    dependencies:
+      '@milaboratories/software-pframes-conv': 2.2.2
+      '@platforma-open/milaboratories.software-ptabler': 1.6.0
+      '@platforma-open/milaboratories.software-small-binaries': 1.15.21
+
+  '@platforma-sdk/workflow-tengo@4.9.1':
     dependencies:
       '@milaboratories/software-pframes-conv': 2.2.2
       '@platforma-open/milaboratories.software-ptabler': 1.6.0

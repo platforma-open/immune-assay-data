@@ -3,7 +3,7 @@ import type {
   InferOutputsType,
   PlDataTableStateV2,
   PlRef,
-  SUniversalPColumnId
+  SUniversalPColumnId,
 } from '@platforma-sdk/model';
 import {
   BlockModel,
