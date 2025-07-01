@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.model
 
+## 1.4.0
+
+### Minor Changes
+
+- 7cc0824: downgrade dependencies
+
 ## 1.3.0
 
 ### Minor Changes
