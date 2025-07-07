@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.workflow
 
+## 1.3.0
+
+### Minor Changes
+
+- b18f925: Update trace label and importance
+
 ## 1.2.0
 
 ### Minor Changes
