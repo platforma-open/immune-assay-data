@@ -463,11 +463,18 @@ wf.body(func(args) {
 			{ splitDataAndSpec: true, cpu: 1, mem: "16GiB" }
 		)
 
+		// Create informative label with relevant matching parameters
+		identityStr := string(args.settings.identity)
+		coverageStr := string(args.settings.coverageThreshold)
+		similarityTypeStr := args.settings.similarityType == "sequence-identity" ? "Exact Match" : "BLOSUM"
+		
+		traceLabel := "Assay Data (sim:" + similarityTypeStr + ", ident:" + identityStr + ", cov:" + coverageStr + ")"
+		
 		trace := pSpec.makeTrace(datasetSpec,
 			{
 				type: "milaboratories.immune-assay-data",
-				importance: 30,
-				label: "Assay Data"
+				importance: 40,
+				label: traceLabel
 			})
 
 		epfB := pframes.pFrameBuilder()
