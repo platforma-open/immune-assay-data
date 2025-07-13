@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.ui
 
+## 1.2.3
+
+### Patch Changes
+
+- 56a1047: fix extensions for Windows
+
 ## 1.2.2
 
 ### Patch Changes
