@@ -186,7 +186,7 @@ const similarityTypeOptions = [
       </PlDropdown>
       <PlFileInput
         v-model="app.model.args.fileHandle" label="Assay data to import" placeholder="Assay data table"
-        :extensions="['.csv', '.tsv']" :error="app.model.ui.fileImportError" required @update:model-value="setFile"
+        :extensions="['csv', 'tsv']" :error="app.model.ui.fileImportError" required @update:model-value="setFile"
       >
         <template #tooltip>
           Upload a comma-separated (.csv) or tab-separated (.tsv) file containing assay data.
