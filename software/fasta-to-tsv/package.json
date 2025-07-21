@@ -1,6 +1,6 @@
 {
-  "name": "@platforma-open/milaboratories.immune-assay-data.add-header",
-  "version": "1.0.2",
+  "name": "@platforma-open/milaboratories.immune-assay-data.fasta-to-tsv",
+  "version": "1.0.0",
   "scripts": {
     "build": "pl-pkg build",
     "prepublishOnly": "pl-pkg publish packages",

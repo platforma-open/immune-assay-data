@@ -16,8 +16,8 @@ catalogs:
       specifier: ^1.1.126
       version: 1.1.126
     '@platforma-open/milaboratories.runenv-python-3':
-      specifier: ^1.1.7
-      version: 1.1.14
+      specifier: ^1.2.0
+      version: 1.2.0
     '@platforma-open/soedinglab.software-mmseqs2':
       specifier: ^1.0.0
       version: 1.17.0
@@ -138,7 +138,7 @@ importers:
     devDependencies:
       '@platforma-open/milaboratories.runenv-python-3':
         specifier: 'catalog:'
-        version: 1.1.14
+        version: 1.2.0
       '@platforma-sdk/package-builder':
         specifier: 'catalog:'
         version: 2.16.2
@@ -147,7 +147,16 @@ importers:
     devDependencies:
       '@platforma-open/milaboratories.runenv-python-3':
         specifier: 'catalog:'
-        version: 1.1.14
+        version: 1.2.0
+      '@platforma-sdk/package-builder':
+        specifier: 'catalog:'
+        version: 2.16.2
+
+  software/fasta-to-tsv:
+    devDependencies:
+      '@platforma-open/milaboratories.runenv-python-3':
+        specifier: 'catalog:'
+        version: 1.2.0
       '@platforma-sdk/package-builder':
         specifier: 'catalog:'
         version: 2.16.2
@@ -156,7 +165,7 @@ importers:
     devDependencies:
       '@platforma-open/milaboratories.runenv-python-3':
         specifier: 'catalog:'
-        version: 1.1.14
+        version: 1.2.0
       '@platforma-sdk/package-builder':
         specifier: 'catalog:'
         version: 2.16.2
@@ -215,6 +224,9 @@ importers:
       '@platforma-open/milaboratories.immune-assay-data.coverage-mode-calc':
         specifier: workspace:*
         version: link:../software/coverage-mode-calc
+      '@platforma-open/milaboratories.immune-assay-data.fasta-to-tsv':
+        specifier: workspace:*
+        version: link:../software/fasta-to-tsv
       '@platforma-open/milaboratories.immune-assay-data.prepare-fasta':
         specifier: workspace:*
         version: link:../software/prepare-fasta
@@ -1219,8 +1231,14 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@platforma-open/milaboratories.runenv-python-3@1.1.14':
-    resolution: {integrity: sha512-W05sFGFh+k+x+tLibJFbd4AFHE1fsXeFCBJWvGCbG5P/VWdpZBT5DZnAna3FRr83a5t+w6Or2dZ6uxd/5+Fcng==}
+  '@platforma-open/milaboratories.runenv-python-3.10.11@1.0.0':
+    resolution: {integrity: sha512-31xoBIpwG3Rw8NeU4rOhv6rehm7GY5VnaOCbWNtVNSeFNlRL7ztv4Nmh8N6dnLqHCaoWwqJcE51PL5BV+KR/uQ==}
+
+  '@platforma-open/milaboratories.runenv-python-3.12.10@1.0.0':
+    resolution: {integrity: sha512-Zc/EOAD8JIahgHijP4i7eLNHN7Pnwv/yHATARX8KehrwefFbEbWNd1BnFhxRpXprgtsOL/tE0vfR+eKPrmgDcg==}
+
+  '@platforma-open/milaboratories.runenv-python-3@1.2.0':
+    resolution: {integrity: sha512-KpRpjmGzfUh0k+2VtQrGbZ8YR0kM5ohufHy58z+UwrkG/KFWplvdnF3G7BGYnUBNPm4hJJhlWPGmDuIBb8qnIQ==}
 
   '@platforma-open/milaboratories.software-ptabler@1.6.0':
     resolution: {integrity: sha512-pHOMYwDikYB2L8K7XoTHDNJ7lr+mGIXv88iov1UZkSdvdOTb+owD3xZ3u9uxDNwyzyiQ7a4E+MIAdx/eJEYL8g==}
@@ -6924,7 +6942,14 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@platforma-open/milaboratories.runenv-python-3@1.1.14': {}
+  '@platforma-open/milaboratories.runenv-python-3.10.11@1.0.0': {}
+
+  '@platforma-open/milaboratories.runenv-python-3.12.10@1.0.0': {}
+
+  '@platforma-open/milaboratories.runenv-python-3@1.2.0':
+    dependencies:
+      '@platforma-open/milaboratories.runenv-python-3.10.11': 1.0.0
+      '@platforma-open/milaboratories.runenv-python-3.12.10': 1.0.0
 
   '@platforma-open/milaboratories.software-ptabler@1.6.0': {}
 

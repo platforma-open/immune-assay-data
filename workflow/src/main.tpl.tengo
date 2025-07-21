@@ -16,6 +16,7 @@ strings := import("@platforma-sdk/workflow-tengo:strings")
 runAlignmentTpl := assets.importTemplate(":run-alignment")
 
 prepareFastaSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.prepare-fasta:main")
+fastaToTsvSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.fasta-to-tsv:main")
 addHeaderSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.add-header:main")
 covModeCalcSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.coverage-mode-calc:main")
 
@@ -37,9 +38,20 @@ prepareAssayFile := func(args, file, xsvType) {
 	})
 
 	//////// calculate sequence id ////////
-	df = df.addColumns(
-		pt.col(args.sequenceColumnHeader).hash("sha256", "base64_alphanumeric", 120).alias("seqId")
+	// Use a combination of sequence content and a unique identifier to ensure unique hashes for duplicate sequences
+	// First add a unique identifier based on the sequence content and row position
+	df = df.withColumns(
+		pt.rank(pt.col(args.sequenceColumnHeader)).alias("rowRank")
 	)
+	df = df.withColumns(
+		pt.concatStr([pt.col(args.sequenceColumnHeader), pt.col("rowRank").cast("String")], {delimiter: "_"}).alias("uniqueKey")
+	)
+	// Create hash from the unique key
+	df = df.addColumns(
+		pt.col("uniqueKey").hash("sha256", "base64_alphanumeric", 120).alias("seqId")
+	)
+	// Remove the temporary columns
+	df = df.withoutColumns("uniqueKey", "rowRank")
 	//////// add label to ids ////////
 	df = df.withColumns(
         pt.col("seqId").
@@ -104,6 +116,24 @@ runTsvToFasta := func(fileTsv) {
 	return e.run()
 }
 
+/**
+ * Convert fasta file to tsv file
+ * @param fileFasta - fasta file
+ * @return tsv file run result
+ */
+runFastaToTsv := func(fileFasta) {
+	e := exec.builder().
+		software(fastaToTsvSw).
+		mem("16GiB").
+		cpu(1).
+		addFile("input.fasta", fileFasta).
+		arg("-i").arg("input.fasta").
+		arg("-o").arg("output.tsv").
+		saveFile("output.tsv")
+
+	return e.run()
+}
+
 assayColumnName := func(header) {
 	return "pl7.app/vdj/assay-data/" + strings.substituteSpecialCharacters(header)
 }
@@ -151,6 +181,13 @@ wf.body(func(args) {
 	xsvType := "tsv"
 	if len(fileNameParts) > 1 {
 		xsvType = fileNameParts[len(fileNameParts)-1]
+	}
+
+	// Handle FASTA files by converting to TSV first
+	if xsvType == "fasta" || xsvType == "fa" {
+		fastaToTsvRun := runFastaToTsv(importFile.file)
+		importFile.file = fastaToTsvRun.getFile("output.tsv")
+		xsvType = "tsv"
 	}
 
 	assayTsv := prepareAssayFile(args, importFile.file, xsvType)

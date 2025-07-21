@@ -4,6 +4,7 @@ import { useApp } from './app';
 
 import type { ImportColumnInfo } from '@platforma-open/milaboratories.immune-assay-data.model';
 import * as XLSX from 'xlsx';
+import { processFastaFile } from './fastaParser';
 
 // Define a more specific type for raw Excel data
 type TableRow = string[];
@@ -144,20 +145,37 @@ export async function importFile(file: LocalImportFileHandle) {
   app.model.args.importColumns = undefined;
   app.model.ui.fileImportError = undefined;
   const fileName = getFileNameFromHandle(file);
-  const extension = fileName.split('.').pop();
+  const extension = fileName.split('.').pop()?.toLowerCase();
   app.model.args.fileExtension = extension;
 
-  const data = await getRawPlatformaInstance().lsDriver.getLocalFileContent(file);
-  const wb = XLSX.read(data);
+  let rawData: TableData;
 
-  // @TODO: allow user to select worksheet
-  const worksheet = wb.Sheets[wb.SheetNames[0]];
+  // Handle FASTA files
+  if (extension === 'fasta' || extension === 'fa') {
+    const fastaResult = await processFastaFile(file);
 
-  const rawData = XLSX.utils.sheet_to_json(worksheet, {
-    header: 1,
-    raw: true,
-    blankrows: false,
-  }) as TableData;
+    if (fastaResult.error) {
+      app.model.ui.fileImportError = fastaResult.error;
+      return;
+    }
+
+    // Convert tab-delimited string to table data
+    const lines = fastaResult.content.split('\n');
+    rawData = lines.map((line) => line.split('\t'));
+  } else {
+    // Handle Excel/CSV files as before
+    const data = await getRawPlatformaInstance().lsDriver.getLocalFileContent(file);
+    const wb = XLSX.read(data);
+
+    // @TODO: allow user to select worksheet
+    const worksheet = wb.Sheets[wb.SheetNames[0]];
+
+    rawData = XLSX.utils.sheet_to_json(worksheet, {
+      header: 1,
+      raw: true,
+      blankrows: false,
+    }) as TableData;
+  }
 
   const header = rawData[0];
   if (!header) {
