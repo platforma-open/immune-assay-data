@@ -42,7 +42,8 @@ prepareAssayFile := func(args, file, xsvType) {
 	// First add row index using ordinal rank
 	df = df.withColumns(
 		pt.rank(pt.col(args.sequenceColumnHeader)).
-		alias("rowIndex")
+			over(pt.col(args.sequenceColumnHeader)).
+			alias("rowIndex")
 	)
 	// Concatenate sequence with row index and then hash
 	df = df.withColumns(
@@ -56,7 +57,7 @@ prepareAssayFile := func(args, file, xsvType) {
 		pt.col("uniqueKey").hash("sha256", "base64_alphanumeric", 120).alias("seqId")
 	)
 	// Remove the temporary columns
-	df = df.withoutColumns("uniqueKey", "rowIndex")
+	//df = df.withoutColumns("uniqueKey", "rowIndex")
 	//////// add label to ids ////////
 	df = df.withColumns(
         pt.col("seqId").
