@@ -52,13 +52,8 @@ def parse_fasta_content(content: str) -> List[Tuple[str, str]]:
             if not current_header:
                 raise ValueError(f"Sequence found without header at line {i}. All sequences must have headers starting with '>'.")
             
-            # Validate sequence contains only valid characters
+            # Clean sequence (remove whitespace and convert to uppercase)
             clean_sequence = line.upper().replace(' ', '').replace('\t', '')
-            valid_chars = set('ACGTNRYWSKMBDHV')
-            invalid_chars = set(clean_sequence) - valid_chars
-            
-            if invalid_chars:
-                raise ValueError(f"Invalid characters in sequence at line {i}. Only DNA nucleotides (ACGT) and IUPAC wildcards (NRYWSKMBDHV) are allowed. Invalid characters: {', '.join(sorted(invalid_chars))}")
             
             current_sequence += clean_sequence
     

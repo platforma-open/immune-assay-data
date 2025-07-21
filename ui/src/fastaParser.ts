@@ -12,6 +12,22 @@ export interface FastaParseResult {
 }
 
 /**
+ * Detect if a sequence is nucleotide, amino acid, or unknown
+ */
+function detectSequenceType(sequence: string): 'nucleotide' | 'aminoacid' | 'unknown' {
+  const validDnaChars = /^[ACGTNRYWSKMBDHV]+$/;
+  const validAminoAcidChars = /^[ACDEFGHIKLMNPQRSTVWY]+$/;
+
+  if (validDnaChars.test(sequence)) {
+    return 'nucleotide';
+  } else if (validAminoAcidChars.test(sequence)) {
+    return 'aminoacid';
+  } else {
+    return 'unknown';
+  }
+}
+
+/**
  * Parse FASTA content and convert to tab-delimited table format
  */
 export function parseFastaContent(content: string): FastaParseResult {
@@ -54,12 +70,13 @@ export function parseFastaContent(content: string): FastaParseResult {
         };
       }
 
-      // Validate sequence contains only valid characters (DNA or amino acid)
+      // Clean sequence for validation
       const cleanSequence = line.toUpperCase().replace(/\s/g, '');
-      const validDnaChars = /^[ACGTNRYWSKMBDHV]+$/;
-      const validAminoAcidChars = /^[ACDEFGHIKLMNPQRSTVWY]+$/;
 
-      if (!validDnaChars.test(cleanSequence) && !validAminoAcidChars.test(cleanSequence)) {
+      // Determine sequence type and validate accordingly
+      const sequenceType = detectSequenceType(cleanSequence);
+
+      if (sequenceType === 'unknown') {
         const invalidChars = cleanSequence.match(/[^ACGTNRYWSKMBDHVACDEFGHIKLMNPQRSTVWY]/g);
         return {
           records: [],
