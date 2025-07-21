@@ -54,14 +54,16 @@ export function parseFastaContent(content: string): FastaParseResult {
         };
       }
 
-      // Validate sequence contains only valid characters
+      // Validate sequence contains only valid characters (DNA or amino acid)
       const cleanSequence = line.toUpperCase().replace(/\s/g, '');
-      const validChars = /^[ACGTNRYWSKMBDHV]+$/;
-      if (!validChars.test(cleanSequence)) {
-        const invalidChars = cleanSequence.match(/[^ACGTNRYWSKMBDHV]/g);
+      const validDnaChars = /^[ACGTNRYWSKMBDHV]+$/;
+      const validAminoAcidChars = /^[ACDEFGHIKLMNPQRSTVWY]+$/;
+
+      if (!validDnaChars.test(cleanSequence) && !validAminoAcidChars.test(cleanSequence)) {
+        const invalidChars = cleanSequence.match(/[^ACGTNRYWSKMBDHVACDEFGHIKLMNPQRSTVWY]/g);
         return {
           records: [],
-          error: `Invalid characters in sequence at line ${i + 1}. Only DNA nucleotides (ACGT) and IUPAC wildcards (NRYWSKMBDHV) are allowed. Invalid characters: ${invalidChars?.join(', ')}`,
+          error: `Invalid characters in sequence at line ${i + 1}. Only DNA nucleotides (ACGT) with IUPAC wildcards (NRYWSKMBDHV) or amino acids (ACDEFGHIKLMNPQRSTVWY) are allowed. Invalid characters: ${invalidChars?.join(', ')}`,
         };
       }
 
@@ -128,4 +130,4 @@ export async function processFastaFile(file: LocalImportFileHandle): Promise<{ c
       error: `Failed to read FASTA file: ${error instanceof Error ? error.message : 'Unknown error'}`,
     };
   }
-} 
+}

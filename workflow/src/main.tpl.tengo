@@ -38,20 +38,24 @@ prepareAssayFile := func(args, file, xsvType) {
 	})
 
 	//////// calculate sequence id ////////
-	// Use a combination of sequence content and a unique identifier to ensure unique hashes for duplicate sequences
-	// First add a unique identifier based on the sequence content and row position
+	// Create unique seqId for each row by combining sequence with rank
+	// First create a hash of the sequence as base
 	df = df.withColumns(
-		pt.rank(pt.col(args.sequenceColumnHeader)).alias("rowRank")
+		pt.col(args.sequenceColumnHeader).hash("sha256", "base64_alphanumeric", 120).alias("seqId")
 	)
+	// Add rank to ensure uniqueness for identical sequences
 	df = df.withColumns(
-		pt.concatStr([pt.col(args.sequenceColumnHeader), pt.col("rowRank").cast("String")], {delimiter: "_"}).alias("uniqueKey")
+		pt.rank(pt.col("seqId")).over(pt.col("seqId")).alias("rank")
 	)
-	// Create hash from the unique key
-	df = df.addColumns(
-		pt.col("uniqueKey").hash("sha256", "base64_alphanumeric", 120).alias("seqId")
+	// Combine seqId with rank for uniqueness
+	df = df.withColumns(
+		pt.when(pt.col("rank").gt(pt.lit(1))).
+			then(pt.concatStr([pt.col("seqId"), pt.col("rank").cast("String")], {delimiter: "_"})).
+			otherwise(pt.col("seqId")).
+			alias("seqId")
 	)
-	// Remove the temporary columns
-	df = df.withoutColumns("uniqueKey", "rowRank")
+	// Remove the temporary rank column
+	df = df.withoutColumns("rank")
 	//////// add label to ids ////////
 	df = df.withColumns(
         pt.col("seqId").
