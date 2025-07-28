@@ -41,7 +41,7 @@ def parse_fasta_content(content: str) -> List[Tuple[str, str]]:
                 records.append((current_header, current_sequence))
             
             # Start new record
-            current_header = line[1:].strip()
+            current_header = line[1:].strip().replace('\t', ' ')
             current_sequence = ''
             
             # Validate header is not empty

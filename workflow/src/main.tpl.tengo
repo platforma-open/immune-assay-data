@@ -183,7 +183,7 @@ wf.body(func(args) {
 		ll.panic("Could not determine filename from file handle: ", args.fileHandle)
 	}
 
-	fileNameParts := path.split(fileName, ".")
+	fileNameParts := path.split(text.to_lower(fileName), ".")
 	xsvType := "tsv"
 	if len(fileNameParts) > 1 {
 		xsvType = fileNameParts[len(fileNameParts)-1]

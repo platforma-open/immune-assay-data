@@ -51,7 +51,7 @@ export function parseFastaContent(content: string): FastaParseResult {
       }
 
       // Start new record
-      currentHeader = line.substring(1).trim();
+      currentHeader = line.substring(1).trim().replace(/\t/g, ' ');
       currentSequence = '';
 
       // Validate header is not empty
