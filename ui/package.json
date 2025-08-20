@@ -1,6 +1,6 @@
 {
   "name": "@platforma-open/milaboratories.immune-assay-data.ui",
-  "version": "1.2.3",
+  "version": "1.3.0",
   "type": "module",
   "scripts": {
     "dev": "vite",

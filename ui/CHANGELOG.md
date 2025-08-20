@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.ui
 
+## 1.3.0
+
+### Minor Changes
+
+- 8e515a8: Support fasta file as assay data
+
 ## 1.2.3
 
 ### Patch Changes

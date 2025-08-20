@@ -1,5 +1,19 @@
 # @platforma-open/milaboratories.immune-assay-data.workflow
 
+## 1.4.0
+
+### Minor Changes
+
+- 8e515a8: Support fasta file as assay data
+
+### Patch Changes
+
+- Updated dependencies [8e515a8]
+  - @platforma-open/milaboratories.immune-assay-data.coverage-mode-calc@1.1.0
+  - @platforma-open/milaboratories.immune-assay-data.prepare-fasta@1.1.0
+  - @platforma-open/milaboratories.immune-assay-data.fasta-to-tsv@1.1.0
+  - @platforma-open/milaboratories.immune-assay-data.add-header@1.1.0
+
 ## 1.3.0
 
 ### Minor Changes
