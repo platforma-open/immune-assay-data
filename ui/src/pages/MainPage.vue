@@ -9,7 +9,6 @@ import {
   plRefsEqual,
 } from '@platforma-sdk/model';
 import {
-  PlAgDataTableToolsPanel,
   PlAgDataTableV2,
   PlBlockPage,
   PlBtnGhost,
@@ -144,16 +143,6 @@ const similarityTypeOptions = [
       {{ app.model.ui.title }}
     </template>
     <template #append>
-      <PlAgDataTableToolsPanel>
-        <!-- <PlMultiSequenceAlignment
-          v-model="app.model.ui.alignmentModel"
-          :label-column-option-predicate="isLabelColumnOption"
-          :sequence-column-predicate="isSequenceColumn"
-          :linker-column-predicate="isLinkerColumn"
-          :p-frame="app.model.outputs.pf"
-          :selection="selection"
-        /> -->
-      </PlAgDataTableToolsPanel>
       <PlBtnGhost @click.stop="() => (settingsOpen = true)">
         Settings
         <template #append>
