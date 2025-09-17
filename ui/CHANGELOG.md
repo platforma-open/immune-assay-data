@@ -1,5 +1,13 @@
 # @platforma-open/milaboratories.immune-assay-data.ui
 
+## 1.3.1
+
+### Patch Changes
+
+- 2183585: Full SDK update
+- Updated dependencies [2183585]
+  - @platforma-open/milaboratories.immune-assay-data.model@1.4.1
+
 ## 1.3.0
 
 ### Minor Changes

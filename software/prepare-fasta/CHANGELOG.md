@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.prepare-fasta
 
+## 1.1.1
+
+### Patch Changes
+
+- 2183585: Full SDK update
+
 ## 1.1.0
 
 ### Minor Changes

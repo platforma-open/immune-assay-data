@@ -1,5 +1,15 @@
 # @platforma-open/milaboratories.immune-assay-data.workflow
 
+## 1.4.1
+
+### Patch Changes
+
+- Updated dependencies [2183585]
+  - @platforma-open/milaboratories.immune-assay-data.coverage-mode-calc@1.1.1
+  - @platforma-open/milaboratories.immune-assay-data.prepare-fasta@1.1.1
+  - @platforma-open/milaboratories.immune-assay-data.fasta-to-tsv@1.1.1
+  - @platforma-open/milaboratories.immune-assay-data.add-header@1.1.1
+
 ## 1.4.0
 
 ### Minor Changes

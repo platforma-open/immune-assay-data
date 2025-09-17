@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.model
 
+## 1.4.1
+
+### Patch Changes
+
+- 2183585: Full SDK update
+
 ## 1.4.0
 
 ### Minor Changes
