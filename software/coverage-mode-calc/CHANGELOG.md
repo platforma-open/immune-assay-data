@@ -1,5 +1,14 @@
 # @platforma-open/milaboratories.immune-assay-data.coverage-mode-calc
 
+## 1.1.2
+
+### Patch Changes
+
+- 8e80807: technical release
+- 6d5fccb: technical release
+- 0017c0f: technical release
+- 9b40999: technical release
+
 ## 1.1.1
 
 ### Patch Changes

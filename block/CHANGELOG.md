@@ -1,5 +1,21 @@
 # @platforma-open/milaboratories.immune-assay-data
 
+## 1.2.8
+
+### Patch Changes
+
+- 8e80807: technical release
+- 6d5fccb: technical release
+- 0017c0f: technical release
+- 9b40999: technical release
+- Updated dependencies [8e80807]
+- Updated dependencies [6d5fccb]
+- Updated dependencies [0017c0f]
+- Updated dependencies [9b40999]
+  - @platforma-open/milaboratories.immune-assay-data.model@1.4.2
+  - @platforma-open/milaboratories.immune-assay-data.ui@1.3.2
+  - @platforma-open/milaboratories.immune-assay-data.workflow@1.4.2
+
 ## 1.2.7
 
 ### Patch Changes
