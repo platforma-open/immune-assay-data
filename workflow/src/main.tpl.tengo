@@ -420,9 +420,8 @@ wf.body(func(args) {
 				}
 			}],
 			columns: assayColumns,
-			annotations: {
-				"pl7.app/isAnchor": "true"
-			}
+			storageFormat: "Parquet",
+			partitionKeyLength: 0
 		}, {cpu: 1, mem: "16GiB"})
 
 		// "bits", "evalue", "pident"
@@ -501,7 +500,9 @@ wf.body(func(args) {
 					column: "query",
 					spec: datasetSpec.axesSpec[1]
 				}],
-				columns: cloneColumns
+				columns: cloneColumns,
+				storageFormat: "Parquet",
+				partitionKeyLength: 0
 			},
 			{ splitDataAndSpec: true, cpu: 1, mem: "16GiB" }
 		)
