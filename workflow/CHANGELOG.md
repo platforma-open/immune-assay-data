@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.workflow
 
+## 1.4.3
+
+### Patch Changes
+
+- af2e338: Support parquet format (update SDK)
+
 ## 1.4.2
 
 ### Patch Changes
