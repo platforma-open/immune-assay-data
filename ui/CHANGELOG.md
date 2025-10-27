@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.ui
 
+## 1.3.3
+
+### Patch Changes
+
+- f7fa342: update graph-maker version
+
 ## 1.3.2
 
 ### Patch Changes
