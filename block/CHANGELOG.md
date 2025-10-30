@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data
 
+## 1.2.11
+
+### Patch Changes
+
+- 050153e: Update SDK
+
 ## 1.2.10
 
 ### Patch Changes
