@@ -24,10 +24,10 @@
     "meta": {
       "title": "Immune Assay Data",
       "logo": "file:../logos/block-logo.png",
-      "url": "https://github.com/milaboratory/platforma-immune-assay-data",
-      "docs": "https://github.com/milaboratory/platforma-immune-assay-data/docs",
+      "url": "https://github.com/platforma-open/immune-assay-data",
+      "docs": "https://docs.platforma.bio/guides/antibody-discovery/functinal-assay-data/",
       "support": "mailto:support@milaboratories.com",
-      "description": "Import immune assay data.",
+      "description": "Imports immune assay data and aligns clonotypes with assay sequences using MMseqs2 to assign functional annotations.",
       "longDescription": "file:../docs/description.md",
       "changelog": "file:../CHANGELOG.md",
       "tags": [
