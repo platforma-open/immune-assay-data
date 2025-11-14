@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data
 
+## 1.2.12
+
+### Patch Changes
+
+- 651b28b: Block metadata updated.
+
 ## 1.2.11
 
 ### Patch Changes
