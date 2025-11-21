@@ -256,6 +256,7 @@ wf.body(func(args) {
 		arg("-o").arg("results_with_header.tsv").
 		addFile("results.tsv", mmseqsOutput).
 		saveFile("results_with_header.tsv").
+		saveFileContent("results_with_header.tsv").
 		run()
 
 	mmseqsResultTsv := addHeaderRunResult.getFile("results_with_header.tsv")

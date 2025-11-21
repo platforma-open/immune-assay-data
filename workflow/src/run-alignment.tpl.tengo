@@ -20,7 +20,6 @@ self.body(func(args) {
 		software(mmseqsSw).
 		mem("32GiB").
 		cpu(1).
-		dontSaveStdoutOrStderr(). // important to avoid CID conflict problems coming from different stdout output on same datasets
 		arg("easy-search").
 		arg("clones.fasta").
 		arg("assay.fasta").
