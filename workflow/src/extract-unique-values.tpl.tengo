@@ -1,0 +1,32 @@
+self := import("@platforma-sdk/workflow-tengo:tpl")
+ll := import("@platforma-sdk/workflow-tengo:ll")
+json := import("json")
+text := import("text")
+
+self.defineOutputs("uniqueValuesMap")
+
+self.body(func(inputs) {
+	fileContents := inputs.fileContents
+	uniqueValuesMap := {}
+
+	for header, contentField in fileContents {
+		// In subtemplate, we can call getData() directly on exec fileContent fields
+		// (following clonotype-enrichment pattern)
+		contentBytes := contentField.getData()
+		content := string(contentBytes)
+		lines := text.split(text.trim_space(content), "\n")
+		
+		if len(lines) > 1 {
+			// Skip header and collect values
+			values := lines[1:]
+			// JSON encode the array of strings and convert to string
+			encodedBytes := json.encode(values)
+			uniqueValuesMap[header] = string(encodedBytes)
+		}
+	}
+
+	return {
+		uniqueValuesMap: uniqueValuesMap
+	}
+})
+
