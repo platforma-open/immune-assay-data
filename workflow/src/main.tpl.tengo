@@ -363,7 +363,7 @@ wf.body(func(args) {
 		}
 		
 		//////// Building outputs & exports ////////
-		buildOutputsResult := render.create(buildOutputsTpl, {
+		buildOutputsResult := render.createEphemeral(buildOutputsTpl, {
 			importColumns: args.importColumns,
 			selectedColumns: args.selectedColumns,
 			sequenceColumnHeader: args.sequenceColumnHeader,
