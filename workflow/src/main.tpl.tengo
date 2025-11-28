@@ -15,6 +15,7 @@ render := import("@platforma-sdk/workflow-tengo:render")
 strings := import("@platforma-sdk/workflow-tengo:strings")
 runAlignmentTpl := assets.importTemplate(":run-alignment")
 extractUniqueValuesTpl := assets.importTemplate(":extract-unique-values")
+buildOutputsTpl := assets.importTemplate(":build-outputs")
 
 prepareFastaSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.prepare-fasta:main")
 fastaToTsvSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.fasta-to-tsv:main")
@@ -139,10 +140,6 @@ runFastaToTsv := func(fileFasta) {
 		saveFile("output.tsv")
 
 	return e.run()
-}
-
-assayColumnName := func(header) {
-	return "pl7.app/vdj/assay-data/" + strings.substituteSpecialCharacters(header)
 }
 
 wf.body(func(args) {
@@ -366,211 +363,21 @@ wf.body(func(args) {
 		}
 		
 		//////// Building outputs & exports ////////
-		assayColumns := [
-			{
-				column: "seqIdLabel",
-				spec: {
-					name: "pl7.app/label",
-					valueType: "String",
-					annotations: {
-						"pl7.app/label": "Sequence Id",
-						"pl7.app/table/fontFamily": "monospace"
-					}
-				}
-			},	
-			{
-				column: "queryCount",
-				spec: {
-					name: "pl7.app/vdj/assay/queryCount",
-					valueType: "Int",
-					annotations: {
-						"pl7.app/label": "Matched Clones",
-						"pl7.app/table/orderPriority": "9000"
-					}
-				}
-			},	
-			{
-				column: sequenceColumnInfo.header,
-				id: strings.substituteSpecialCharacters(sequenceColumnInfo.header),
-				spec: {
-					name: "pl7.app/vdj/sequence",
-					valueType: "String",
-					domain: {
-						"pl7.app/alphabet": assaySequenceType
-					},
-					annotations: {
-						"pl7.app/label": sequenceColumnInfo.header,
-						"pl7.app/table/fontFamily": "monospace",
-						"pl7.app/table/orderPriority": "10000"
-					}
-				}
-			}
-		]
-		
-		columnsToImport := args.importColumns
-		if args.selectedColumns != undefined && len(args.selectedColumns) > 0 {
-			selectedHeaders := {}
-			for header in args.selectedColumns {
-				selectedHeaders[header] = true
-			}
-			
-			filteredColumns := []
-			for col in args.importColumns {
-				// Always include the main sequence column
-				if col.header == args.sequenceColumnHeader || selectedHeaders[col.header] {
-					filteredColumns = append(filteredColumns, col)
-				}
-			}
-			columnsToImport = filteredColumns
-		}
-
-		for h in columnsToImport {
-			if h.header == args.sequenceColumnHeader {
-				continue
-			}
-			assayColumns = append(assayColumns, {
-				column: h.header,
-				id: strings.substituteSpecialCharacters(h.header),
-				spec: {
-					name: assayColumnName(h.header),
-					valueType: h.type,
-					annotations: {
-						"pl7.app/label": h.header,
-						"pl7.app/table/orderPriority": "1000"
-					}
-				}
-			})
-		}
-
-		assayImportResults := xsv.importFile(ptw.getFile("assayData.tsv"), "tsv", {
-			axes: [{
-				column: "seqId",
-				spec: {
-					name: "pl7.app/vdj/assay/sequenceId",
-					type: "String",
-					domain: {
-						"pl7.app/blockId": blockId
-					},
-					annotations: {
-						"pl7.app/label": "Sequence Id",
-						"pl7.app/table/fontFamily": "monospace"
-					}
-				}
-			}],
-			columns: assayColumns,
-			storageFormat: "Parquet",
-			partitionKeyLength: 0
-		}, {cpu: 1, mem: "16GiB"})
-
-		// "bits", "evalue", "pident"
-		cloneColumns := [
-		{
-			column: "seqIdLabel",
-			spec: {
-				name: "pl7.app/vdj/assay/sequenceIdLabel",
-				valueType: "String",
-				annotations: {
-					"pl7.app/label": "Assay Sequence Id",
-					"pl7.app/table/fontFamily": "monospace",
-					"pl7.app/table/visibility": "optional"
-				}
-			}
-		},
-		{
-			column: "bits",
-			spec: {
-				name: "pl7.app/alignment/bitScore",
-				valueType: "Float",
-				annotations: {
-					"pl7.app/label": "Bit Score",
-					"pl7.app/table/visibility": "optional"
-				}
-			}
-		},
-		{
-			column: "evalue",
-			spec: {
-				name: "pl7.app/alignment/evalue",
-				valueType: "Float",
-				annotations: {
-					"pl7.app/label": "E-value",
-					"pl7.app/table/visibility": "optional"
-				}
-			}
-		},
-		{
-			column: "pident",
-			spec: {
-				name: "pl7.app/alignment/pident",
-				valueType: "Float",
-				annotations: {
-					"pl7.app/label": "Percentage of identical matches",
-					"pl7.app/table/visibility": "optional"
-				}
-			}
-		}]
-
-		for h in columnsToImport {
-			annotations := {
-				"pl7.app/label": h.header,
-				"pl7.app/table/visibility": h.header == args.sequenceColumnHeader ? "optional" : "default"
-			}
-			if h.type == "String" && h.header != args.sequenceColumnHeader {
-				annotations["pl7.app/isDiscreteFilter"] = "true"
-				annotations["pl7.app/discreteValues"] = uniqueValuesMap[h.header]
-			}
-			
-			cloneColumns = append(cloneColumns, {
-				column: h.header,
-				id: strings.substituteSpecialCharacters(h.header),
-				spec: {
-					name: assayColumnName(h.header),
-					valueType: h.type,
-					annotations: annotations
-				}
-			})
-		}
-
-		// insert domain
-		for col in cloneColumns {
-			col.spec.domain = maps.deepMerge(col.spec.domain, {
-				"pl7.app/blockId": blockId
-			})
-		}
-
-		cloneImportResults := xsv.importFile(
-			ptw.getFile("clonesData.tsv"), "tsv", {
-				axes: [{
-					column: "query",
-					spec: datasetSpec.axesSpec[1]
-				}],
-				columns: cloneColumns,
-				storageFormat: "Parquet",
-				partitionKeyLength: 0
-			},
-			{ splitDataAndSpec: true, cpu: 1, mem: "16GiB" }
-		)
-
-		// Create informative label with relevant matching parameters
-		identityStr := string(args.settings.identity)
-		coverageStr := string(args.settings.coverageThreshold)
-		similarityTypeStr := args.settings.similarityType == "sequence-identity" ? "Exact Match" : "BLOSUM"
-		
-		traceLabel := "Assay Data (sim:" + similarityTypeStr + ", ident:" + identityStr + ", cov:" + coverageStr + ")"
-		
-		trace := pSpec.makeTrace(datasetSpec,
-			{
-				type: "milaboratories.immune-assay-data",
-				importance: 40,
-				label: traceLabel
-			})
-
-		epfB := pframes.pFrameBuilder()
-		for k, v in cloneImportResults {
-			epfB.add(k, trace.inject(v.spec), v.data)
-		}
-		epf = epfB.build()
-		assayPframe = pframes.exportFrame(assayImportResults)
+		buildOutputsResult := render.create(buildOutputsTpl, {
+			importColumns: args.importColumns,
+			selectedColumns: args.selectedColumns,
+			sequenceColumnHeader: args.sequenceColumnHeader,
+			sequenceColumnInfo: sequenceColumnInfo,
+			assaySequenceType: assaySequenceType,
+			blockId: blockId,
+			datasetSpec: datasetSpec,
+			assayDataTsv: ptw.getFile("assayData.tsv"),
+			clonesDataTsv: ptw.getFile("clonesData.tsv"),
+			uniqueValuesMap: uniqueValuesMap,
+			settings: args.settings
+		})
+		assayPframe = buildOutputsResult.output("assayPframe")
+		epf = buildOutputsResult.output("epf")
 	}
 
 	result := {
