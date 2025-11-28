@@ -5,10 +5,10 @@ pSpec := import("@platforma-sdk/workflow-tengo:pframes.spec")
 maps := import("@platforma-sdk/workflow-tengo:maps")
 strings := import("@platforma-sdk/workflow-tengo:strings")
 
-self.awaitState("uniqueValuesMap", "Set")
-self.awaitState("datasetSpec", "Set")
-self.awaitState("assaySequenceType", "Set")
-self.awaitState("sequenceColumnInfo", "Set")
+self.awaitState("uniqueValuesMap", "ResourceReady")
+self.awaitState("datasetSpec", "ResourceReady")
+self.awaitState("assaySequenceType", "ResourceReady")
+self.awaitState("sequenceColumnInfo", "ResourceReady")
 
 assayColumnName := func(header) {
 	return "pl7.app/vdj/assay-data/" + strings.substituteSpecialCharacters(header)
