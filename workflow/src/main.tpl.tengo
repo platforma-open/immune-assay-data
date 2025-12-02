@@ -339,20 +339,23 @@ wf.body(func(args) {
 		// Extract unique values for all String columns
 		fileContentsMap := {}
 		if len(stringColumns) > 0 {
+			uniqueValuesWf := pt.workflow().mem("4GiB").cpu(1)
+			baseDf := uniqueValuesWf.frame({
+				file: ptw.getFile("assayData.tsv"),
+				xsvType: "tsv"
+			})
 			// Process each String column to extract unique values
 			for colHeader in stringColumns {
-				uniqueValuesWf := pt.workflow().mem("4GiB").cpu(1)
-				uniqueValuesDf := uniqueValuesWf.frame({
-					file: ptw.getFile("assayData.tsv"),
-					xsvType: "tsv"
-				})
-				uniqueValuesDf = uniqueValuesDf.select(pt.col(colHeader).alias("value")).groupBy("value").agg(pt.col("value").count().alias("_count"))
+				uniqueValuesDf := baseDf.select(pt.col(colHeader).alias("value")).groupBy("value").agg(pt.col("value").count().alias("_count"))
 				uniqueValuesDf = uniqueValuesDf.select("value")
 				fileName := "unique_values_" + strings.substituteSpecialCharacters(colHeader) + ".csv"
 				uniqueValuesDf.saveContent(fileName)
-				uniqueValuesResult := uniqueValuesWf.run()
-				uniqueValuesContentField := uniqueValuesResult.getFileContent(fileName)
-				fileContentsMap[colHeader] = uniqueValuesContentField
+			}
+			// Run once and collect all results
+			uniqueValuesResult := uniqueValuesWf.run()
+			for colHeader in stringColumns {
+				fileName := "unique_values_" + strings.substituteSpecialCharacters(colHeader) + ".csv"
+				fileContentsMap[colHeader] = uniqueValuesResult.getFileContent(fileName)
 			}
 			
 			// Use subtemplate to extract content (getData() only works in subtemplates)
