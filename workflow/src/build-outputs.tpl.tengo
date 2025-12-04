@@ -1,0 +1,230 @@
+self := import("@platforma-sdk/workflow-tengo:tpl")
+xsv := import("@platforma-sdk/workflow-tengo:pframes.xsv")
+pframes := import("@platforma-sdk/workflow-tengo:pframes")
+pSpec := import("@platforma-sdk/workflow-tengo:pframes.spec")
+maps := import("@platforma-sdk/workflow-tengo:maps")
+strings := import("@platforma-sdk/workflow-tengo:strings")
+
+self.awaitState("uniqueValuesMap", "ResourceReady")
+self.awaitState("datasetSpec", "ResourceReady")
+self.awaitState("assaySequenceType", "ResourceReady")
+self.awaitState("sequenceColumnInfo", "ResourceReady")
+
+assayColumnName := func(header) {
+	return "pl7.app/vdj/assay-data/" + strings.substituteSpecialCharacters(header)
+}
+
+self.body(func(inputs) {
+	//////// Building outputs & exports ////////
+	assayColumns := [
+		{
+			column: "seqIdLabel",
+			spec: {
+				name: "pl7.app/label",
+				valueType: "String",
+				annotations: {
+					"pl7.app/label": "Sequence Id",
+					"pl7.app/table/fontFamily": "monospace"
+				}
+			}
+		},	
+		{
+			column: "queryCount",
+			spec: {
+				name: "pl7.app/vdj/assay/queryCount",
+				valueType: "Int",
+				annotations: {
+					"pl7.app/label": "Matched Clones",
+					"pl7.app/table/orderPriority": "9000"
+				}
+			}
+		},	
+		{
+			column: inputs.sequenceColumnInfo.header,
+			id: strings.substituteSpecialCharacters(inputs.sequenceColumnInfo.header),
+			spec: {
+				name: "pl7.app/vdj/sequence",
+				valueType: "String",
+				domain: {
+					"pl7.app/alphabet": inputs.assaySequenceType
+				},
+				annotations: {
+					"pl7.app/label": inputs.sequenceColumnInfo.header,
+					"pl7.app/table/fontFamily": "monospace",
+					"pl7.app/table/orderPriority": "10000"
+				}
+			}
+		}
+	]
+	
+	columnsToImport := inputs.importColumns
+	if inputs.selectedColumns != undefined && len(inputs.selectedColumns) > 0 {
+		selectedHeaders := {}
+		for header in inputs.selectedColumns {
+			selectedHeaders[header] = true
+		}
+		
+		filteredColumns := []
+		for col in inputs.importColumns {
+			// Always include the main sequence column
+			if col.header == inputs.sequenceColumnHeader || selectedHeaders[col.header] {
+				filteredColumns = append(filteredColumns, col)
+			}
+		}
+		columnsToImport = filteredColumns
+	}
+
+	for h in columnsToImport {
+		if h.header == inputs.sequenceColumnHeader {
+			continue
+		}
+		assayColumns = append(assayColumns, {
+			column: h.header,
+			id: strings.substituteSpecialCharacters(h.header),
+			spec: {
+				name: assayColumnName(h.header),
+				valueType: h.type,
+				annotations: {
+					"pl7.app/label": h.header,
+					"pl7.app/table/orderPriority": "1000"
+				}
+			}
+		})
+	}
+
+	assayImportResults := xsv.importFile(inputs.assayDataTsv, "tsv", {
+		axes: [{
+			column: "seqId",
+			spec: {
+				name: "pl7.app/vdj/assay/sequenceId",
+				type: "String",
+				domain: {
+					"pl7.app/blockId": inputs.blockId
+				},
+				annotations: {
+					"pl7.app/label": "Sequence Id",
+					"pl7.app/table/fontFamily": "monospace"
+				}
+			}
+		}],
+		columns: assayColumns,
+		storageFormat: "Parquet",
+		partitionKeyLength: 0
+	}, {cpu: 1, mem: "16GiB"})
+
+	// "bits", "evalue", "pident"
+	cloneColumns := [
+	{
+		column: "seqIdLabel",
+		spec: {
+			name: "pl7.app/vdj/assay/sequenceIdLabel",
+			valueType: "String",
+			annotations: {
+				"pl7.app/label": "Assay Sequence Id",
+				"pl7.app/table/fontFamily": "monospace",
+				"pl7.app/table/visibility": "optional"
+			}
+		}
+	},
+	{
+		column: "bits",
+		spec: {
+			name: "pl7.app/alignment/bitScore",
+			valueType: "Float",
+			annotations: {
+				"pl7.app/label": "Bit Score",
+				"pl7.app/table/visibility": "optional"
+			}
+		}
+	},
+	{
+		column: "evalue",
+		spec: {
+			name: "pl7.app/alignment/evalue",
+			valueType: "Float",
+			annotations: {
+				"pl7.app/label": "E-value",
+				"pl7.app/table/visibility": "optional"
+			}
+		}
+	},
+	{
+		column: "pident",
+		spec: {
+			name: "pl7.app/alignment/pident",
+			valueType: "Float",
+			annotations: {
+				"pl7.app/label": "Percentage of identical matches",
+				"pl7.app/table/visibility": "optional"
+			}
+		}
+	}]
+
+	for h in columnsToImport {
+		annotations := {
+			"pl7.app/label": h.header,
+			"pl7.app/table/visibility": h.header == inputs.sequenceColumnHeader ? "optional" : "default"
+		}
+		if h.type == "String" && h.header != inputs.sequenceColumnHeader {
+			annotations["pl7.app/isDiscreteFilter"] = "true"
+			annotations["pl7.app/discreteValues"] = inputs.uniqueValuesMap[h.header]
+		}
+		
+		cloneColumns = append(cloneColumns, {
+			column: h.header,
+			id: strings.substituteSpecialCharacters(h.header),
+			spec: {
+				name: assayColumnName(h.header),
+				valueType: h.type,
+				annotations: annotations
+			}
+		})
+	}
+
+	// insert domain
+	for col in cloneColumns {
+		col.spec.domain = maps.deepMerge(col.spec.domain, {
+			"pl7.app/blockId": inputs.blockId
+		})
+	}
+
+	cloneImportResults := xsv.importFile(
+		inputs.clonesDataTsv, "tsv", {
+			axes: [{
+				column: "query",
+				spec: inputs.datasetSpec.axesSpec[1]
+			}],
+			columns: cloneColumns,
+			storageFormat: "Parquet",
+			partitionKeyLength: 0
+		},
+		{ splitDataAndSpec: true, cpu: 1, mem: "16GiB" }
+	)
+
+	// Create informative label with relevant matching parameters
+	identityStr := string(inputs.settings.identity)
+	coverageStr := string(inputs.settings.coverageThreshold)
+	similarityTypeStr := inputs.settings.similarityType == "sequence-identity" ? "Exact Match" : "BLOSUM"
+	
+	traceLabel := "Assay Data (sim:" + similarityTypeStr + ", ident:" + identityStr + ", cov:" + coverageStr + ")"
+	
+	trace := pSpec.makeTrace(inputs.datasetSpec,
+		{
+			type: "milaboratories.immune-assay-data",
+			importance: 40,
+			label: traceLabel
+		})
+
+	epfB := pframes.pFrameBuilder()
+	for k, v in cloneImportResults {
+		epfB.add(k, trace.inject(v.spec), v.data)
+	}
+	epf := epfB.build()
+	assayPframe := pframes.exportFrame(assayImportResults)
+
+	return {
+		assayPframe: assayPframe,
+		epf: epf
+	}
+})
+
