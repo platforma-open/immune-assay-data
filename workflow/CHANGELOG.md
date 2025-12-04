@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.workflow
 
+## 1.5.0
+
+### Minor Changes
+
+- b21c35e: Add isDiscreteFilter and discreteValues annotation to string pcolumn export specs
+
 ## 1.4.3
 
 ### Patch Changes
