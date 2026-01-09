@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.fasta-to-tsv
 
+## 1.1.3
+
+### Patch Changes
+
+- 35cde6e: Show running state for tables and graphs
+
 ## 1.1.2
 
 ### Patch Changes

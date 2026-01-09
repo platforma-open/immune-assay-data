@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.model
 
+## 1.4.3
+
+### Patch Changes
+
+- 35cde6e: Show running state for tables and graphs
+
 ## 1.4.2
 
 ### Patch Changes

@@ -1,5 +1,16 @@
 # @platforma-open/milaboratories.immune-assay-data.workflow
 
+## 1.5.1
+
+### Patch Changes
+
+- 35cde6e: Show running state for tables and graphs
+- Updated dependencies [35cde6e]
+  - @platforma-open/milaboratories.immune-assay-data.coverage-mode-calc@1.1.3
+  - @platforma-open/milaboratories.immune-assay-data.prepare-fasta@1.1.3
+  - @platforma-open/milaboratories.immune-assay-data.add-header@1.1.3
+  - @platforma-open/milaboratories.immune-assay-data.fasta-to-tsv@1.1.3
+
 ## 1.5.0
 
 ### Minor Changes
