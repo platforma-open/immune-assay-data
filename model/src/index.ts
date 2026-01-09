@@ -127,7 +127,7 @@ export const model = BlockModel.create()
     { isActive: true },
   )
 
-  .output('table', (ctx) => {
+  .outputWithStatus('table', (ctx) => {
     if (ctx.outputs?.resolve('emptyResults')?.getDataAsJson<boolean>()) {
       return undefined;
     }
