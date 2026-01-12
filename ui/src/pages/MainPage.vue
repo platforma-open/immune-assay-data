@@ -6,7 +6,6 @@ import type {
 } from '@platforma-sdk/model';
 import {
   getRawPlatformaInstance,
-  plRefsEqual,
 } from '@platforma-sdk/model';
 import {
   PlAgDataTableV2,
@@ -26,6 +25,7 @@ import {
   computed,
   ref,
   watch,
+  watchEffect,
 } from 'vue';
 import * as XLSX from 'xlsx';
 import {
@@ -38,11 +38,6 @@ const app = useApp();
 
 function setDataset(ref: PlRef | undefined) {
   app.model.args.datasetRef = ref;
-  app.model.ui.title = 'Immune Assay Data - ' + (ref
-    ? app.model.outputs.datasetOptions?.find((o) =>
-      plRefsEqual(o.ref, ref),
-    )?.label
-    : '');
 }
 const settingsOpen = ref(app.model.args.datasetRef === undefined);
 
@@ -135,13 +130,35 @@ const similarityTypeOptions = [
 //   { label: 'Query length ≥ x% of assay sequence length', value: 4 },
 //   { label: 'Shorter sequence ≥ x% of longer', value: 5 },
 // ];
+
+// Build defaultBlockLabel from settings
+watchEffect(() => {
+  const parts: string[] = [];
+
+  // Add similarity type
+  const similarityLabel = similarityTypeOptions
+    .find((o) => o.value === app.model.args.settings.similarityType)
+    ?.label ?? '';
+  if (similarityLabel) {
+    parts.push(similarityLabel);
+  }
+
+  // Add identity threshold
+  parts.push(`ident:${app.model.args.settings.identity}`);
+
+  // Add coverage threshold
+  parts.push(`cov:${app.model.args.settings.coverageThreshold}`);
+
+  app.model.args.defaultBlockLabel = parts.filter(Boolean).join(', ');
+});
 </script>
 
 <template>
-  <PlBlockPage>
-    <template #title>
-      {{ app.model.ui.title }}
-    </template>
+  <PlBlockPage
+    v-model:subtitle="app.model.args.customBlockLabel"
+    :subtitle-placeholder="app.model.args.defaultBlockLabel"
+    title="Immune Assay Data"
+  >
     <template #append>
       <PlBtnGhost @click.stop="() => (settingsOpen = true)">
         Settings
