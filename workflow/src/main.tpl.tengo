@@ -377,7 +377,9 @@ wf.body(func(args) {
 			assayDataTsv: ptw.getFile("assayData.tsv"),
 			clonesDataTsv: ptw.getFile("clonesData.tsv"),
 			uniqueValuesMap: uniqueValuesMap,
-			settings: args.settings
+			settings: args.settings,
+			customBlockLabel: args.customBlockLabel,
+			defaultBlockLabel: args.defaultBlockLabel
 		})
 		assayPframe = buildOutputsResult.output("assayPframe")
 		epf = buildOutputsResult.output("epf")

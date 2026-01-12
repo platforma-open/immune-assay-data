@@ -1,6 +1,5 @@
 import type {
   ImportFileHandle,
-  InferOutputsType,
   PlDataTableStateV2,
   PlRef,
   SUniversalPColumnId,
@@ -25,6 +24,8 @@ export type ImportColumnInfo = {
 };
 
 export type BlockArgs = {
+  defaultBlockLabel: string;
+  customBlockLabel: string;
   datasetRef?: PlRef;
   targetRef?: SUniversalPColumnId;
   fileHandle?: ImportFileHandle;
@@ -36,7 +37,6 @@ export type BlockArgs = {
 };
 
 export type UiState = {
-  title: string;
   fileImportError?: string;
   tableState: PlDataTableStateV2;
 };
@@ -44,6 +44,8 @@ export type UiState = {
 export const model = BlockModel.create()
 
   .withArgs<BlockArgs>({
+    defaultBlockLabel: '',
+    customBlockLabel: '',
     settings: {
       coverageThreshold: 0.95, // default value matching MMseqs2 default
       identity: 0.9,
@@ -53,7 +55,6 @@ export const model = BlockModel.create()
   })
 
   .withUiState<UiState>({
-    title: 'Immune Assay Data',
     tableState: createPlDataTableStateV2(),
   })
 
@@ -144,12 +145,12 @@ export const model = BlockModel.create()
 
   .output('isRunning', (ctx) => ctx.outputs?.getIsReadyOrError() === false)
 
-  .title((ctx) => ctx.uiState.title)
+  .title(() => 'Immune Assay Data')
+
+  .subtitle((ctx) => ctx.args.customBlockLabel || ctx.args.defaultBlockLabel)
 
   .sections((_ctx) => ([
     { type: 'link', href: '/', label: 'Main' },
   ]))
 
   .done(2);
-
-export type BlockOutputs = InferOutputsType<typeof model>;

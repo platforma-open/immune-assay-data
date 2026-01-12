@@ -206,7 +206,9 @@ self.body(func(inputs) {
 	coverageStr := string(inputs.settings.coverageThreshold)
 	similarityTypeStr := inputs.settings.similarityType == "sequence-identity" ? "Exact Match" : "BLOSUM"
 	
-	traceLabel := "Assay Data (sim:" + similarityTypeStr + ", ident:" + identityStr + ", cov:" + coverageStr + ")"
+	// Use block label if provided, otherwise fall back to default technical label
+	blockLabel := inputs.customBlockLabel || inputs.defaultBlockLabel || ""
+	traceLabel := blockLabel != "" ? blockLabel : "Assay Data (sim:" + similarityTypeStr + ", ident:" + identityStr + ", cov:" + coverageStr + ")"
 	
 	trace := pSpec.makeTrace(inputs.datasetSpec,
 		{
