@@ -5,6 +5,7 @@ import type {
   PlRef,
 } from '@platforma-sdk/model';
 import {
+  getFileNameFromHandle,
   getRawPlatformaInstance,
 } from '@platforma-sdk/model';
 import {
@@ -134,6 +135,14 @@ const similarityTypeOptions = [
 // Build defaultBlockLabel from settings
 watchEffect(() => {
   const parts: string[] = [];
+
+  // Add file name if available
+  if (app.model.args.fileHandle) {
+    const fileName = getFileNameFromHandle(app.model.args.fileHandle);
+    if (fileName) {
+      parts.push(fileName);
+    }
+  }
 
   // Add similarity type
   const similarityLabel = similarityTypeOptions
