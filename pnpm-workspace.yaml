@@ -23,6 +23,7 @@ catalog:
   '@platforma-sdk/test': 1.51.3
   '@milaboratories/helpers': 1.13.0
   '@milaboratories/graph-maker': 1.1.202
+  '@milaboratories/multi-sequence-alignment': 1.45.7
 
   # Common dependencies - can use ^ or ~
   'vue': ^3.5.24

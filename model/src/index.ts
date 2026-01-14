@@ -2,11 +2,13 @@ import type {
   ImportFileHandle,
   InferOutputsType,
   PlDataTableStateV2,
+  PlMultiSequenceAlignmentModel,
   PlRef,
   SUniversalPColumnId,
 } from '@platforma-sdk/model';
 import {
   BlockModel,
+  createPFrameForGraphs,
   createPlDataTableStateV2,
   createPlDataTableV2,
 } from '@platforma-sdk/model';
@@ -39,6 +41,7 @@ export type UiState = {
   title: string;
   fileImportError?: string;
   tableState: PlDataTableStateV2;
+  alignmentModel: PlMultiSequenceAlignmentModel;
 };
 
 export const model = BlockModel.create()
@@ -55,6 +58,7 @@ export const model = BlockModel.create()
   .withUiState<UiState>({
     title: 'Immune Assay Data',
     tableState: createPlDataTableStateV2(),
+    alignmentModel: {},
   })
 
   .argsValid((ctx) =>
@@ -140,6 +144,28 @@ export const model = BlockModel.create()
       cols,
       ctx.uiState.tableState,
     );
+  })
+
+  .output('pf', (ctx) => {
+    if (ctx.outputs?.resolve('emptyResults')?.getDataAsJson<boolean>()) {
+      return undefined;
+    }
+    const cols = ctx.outputs?.resolve('table')?.getPColumns();
+    if (cols === undefined)
+      return undefined;
+
+    return createPFrameForGraphs(ctx, cols);
+  })
+
+  .outputWithStatus('test', (ctx) => {
+    if (ctx.outputs?.resolve('emptyResults')?.getDataAsJson<boolean>()) {
+      return undefined;
+    }
+    const cols = ctx.outputs?.resolve('table')?.getPColumns();
+    if (cols === undefined)
+      return undefined;
+
+    return cols;
   })
 
   .output('isRunning', (ctx) => ctx.outputs?.getIsReadyOrError() === false)

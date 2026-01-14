@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { PlMultiSequenceAlignment } from '@milaboratories/multi-sequence-alignment';
 import type {
   ImportFileHandle,
   LocalImportFileHandle,
   PlRef,
+  PlSelectionModel,
 } from '@platforma-sdk/model';
 import {
   getRawPlatformaInstance,
@@ -33,6 +35,9 @@ import {
 } from '../app';
 
 import { importFile } from '../importFile';
+import {
+  isSequenceColumn,
+} from '../util';
 
 const app = useApp();
 
@@ -45,9 +50,15 @@ function setDataset(ref: PlRef | undefined) {
     : '');
 }
 const settingsOpen = ref(app.model.args.datasetRef === undefined);
+const multipleSequenceAlignmentOpen = ref(false);
 
 const tableSettings = usePlDataTableSettingsV2({
   model: () => app.model.outputs.table,
+});
+
+const selection = ref<PlSelectionModel>({
+  axesSpec: [],
+  selectedKeys: [],
 });
 
 const setFile = async (file: ImportFileHandle | undefined) => {
@@ -143,6 +154,12 @@ const similarityTypeOptions = [
       {{ app.model.ui.title }}
     </template>
     <template #append>
+      <PlBtnGhost
+        icon="dna"
+        @click.stop="() => (multipleSequenceAlignmentOpen = true)"
+      >
+        Multiple Sequence Alignment
+      </PlBtnGhost>
       <PlBtnGhost @click.stop="() => (settingsOpen = true)">
         Settings
         <template #append>
@@ -152,6 +169,7 @@ const similarityTypeOptions = [
     </template>
     <PlAgDataTableV2
       v-model="app.model.ui.tableState"
+      v-model:selection="selection"
       :settings="tableSettings"
       show-columns-panel
       not-ready-text="Data is not computed"
@@ -235,6 +253,19 @@ const similarityTypeOptions = [
           Select min fraction of aligned (covered) residues of clonotypes in the cluster.
         </template>
       </PlNumberField>
+    </PlSlideModal>
+    <PlSlideModal
+      v-model="multipleSequenceAlignmentOpen"
+      width="100%"
+      :close-on-outside-click="false"
+    >
+      <template #title>Multiple Sequence Alignment</template>
+      <PlMultiSequenceAlignment
+        v-model="app.model.ui.alignmentModel"
+        :sequence-column-predicate="isSequenceColumn"
+        :p-frame="app.model.outputs.pf"
+        :selection="selection"
+      />
     </PlSlideModal>
   </PlBlockPage>
 </template>
