@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.model
 
+## 1.5.0
+
+### Minor Changes
+
+- a47580b: Support custom block title
+
 ## 1.4.3
 
 ### Patch Changes
