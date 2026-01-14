@@ -265,11 +265,13 @@ wf.body(func(args) {
 
 	assayPframe := undefined
 	epf := undefined
+	assayLinkerPframe := undefined
 	uniqueValuesMap := undefined
 
 	if emptyResults {
 		assayPframe = pframes.emptyPFrame()
 		epf = pframes.emptyPFrame()
+		assayLinkerPframe = pframes.emptyPFrame()
 	} else {
 		//////// Process tables ////////
 		ptw := pt.workflow()
@@ -295,6 +297,12 @@ wf.body(func(args) {
 		}
 		
 		df = df.groupBy("query").agg(cols...)
+		
+		// Add link column for linker pFrame (assayLinkerPframe)
+		df = df.withColumns(
+			pt.lit(1).cast("Int64").alias("link")
+		)
+		
 		df.save("results.tsv")
 
 		// assay data import summary
@@ -374,6 +382,7 @@ wf.body(func(args) {
 			assaySequenceType: assaySequenceType,
 			blockId: blockId,
 			datasetSpec: datasetSpec,
+			bestAlignmentTsv: ptw.getFile("results.tsv"),
 			assayDataTsv: ptw.getFile("assayData.tsv"),
 			clonesDataTsv: ptw.getFile("clonesData.tsv"),
 			uniqueValuesMap: uniqueValuesMap,
@@ -381,12 +390,14 @@ wf.body(func(args) {
 		})
 		assayPframe = buildOutputsResult.output("assayPframe")
 		epf = buildOutputsResult.output("epf")
+		assayLinkerPframe = buildOutputsResult.output("assayLinkerPframe")
 	}
 
 	result := {
 		outputs: {
 			dataImportHandle: importFile.handle,
 			table: assayPframe,
+			assayLinkerPframe: assayLinkerPframe,
 			mmseqsOutput: mmseqsOutput, // @TODO tmp fix to resolve CID conflicts
 			emptyResults: emptyResults		}
 	}

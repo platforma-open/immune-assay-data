@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { PlMultiSequenceAlignment } from '@milaboratories/multi-sequence-alignment';
 import type {
+  AxisId,
   ImportFileHandle,
   LocalImportFileHandle,
   PlRef,
   PlSelectionModel,
+  PTableKey,
 } from '@platforma-sdk/model';
 import {
   getRawPlatformaInstance,
@@ -26,6 +28,7 @@ import {
 } from '@platforma-sdk/ui-vue';
 import {
   computed,
+  reactive,
   ref,
   watch,
 } from 'vue';
@@ -36,6 +39,7 @@ import {
 
 import { importFile } from '../importFile';
 import {
+  isAssayColumn,
   isSequenceColumn,
 } from '../util';
 
@@ -50,7 +54,8 @@ function setDataset(ref: PlRef | undefined) {
     : '');
 }
 const settingsOpen = ref(app.model.args.datasetRef === undefined);
-const multipleSequenceAlignmentOpen = ref(false);
+const multipleSequenceAlignmentAssayOpen = ref(false);
+const multipleSequenceAlignmentClonotypesOpen = ref(false);
 
 const tableSettings = usePlDataTableSettingsV2({
   model: () => app.model.outputs.table,
@@ -59,6 +64,37 @@ const tableSettings = usePlDataTableSettingsV2({
 const selection = ref<PlSelectionModel>({
   axesSpec: [],
   selectedKeys: [],
+});
+
+// Define the assay sequence axis for the cell button
+const assayAxis = computed<AxisId>(() => {
+  if (app.model.outputs.assaySequenceSpec?.axesSpec[0] === undefined) {
+    return {
+      type: 'String',
+      name: 'pl7.app/vdj/assay/sequenceId',
+      domain: {},
+    };
+  } else {
+    return {
+      type: 'String',
+      name: 'pl7.app/vdj/assay/sequenceId',
+      domain: app.model.outputs.assaySequenceSpec.axesSpec[0].domain,
+    };
+  }
+});
+
+// Open MSA when we click in a row
+const onRowDoubleClicked = reactive((key?: PTableKey) => {
+  // Using keys (that will contain assay ID) we get included clonotypes
+  if (key) {
+    const assaySpecs = app.model.outputs.assaySequenceSpec;
+    if (assaySpecs === undefined) return;
+    selection.value = {
+      axesSpec: [assaySpecs.axesSpec[0]],
+      selectedKeys: [key],
+    };
+  }
+  multipleSequenceAlignmentClonotypesOpen.value = true;
 });
 
 const setFile = async (file: ImportFileHandle | undefined) => {
@@ -156,7 +192,7 @@ const similarityTypeOptions = [
     <template #append>
       <PlBtnGhost
         icon="dna"
-        @click.stop="() => (multipleSequenceAlignmentOpen = true)"
+        @click.stop="() => (multipleSequenceAlignmentAssayOpen = true)"
       >
         Multiple Sequence Alignment
       </PlBtnGhost>
@@ -174,6 +210,8 @@ const similarityTypeOptions = [
       show-columns-panel
       not-ready-text="Data is not computed"
       show-export-button
+      :show-cell-button-for-axis-id="assayAxis"
+      @cell-button-clicked="onRowDoubleClicked"
     />
     <PlSlideModal v-model="settingsOpen" :close-on-outside-click="false">
       <template #title>Settings</template>
@@ -255,7 +293,20 @@ const similarityTypeOptions = [
       </PlNumberField>
     </PlSlideModal>
     <PlSlideModal
-      v-model="multipleSequenceAlignmentOpen"
+      v-model="multipleSequenceAlignmentAssayOpen"
+      width="100%"
+      :close-on-outside-click="false"
+    >
+      <template #title>Multiple Sequence Alignment</template>
+      <PlMultiSequenceAlignment
+        v-model="app.model.ui.alignmentModel"
+        :sequence-column-predicate="isAssayColumn"
+        :p-frame="app.model.outputs.pf"
+        :selection="selection"
+      />
+    </PlSlideModal>
+    <PlSlideModal
+      v-model="multipleSequenceAlignmentClonotypesOpen"
       width="100%"
       :close-on-outside-click="false"
     >
@@ -263,7 +314,7 @@ const similarityTypeOptions = [
       <PlMultiSequenceAlignment
         v-model="app.model.ui.alignmentModel"
         :sequence-column-predicate="isSequenceColumn"
-        :p-frame="app.model.outputs.pf"
+        :p-frame="app.model.outputs.msaPf"
         :selection="selection"
       />
     </PlSlideModal>

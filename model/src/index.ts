@@ -1,10 +1,16 @@
 import type {
+  DataInfo,
   ImportFileHandle,
   InferOutputsType,
+  PColumn,
+  PColumnSpec,
+  PColumnValues,
   PlDataTableStateV2,
   PlMultiSequenceAlignmentModel,
   PlRef,
+  RenderCtx,
   SUniversalPColumnId,
+  TreeNodeAccessor,
 } from '@platforma-sdk/model';
 import {
   BlockModel,
@@ -43,6 +49,36 @@ export type UiState = {
   tableState: PlDataTableStateV2;
   alignmentModel: PlMultiSequenceAlignmentModel;
 };
+
+type Column = PColumn<DataInfo<TreeNodeAccessor> | TreeNodeAccessor | PColumnValues>;
+
+type Columns = {
+  props: Column[];
+};
+
+function getColumns(ctx: RenderCtx<BlockArgs, UiState>): Columns | undefined {
+  const anchor = ctx.args.datasetRef;
+  if (anchor === undefined)
+    return undefined;
+
+  const anchorSpec = ctx.resultPool.getPColumnSpecByRef(anchor);
+  if (anchorSpec === undefined)
+    return undefined;
+
+  // all clone properties
+  const props = (ctx.resultPool.getAnchoredPColumns(
+    { main: anchor },
+    [
+      {
+        axes: [{ anchor: 'main', idx: 1 }],
+      },
+    ]) ?? [])
+    .filter((p) => p.spec.annotations?.['pl7.app/sequence/isAnnotation'] !== 'true');
+
+  return {
+    props: props,
+  };
+}
 
 export const model = BlockModel.create()
 
@@ -157,7 +193,19 @@ export const model = BlockModel.create()
     return createPFrameForGraphs(ctx, cols);
   })
 
-  .outputWithStatus('test', (ctx) => {
+  .output('assaySequenceSpec', (ctx): PColumnSpec | undefined => {
+    if (ctx.outputs?.resolve('emptyResults')?.getDataAsJson<boolean>()) {
+      return undefined;
+    }
+    const cols = ctx.outputs?.resolve('table')?.getPColumns();
+    if (cols === undefined)
+      return undefined;
+    // Return only sequence column
+    return cols.find((c) => c.spec.name === 'pl7.app/vdj/sequence'
+      && c.spec.axesSpec[0].name === 'pl7.app/vdj/assay/sequenceId')?.spec;
+  })
+
+  .output('msaPf', (ctx) => {
     if (ctx.outputs?.resolve('emptyResults')?.getDataAsJson<boolean>()) {
       return undefined;
     }
@@ -165,7 +213,15 @@ export const model = BlockModel.create()
     if (cols === undefined)
       return undefined;
 
-    return cols;
+    const msaCols = ctx.outputs?.resolve('assayLinkerPframe')?.getPColumns();
+    if (!msaCols) return undefined;
+
+    const columns = getColumns(ctx);
+    if (columns === undefined) {
+      return undefined;
+    }
+
+    return createPFrameForGraphs(ctx, [...msaCols, ...cols, ...columns.props]);
   })
 
   .output('isRunning', (ctx) => ctx.outputs?.getIsReadyOrError() === false)
