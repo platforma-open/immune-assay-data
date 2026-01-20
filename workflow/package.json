@@ -1,6 +1,6 @@
 {
   "name": "@platforma-open/milaboratories.immune-assay-data.workflow",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "type": "module",
   "description": "Tengo-based template",
   "scripts": {
