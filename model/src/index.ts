@@ -44,7 +44,7 @@ export type UiState = {
 export const model = BlockModel.create()
 
   .withArgs<BlockArgs>({
-    defaultBlockLabel: '',
+    defaultBlockLabel: 'Select Dataset',
     customBlockLabel: '',
     settings: {
       coverageThreshold: 0.95, // default value matching MMseqs2 default
