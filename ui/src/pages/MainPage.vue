@@ -62,6 +62,11 @@ const selection = ref<PlSelectionModel>({
   selectedKeys: [],
 });
 
+const selectionAssay = ref<PlSelectionModel>({
+  axesSpec: [],
+  selectedKeys: [],
+});
+
 // Define the assay sequence axis for the cell button
 const assayAxis = computed<AxisId>(() => {
   if (app.model.outputs.assaySequenceSpec?.axesSpec[0] === undefined) {
@@ -231,7 +236,7 @@ watchEffect(() => {
     </template>
     <PlAgDataTableV2
       v-model="app.model.ui.tableState"
-      v-model:selection="selection"
+      v-model:selection="selectionAssay"
       :settings="tableSettings"
       show-columns-panel
       not-ready-text="Data is not computed"
@@ -328,7 +333,7 @@ watchEffect(() => {
         v-model="app.model.ui.alignmentModel"
         :sequence-column-predicate="isAssayColumn"
         :p-frame="app.model.outputs.pf"
-        :selection="selection"
+        :selection="selectionAssay"
       />
     </PlSlideModal>
     <PlSlideModal
