@@ -8,7 +8,7 @@ import type {
   PlDataTableStateV2,
   PlMultiSequenceAlignmentModel,
   PlRef,
-  RenderCtx,
+  RenderCtxLegacy,
   SUniversalPColumnId,
   TreeNodeAccessor,
 } from '@platforma-sdk/model';
@@ -56,7 +56,7 @@ type Columns = {
   props: Column[];
 };
 
-function getColumns(ctx: RenderCtx<BlockArgs, UiState>): Columns | undefined {
+function getColumns(ctx: RenderCtxLegacy<BlockArgs, UiState>): Columns | undefined {
   const anchor = ctx.args.datasetRef;
   if (anchor === undefined)
     return undefined;
