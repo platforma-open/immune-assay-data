@@ -1,5 +1,23 @@
 # @platforma-open/milaboratories.immune-assay-data
 
+## 1.2.16
+
+### Patch Changes
+
+- Updated dependencies [f10bacb]
+  - @platforma-open/milaboratories.immune-assay-data.workflow@1.6.1
+  - @platforma-open/milaboratories.immune-assay-data.model@1.5.1
+  - @platforma-open/milaboratories.immune-assay-data.ui@1.4.1
+
+## 1.2.15
+
+### Patch Changes
+
+- Updated dependencies [a47580b]
+  - @platforma-open/milaboratories.immune-assay-data.workflow@1.6.0
+  - @platforma-open/milaboratories.immune-assay-data.model@1.5.0
+  - @platforma-open/milaboratories.immune-assay-data.ui@1.4.0
+
 ## 1.2.14
 
 ### Patch Changes

@@ -1,5 +1,24 @@
 # @platforma-open/milaboratories.immune-assay-data.ui
 
+## 1.4.1
+
+### Patch Changes
+
+- f10bacb: Labels migration
+- Updated dependencies [f10bacb]
+  - @platforma-open/milaboratories.immune-assay-data.model@1.5.1
+
+## 1.4.0
+
+### Minor Changes
+
+- a47580b: Support custom block title
+
+### Patch Changes
+
+- Updated dependencies [a47580b]
+  - @platforma-open/milaboratories.immune-assay-data.model@1.5.0
+
 ## 1.3.4
 
 ### Patch Changes

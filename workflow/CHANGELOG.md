@@ -1,5 +1,17 @@
 # @platforma-open/milaboratories.immune-assay-data.workflow
 
+## 1.6.1
+
+### Patch Changes
+
+- f10bacb: Labels migration
+
+## 1.6.0
+
+### Minor Changes
+
+- a47580b: Support custom block title
+
 ## 1.5.1
 
 ### Patch Changes
