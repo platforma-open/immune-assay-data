@@ -12,6 +12,7 @@
   "dependencies": {
     "@platforma-open/milaboratories.immune-assay-data.model": "workspace:*",
     "@platforma-sdk/ui-vue": "catalog:",
+    "@milaboratories/multi-sequence-alignment": "catalog:",
     "@platforma-sdk/model": "catalog:",
     "@milaboratories/graph-maker": "catalog:",
     "vue": "catalog:",
