@@ -1,5 +1,17 @@
 # @platforma-open/milaboratories.immune-assay-data.ui
 
+## 1.4.2
+
+### Patch Changes
+
+- c903a35: Add MSA
+- b85d0b1: Update SDK again
+- f5ad6b1: Add MSA
+- Updated dependencies [c903a35]
+- Updated dependencies [b85d0b1]
+- Updated dependencies [f5ad6b1]
+  - @platforma-open/milaboratories.immune-assay-data.model@1.5.2
+
 ## 1.4.1
 
 ### Patch Changes

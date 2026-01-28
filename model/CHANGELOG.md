@@ -1,5 +1,13 @@
 # @platforma-open/milaboratories.immune-assay-data.model
 
+## 1.5.2
+
+### Patch Changes
+
+- c903a35: Add MSA
+- b85d0b1: Update SDK again
+- f5ad6b1: Add MSA
+
 ## 1.5.1
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @platforma-open/milaboratories.immune-assay-data.workflow
 
+## 1.6.2
+
+### Patch Changes
+
+- c903a35: Add MSA
+- b85d0b1: Update SDK again
+- f5ad6b1: Add MSA
+
 ## 1.6.1
 
 ### Patch Changes

@@ -1,5 +1,18 @@
 # @platforma-open/milaboratories.immune-assay-data
 
+## 1.2.17
+
+### Patch Changes
+
+- c903a35: Add MSA
+- b85d0b1: Update SDK again
+- Updated dependencies [c903a35]
+- Updated dependencies [b85d0b1]
+- Updated dependencies [f5ad6b1]
+  - @platforma-open/milaboratories.immune-assay-data.workflow@1.6.2
+  - @platforma-open/milaboratories.immune-assay-data.model@1.5.2
+  - @platforma-open/milaboratories.immune-assay-data.ui@1.4.2
+
 ## 1.2.16
 
 ### Patch Changes
