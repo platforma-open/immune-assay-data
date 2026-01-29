@@ -15,6 +15,7 @@
     "@milaboratories/multi-sequence-alignment": "catalog:",
     "@platforma-sdk/model": "catalog:",
     "@milaboratories/graph-maker": "catalog:",
+    "@milaboratories/strings": "catalog:",
     "vue": "catalog:",
     "@biowasm/aioli": "catalog:",
     "sass-embedded": "catalog:",

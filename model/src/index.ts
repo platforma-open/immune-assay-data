@@ -17,6 +17,7 @@ import {
   createPlDataTableStateV2,
   createPlDataTableV2,
 } from '@platforma-sdk/model';
+import { getDefaultBlockLabel } from './label';
 
 type Settings = {
   coverageThreshold: number; // fraction of aligned residues required
@@ -83,7 +84,11 @@ function getColumns(ctx: RenderCtxLegacy<BlockArgs, UiState>): Columns | undefin
 export const model = BlockModel.create()
 
   .withArgs<BlockArgs>({
-    defaultBlockLabel: 'Select Dataset',
+    defaultBlockLabel: getDefaultBlockLabel({
+      similarityType: 'alignment-score',
+      identity: 0.9,
+      coverageThreshold: 0.95,
+    }),
     customBlockLabel: '',
     settings: {
       coverageThreshold: 0.95, // default value matching MMseqs2 default
@@ -236,3 +241,5 @@ export const model = BlockModel.create()
   ]))
 
   .done(2);
+
+export { getDefaultBlockLabel } from './label';

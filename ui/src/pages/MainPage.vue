@@ -9,7 +9,6 @@ import type {
   PTableKey,
 } from '@platforma-sdk/model';
 import {
-  getFileNameFromHandle,
   getRawPlatformaInstance,
 } from '@platforma-sdk/model';
 import {
@@ -26,12 +25,12 @@ import {
   PlSlideModal,
   usePlDataTableSettingsV2,
 } from '@platforma-sdk/ui-vue';
+import strings from '@milaboratories/strings';
 import {
   computed,
   reactive,
   ref,
   watch,
-  watchEffect,
 } from 'vue';
 import * as XLSX from 'xlsx';
 import {
@@ -52,6 +51,17 @@ function setDataset(ref: PlRef | undefined) {
 const settingsOpen = ref(app.model.args.datasetRef === undefined);
 const multipleSequenceAlignmentAssayOpen = ref(false);
 const multipleSequenceAlignmentClonotypesOpen = ref(false);
+
+// Auto-close settings panel when block starts running
+watch(
+  () => app.model.outputs.isRunning,
+  (isRunning, wasRunning) => {
+    // Close settings when block starts running (false -> true transition)
+    if (isRunning && !wasRunning) {
+      settingsOpen.value = false;
+    }
+  },
+);
 
 const tableSettings = usePlDataTableSettingsV2({
   model: () => app.model.outputs.table,
@@ -183,35 +193,6 @@ const similarityTypeOptions = [
 //   { label: 'Query length ≥ x% of assay sequence length', value: 4 },
 //   { label: 'Shorter sequence ≥ x% of longer', value: 5 },
 // ];
-
-// Build defaultBlockLabel from settings
-watchEffect(() => {
-  const parts: string[] = [];
-
-  // Add file name if available
-  if (app.model.args.fileHandle) {
-    const fileName = getFileNameFromHandle(app.model.args.fileHandle);
-    if (fileName) {
-      parts.push(fileName);
-    }
-  }
-
-  // Add similarity type
-  const similarityLabel = similarityTypeOptions
-    .find((o) => o.value === app.model.args.settings.similarityType)
-    ?.label ?? '';
-  if (similarityLabel) {
-    parts.push(similarityLabel);
-  }
-
-  // Add identity threshold
-  parts.push(`ident:${app.model.args.settings.identity}`);
-
-  // Add coverage threshold
-  parts.push(`cov:${app.model.args.settings.coverageThreshold}`);
-
-  app.model.args.defaultBlockLabel = parts.filter(Boolean).join(', ');
-});
 </script>
 
 <template>
@@ -239,13 +220,14 @@ watchEffect(() => {
       v-model:selection="selectionAssay"
       :settings="tableSettings"
       show-columns-panel
-      not-ready-text="Data is not computed"
+      :not-ready-text="strings.callToActions.configureSettingsAndRun"
+      :no-rows-text="strings.states.noDataAvailable"
       show-export-button
       :show-cell-button-for-axis-id="assayAxis"
       @cell-button-clicked="onRowDoubleClicked"
     />
     <PlSlideModal v-model="settingsOpen" :close-on-outside-click="false">
-      <template #title>Settings</template>
+      <template #title>{{ strings.titles.settings }}</template>
       <PlDropdownRef
         :model-value="app.model.args.datasetRef" :options="app.model.outputs.datasetOptions"
         label="Dataset" clearable required @update:model-value="setDataset"
