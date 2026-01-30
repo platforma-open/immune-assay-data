@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.model
 
+## 1.5.3
+
+### Patch Changes
+
+- 59c14ff: Set default block label, use sdk strings for status messages
+
 ## 1.5.2
 
 ### Patch Changes
