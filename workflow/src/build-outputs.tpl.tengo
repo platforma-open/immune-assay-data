@@ -237,7 +237,7 @@ self.body(func(inputs) {
 				}
 			}],
 			storageFormat: "Parquet",
-			partitionKeyLength: 1
+			partitionKeyLength: 0
 		},
 		{ cpu: 1, mem: "16GiB" }
 	)
