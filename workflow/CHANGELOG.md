@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.workflow
 
+## 1.6.3
+
+### Patch Changes
+
+- 7b51d0b: Fix performance issue
+
 ## 1.6.2
 
 ### Patch Changes

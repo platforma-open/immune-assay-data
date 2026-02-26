@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.model
 
+## 1.5.4
+
+### Patch Changes
+
+- 7b51d0b: Fix performance issue
+
 ## 1.5.3
 
 ### Patch Changes
