@@ -187,6 +187,11 @@ wf.body(func(args) {
 		xsvType = fileNameParts[len(fileNameParts)-1]
 	}
 
+	// Use detected delimiter from UI if available (file extension may not match actual delimiter)
+	if args.detectedXsvType != undefined {
+		xsvType = args.detectedXsvType
+	}
+
 	// Handle FASTA files by converting to TSV first
 	if xsvType == "fasta" || xsvType == "fa" {
 		fastaToTsvRun := runFastaToTsv(importFile.file)

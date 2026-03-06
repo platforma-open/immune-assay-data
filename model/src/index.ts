@@ -39,6 +39,7 @@ export type BlockArgs = {
   targetRef?: SUniversalPColumnId;
   fileHandle?: ImportFileHandle;
   fileExtension?: string;
+  detectedXsvType?: 'csv' | 'tsv';
   importColumns?: ImportColumnInfo[];
   sequenceColumnHeader?: string;
   selectedColumns: string[];

@@ -147,6 +147,7 @@ export async function importFile(file: LocalImportFileHandle) {
   const fileName = getFileNameFromHandle(file);
   const extension = fileName.split('.').pop()?.toLowerCase();
   app.model.args.fileExtension = extension;
+  app.model.args.detectedXsvType = undefined;
 
   let rawData: TableData;
 
@@ -165,6 +166,7 @@ export async function importFile(file: LocalImportFileHandle) {
   } else {
     // Handle Excel/CSV files as before
     const data = await getRawPlatformaInstance().lsDriver.getLocalFileContent(file);
+
     const wb = XLSX.read(data);
 
     // @TODO: allow user to select worksheet
@@ -175,6 +177,14 @@ export async function importFile(file: LocalImportFileHandle) {
       raw: true,
       blankrows: false,
     }) as TableData;
+
+    // Detect actual delimiter (extension may not match content).
+    // XLSX auto-detects internally via guess_sep but doesn't expose the result,
+    // so we check the first line of the already-in-memory data buffer.
+    if (extension === 'csv' || extension === 'tsv') {
+      const firstLine = new TextDecoder().decode(new Uint8Array(data).slice(0, 4096)).split('\n')[0] ?? '';
+      app.model.args.detectedXsvType = firstLine.includes('\t') ? 'tsv' : 'csv';
+    }
   }
 
   const header = rawData[0];
