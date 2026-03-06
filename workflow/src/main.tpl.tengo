@@ -113,7 +113,7 @@ prepareClonesTsv := func(args) {
 runTsvToFasta := func(fileTsv) {
 	e := exec.builder().
 		software(prepareFastaSw).
-		mem("16GiB").
+		mem("8GiB").
 		cpu(1).
 		addFile("input.tsv", fileTsv).
 		arg("-i").arg("input.tsv").
@@ -133,7 +133,7 @@ runTsvToFasta := func(fileTsv) {
 runFastaToTsv := func(fileFasta) {
 	e := exec.builder().
 		software(fastaToTsvSw).
-		mem("16GiB").
+		mem("8GiB").
 		cpu(1).
 		addFile("input.fasta", fileFasta).
 		arg("-i").arg("input.fasta").
