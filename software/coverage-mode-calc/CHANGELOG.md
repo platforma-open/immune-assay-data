@@ -1,5 +1,12 @@
 # @platforma-open/milaboratories.immune-assay-data.coverage-mode-calc
 
+## 1.2.0
+
+### Minor Changes
+
+- c98d8b5: - Introduce fast mode for sequence match
+  - Support XLSX file as assay data input
+
 ## 1.1.3
 
 ### Patch Changes

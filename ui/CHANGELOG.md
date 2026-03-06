@@ -1,5 +1,17 @@
 # @platforma-open/milaboratories.immune-assay-data.ui
 
+## 1.5.0
+
+### Minor Changes
+
+- c98d8b5: - Introduce fast mode for sequence match
+  - Support XLSX file as assay data input
+
+### Patch Changes
+
+- Updated dependencies [c98d8b5]
+  - @platforma-open/milaboratories.immune-assay-data.model@1.6.0
+
 ## 1.4.4
 
 ### Patch Changes
