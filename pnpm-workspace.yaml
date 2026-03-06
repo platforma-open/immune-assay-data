@@ -3,6 +3,7 @@ packages:
   - software/add-header
   - software/coverage-mode-calc
   - software/fasta-to-tsv
+  - software/xlsx-to-csv
   - workflow
   - model
   - ui

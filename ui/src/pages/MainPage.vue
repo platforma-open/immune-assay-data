@@ -247,7 +247,7 @@ const similarityTypeOptions = [
       </PlDropdown>
       <PlFileInput
         v-model="app.model.args.fileHandle" label="Assay data to import" placeholder="Assay data table"
-        :extensions="['csv', 'tsv', 'fasta', 'fa']" :error="app.model.ui.fileImportError" required @update:model-value="setFile"
+        :extensions="['csv', 'tsv', 'fasta', 'fa', 'xlsx']" :error="app.model.ui.fileImportError" required @update:model-value="setFile"
       >
         <template #tooltip>
           Upload a comma-separated (.csv), tab-separated (.tsv), or FASTA (.fasta/.fa) file containing assay data. FASTA files will be converted to a table with Header and Sequence columns.

@@ -21,6 +21,7 @@ prepareFastaSw := assets.importSoftware("@platforma-open/milaboratories.immune-a
 fastaToTsvSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.fasta-to-tsv:main")
 addHeaderSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.add-header:main")
 covModeCalcSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.coverage-mode-calc:main")
+xlsxToCsvSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.xlsx-to-csv:main")
 
 wf.prepare(func(args){
 	bundleBuilder := wf.createPBundleBuilder()
@@ -142,6 +143,24 @@ runFastaToTsv := func(fileFasta) {
 	return e.run()
 }
 
+/**
+ * Convert xlsx file to csv file
+ * @param fileXlsx - xlsx file
+ * @return csv file run result
+ */
+runXlsxToCsv := func(fileXlsx) {
+	e := exec.builder().
+		software(xlsxToCsvSw).
+		mem("16GiB").
+		cpu(1).
+		addFile("input.xlsx", fileXlsx).
+		arg("-i").arg("input.xlsx").
+		arg("-o").arg("output.csv").
+		saveFile("output.csv")
+
+	return e.run()
+}
+
 wf.body(func(args) {
 	importFile := file.importFile(args.fileHandle)
 	datasetSpec := args.columns.getSpec(args.datasetRef)
@@ -190,6 +209,13 @@ wf.body(func(args) {
 	// Use detected delimiter from UI if available (file extension may not match actual delimiter)
 	if args.detectedXsvType != undefined {
 		xsvType = args.detectedXsvType
+	}
+
+	// Handle XLSX files by converting to CSV first
+	if xsvType == "xlsx" {
+		xlsxToCsvRun := runXlsxToCsv(importFile.file)
+		importFile.file = xlsxToCsvRun.getFile("output.csv")
+		xsvType = "csv"
 	}
 
 	// Handle FASTA files by converting to TSV first
