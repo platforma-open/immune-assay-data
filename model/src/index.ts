@@ -39,10 +39,14 @@ export type BlockArgs = {
   targetRef?: SUniversalPColumnId;
   fileHandle?: ImportFileHandle;
   fileExtension?: string;
+  detectedXsvType?: 'csv' | 'tsv';
   importColumns?: ImportColumnInfo[];
   sequenceColumnHeader?: string;
   selectedColumns: string[];
   settings: Settings;
+  lessSensitive: boolean;
+  mem?: number;
+  cpu?: number;
 };
 
 export type UiState = {
@@ -96,6 +100,7 @@ export const model = BlockModel.create()
       similarityType: 'alignment-score',
     },
     selectedColumns: [],
+    lessSensitive: false,
   })
 
   .withUiState<UiState>({

@@ -15,6 +15,8 @@ import {
   PlAgDataTableV2,
   PlBlockPage,
   PlBtnGhost,
+  PlAccordionSection,
+  PlCheckbox,
   PlDropdown,
   PlDropdownMulti,
   PlDropdownRef,
@@ -23,6 +25,7 @@ import {
   PlNumberField,
   PlSectionSeparator,
   PlSlideModal,
+  PlTooltip,
   usePlDataTableSettingsV2,
 } from '@platforma-sdk/ui-vue';
 import strings from '@milaboratories/strings';
@@ -244,7 +247,7 @@ const similarityTypeOptions = [
       </PlDropdown>
       <PlFileInput
         v-model="app.model.args.fileHandle" label="Assay data to import" placeholder="Assay data table"
-        :extensions="['csv', 'tsv', 'fasta', 'fa']" :error="app.model.ui.fileImportError" required @update:model-value="setFile"
+        :extensions="['csv', 'tsv', 'fasta', 'fa', 'xlsx']" :error="app.model.ui.fileImportError" required @update:model-value="setFile"
       >
         <template #tooltip>
           Upload a comma-separated (.csv), tab-separated (.tsv), or FASTA (.fasta/.fa) file containing assay data. FASTA files will be converted to a table with Header and Sequence columns.
@@ -304,6 +307,40 @@ const similarityTypeOptions = [
           Select min fraction of aligned (covered) residues of clonotypes in the cluster.
         </template>
       </PlNumberField>
+
+      <PlAccordionSection :label="strings.titles.advancedSettings">
+        <PlCheckbox v-model="app.model.args.lessSensitive">
+          Fast mode
+          <PlTooltip class="info" position="top">
+            <template #tooltip>Prioritizes speed over sensitivity. Reduces prefiltering precision, which may miss some weaker matches but significantly speeds up alignment for large datasets.</template>
+          </PlTooltip>
+        </PlCheckbox>
+
+        <PlSectionSeparator>Resource allocation</PlSectionSeparator>
+        <PlNumberField
+          v-model="app.model.args.mem"
+          label="Memory (GiB)"
+          :min-value="1"
+          :step="1"
+          :max-value="1012"
+        >
+          <template #tooltip>
+            Sets the amount of memory to use for the alignment.
+          </template>
+        </PlNumberField>
+
+        <PlNumberField
+          v-model="app.model.args.cpu"
+          label="CPU (cores)"
+          :min-value="1"
+          :step="1"
+          :max-value="128"
+        >
+          <template #tooltip>
+            Sets the number of CPU cores to use for the alignment.
+          </template>
+        </PlNumberField>
+      </PlAccordionSection>
     </PlSlideModal>
     <PlSlideModal
       v-model="multipleSequenceAlignmentAssayOpen"

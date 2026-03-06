@@ -16,15 +16,26 @@ self.body(func(args) {
     clonesFasta := args.clonesFasta
     assayFasta := args.assayFasta
 
+	mem := "8GiB"
+	cpu := 1
+	if !is_undefined(args.mem) {
+		mem = string(args.mem) + "GiB"
+	}
+	if !is_undefined(args.cpu) {
+		cpu = args.cpu
+	}
+
 	mmseqs := exec.builder().
 		software(mmseqsSw).
-		mem("32GiB").
-		cpu(1).
+		mem(mem).
+		cpu(cpu).
 		arg("easy-search").
-		arg("clones.fasta").
 		arg("assay.fasta").
+		arg("clones.fasta").
 		arg("results.tsv").
 		arg("tmp").
+		arg("--threads").arg(string(cpu)).
+		arg("--max-seqs").arg("10000").
 		arg("--search-type").arg(mmseqsSearchType).
 		arg("--cov-mode").arg(string(covMode)).
 		arg("-c").arg(string(coverageThreshold)).
@@ -32,6 +43,15 @@ self.body(func(args) {
 
 	if similarityType == "sequence-identity" {
 		mmseqs = mmseqs.arg("--alignment-mode").arg("3")
+	}
+
+	lessSensitive := is_undefined(args.lessSensitive) ? false : args.lessSensitive
+	if lessSensitive {
+		mmseqs = mmseqs.
+			arg("--comp-bias-corr").arg("0").
+			arg("--mask").arg("0").
+			arg("--exact-kmer-matching").arg("1").
+			arg("-k").arg("7")
 	}
 
 	mmseqs = mmseqs.

@@ -42,7 +42,7 @@ def main():
                         help="Path for the output file (e.g., coverage_mode.txt).")
     args = parser.parse_args()
 
-    coverage_mode = "2"
+    coverage_mode = "1"
 
     clones_count, clones_total_length = get_fasta_stats(args.clones_fasta)
     assay_count, assay_total_length = get_fasta_stats(args.assay_fasta)
@@ -51,7 +51,7 @@ def main():
         clones_avg = clones_total_length / clones_count
         assay_avg = assay_total_length / assay_count
         if assay_avg < clones_avg:
-            coverage_mode = "1"
+            coverage_mode = "2"
 
     with open(args.output, 'w') as f:
         f.write(coverage_mode)
