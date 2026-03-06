@@ -240,7 +240,10 @@ wf.body(func(args) {
 		identityThreshold: args.settings.identity,
 		similarityType: args.settings.similarityType,
 		clonesFasta: clonesFasta,
-		assayFasta: assayFasta
+		assayFasta: assayFasta,
+		lessSensitive: args.lessSensitive,
+		mem: args.mem,
+		cpu: args.cpu
 	})
 
 	mmseqsOutput := runMmseqs.output("mmseqsOutput")
@@ -287,7 +290,7 @@ wf.body(func(args) {
 		)
 
 		cols := []
-		for _, col in ["bits", "evalue", "target", "pident", "alnlen", "mismatch", "gapopen", "qstart", "qend", "tstart", "tend"] {
+		for _, col in ["bits", "evalue", "query", "pident", "alnlen", "mismatch", "gapopen", "qstart", "qend", "tstart", "tend"] {
 			cols = append(cols,
 						pt.col(col).maxBy(
 								pt.col("evalue").multiply(-1),
@@ -296,7 +299,7 @@ wf.body(func(args) {
 						)
 		}
 		
-		df = df.groupBy("query").agg(cols...)
+		df = df.groupBy("target").agg(cols...)
 		
 		// Add link column for linker pFrame (assayLinkerPframe)
 		df = df.withColumns(
@@ -312,13 +315,13 @@ wf.body(func(args) {
 		})
 		// import how many matches per assay sequence found
 		assayDf = assayDf.join(
-			df.groupBy("target").agg(
-				pt.col("query").count().alias("queryCount")
+			df.groupBy("query").agg(
+				pt.col("target").count().alias("queryCount")
 			),
 			{
 				how: "left",
 				leftOn: "seqId",
-				rightOn: "target"
+				rightOn: "query"
 			}
 		)
 		assayDf.save("assayData.tsv")
@@ -327,7 +330,7 @@ wf.body(func(args) {
 		clonesDf := df.join(assayDf,
 			{
 				how: "left",
-				leftOn: "target",
+				leftOn: "query",
 				rightOn: "seqId"
 			}
 		)

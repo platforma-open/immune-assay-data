@@ -191,7 +191,7 @@ self.body(func(inputs) {
 	cloneImportResults := xsv.importFile(
 		inputs.clonesDataTsv, "tsv", {
 			axes: [{
-				column: "query",
+				column: "target",
 				spec: inputs.datasetSpec.axesSpec[1]
 			}],
 			columns: cloneColumns,
@@ -206,11 +206,11 @@ self.body(func(inputs) {
 		inputs.bestAlignmentTsv, "tsv", {
 			axes: [
 				{
-					column: "query",
+					column: "target",
 					spec: inputs.datasetSpec.axesSpec[1]
 				},
 				{
-					column: "target",
+					column: "query",
 					spec: {
 						name: "pl7.app/vdj/assay/sequenceId",
 						type: "String",
