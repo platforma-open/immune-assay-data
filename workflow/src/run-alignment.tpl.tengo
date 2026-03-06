@@ -50,7 +50,7 @@ self.body(func(args) {
 		mmseqs = mmseqs.
 			arg("--comp-bias-corr").arg("0").
 			arg("--mask").arg("0").
-			arg("--exact-kmer-matching").arg("1")
+			arg("--exact-kmer-matching").arg("1").
 			arg("-k").arg("7")
 	}
 
