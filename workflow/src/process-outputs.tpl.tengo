@@ -1,0 +1,47 @@
+self := import("@platforma-sdk/workflow-tengo:tpl")
+render := import("@platforma-sdk/workflow-tengo:render")
+assets := import("@platforma-sdk/workflow-tengo:assets")
+
+getUniqueValuesTpl := assets.importTemplate(":get-unique-values")
+buildOutputsTpl := assets.importTemplate(":build-outputs")
+
+self.defineOutputs("assayPframe", "epf", "assayLinkerPframe")
+
+self.body(func(args) {
+	if string(args.emptyOrNot) == "empty" {
+		return {
+			assayPframe: {},
+			epf: {},
+			assayLinkerPframe: {}
+		}
+	}
+
+	getUniqueValuesResult := render.create(getUniqueValuesTpl, {
+		assayDataTsv: args.assayDataTsv,
+		stringColumns: args.stringColumns
+	})
+	uniqueValuesMap := getUniqueValuesResult.output("uniqueValuesMap")
+
+	buildOutputsResult := render.createEphemeral(buildOutputsTpl, {
+		importColumns: args.importColumns,
+		selectedColumns: args.selectedColumns,
+		sequenceColumnHeader: args.sequenceColumnHeader,
+		sequenceColumnInfo: args.sequenceColumnInfo,
+		assaySequenceType: args.assaySequenceType,
+		datasetSpec: args.datasetSpec,
+		bestAlignmentTsv: args.bestAlignmentTsv,
+		assayDataTsv: args.assayDataTsv,
+		clonesDataTsv: args.clonesDataTsv,
+		uniqueValuesMap: uniqueValuesMap,
+		settings: args.settings,
+		customBlockLabel: args.customBlockLabel,
+		defaultBlockLabel: args.defaultBlockLabel,
+		blockId: args.blockId
+	})
+
+	return {
+		assayPframe: buildOutputsResult.output("assayPframe"),
+		epf: buildOutputsResult.output("epf"),
+		assayLinkerPframe: buildOutputsResult.output("assayLinkerPframe")
+	}
+})

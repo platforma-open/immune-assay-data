@@ -143,7 +143,8 @@ self.body(func(args) {
 	file := args.file
 	xsvType := args.xsvType
 	sequenceColumnHeader := args.sequenceColumnHeader
-	clonesTsv := args.clonesTsv
+	clonesFasta := args.clonesFasta
+	emptyOrNot := args.emptyOrNot
 	targetSequenceType := args.targetSequenceType
 	assaySequenceType := args.assaySequenceType
 	coverageThreshold := args.coverageThreshold
@@ -152,6 +153,17 @@ self.body(func(args) {
 	lessSensitive := args.lessSensitive
 	mem := args.metaInputs.mem
 	cpu := args.metaInputs.cpu
+
+	// Check if clones input is empty (resolved from upstream check template)
+	if string(emptyOrNot) == "empty" {
+		return {
+			bestAlignmentTsv: {},
+			assayDataTsv: {},
+			clonesDataTsv: {},
+			mmseqsOutput: {},
+			emptyResults: true
+		}
+	}
 
 	// Handle XLSX files (convert to CSV)
 	if xsvType == "xlsx" {
@@ -169,10 +181,8 @@ self.body(func(args) {
 
 	assayTsv := prepareAssayFile(file, xsvType, sequenceColumnHeader)
 
-	// Prepare FASTA
-	clonesFastaRun := runTsvToFasta(clonesTsv, "seqId", "sequence")
+	// Prepare assay FASTA (clones FASTA already prepared upstream)
 	assayFastaRun := runTsvToFasta(assayTsv, "seqId", "sequence")
-	clonesFasta := clonesFastaRun.getFile("output.fasta")
 	assayFasta := assayFastaRun.getFile("output.fasta")
 
 	// Dynamically determine coverage mode by comparing average sequence lengths
@@ -238,7 +248,7 @@ self.body(func(args) {
 
 	mmseqsResultTsv := addHeaderRun.getFile("results_with_header.tsv")
 	mmseqsResultContent := addHeaderRun.getFileContent("results_with_header.tsv")
-	
+
 	// Use subtemplate to check if file is empty
 	checkResult := render.create(checkEmptyTpl, {
 		content: mmseqsResultContent
@@ -273,7 +283,7 @@ self.body(func(args) {
 			).alias(col)
 		)
 	}
-	
+
 	dfRes = dfRes.groupBy("target").agg(cols...)
 	// Add link column for linker pFrame (assayLinkerPframe)
 	dfRes = dfRes.withColumns(
@@ -286,7 +296,7 @@ self.body(func(args) {
 		file: assayTsv,
 		xsvType: "tsv"
 	})
-	
+
 	// import how many matches per assay sequence found
 	assayDf = assayDf.join(
 		dfRes.groupBy("query").agg(
@@ -311,7 +321,7 @@ self.body(func(args) {
 	clonesDf.save("clones_data.tsv")
 
 	ptRun2 := ptw2.run()
-	
+
 	result.bestAlignmentTsv = ptRun2.getFile("best_alignment.tsv")
 	result.assayDataTsv = ptRun2.getFile("assay_data.tsv")
 	result.clonesDataTsv = ptRun2.getFile("clones_data.tsv")

@@ -1,6 +1,7 @@
 wf := import("@platforma-sdk/workflow-tengo:workflow")
 ll := import("@platforma-sdk/workflow-tengo:ll")
 file := import("@platforma-sdk/workflow-tengo:file")
+exec := import("@platforma-sdk/workflow-tengo:exec")
 assets:= import("@platforma-sdk/workflow-tengo:assets")
 pframes := import("@platforma-sdk/workflow-tengo:pframes")
 pt := import("@platforma-sdk/workflow-tengo:pt")
@@ -11,8 +12,9 @@ render := import("@platforma-sdk/workflow-tengo:render")
 strings := import("@platforma-sdk/workflow-tengo:strings")
 
 analysisTpl := assets.importTemplate(":analysis")
-getUniqueValuesTpl := assets.importTemplate(":get-unique-values")
-buildOutputsTpl := assets.importTemplate(":build-outputs")
+processOutputsTpl := assets.importTemplate(":process-outputs")
+checkClonesEmptyTpl := assets.importTemplate(":check-clones-empty")
+prepareFastaSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.prepare-fasta:main")
 
 wf.prepare(func(args){
 	bundleBuilder := wf.createPBundleBuilder()
@@ -89,12 +91,35 @@ wf.body(func(args) {
 
 	clonesTsv := prepareClonesTsv(args)
 
+	// Convert clones TSV to FASTA and check if empty
+	clonesFastaRun := exec.builder().
+		software(prepareFastaSw).
+		mem("8GiB").
+		cpu(1).
+		addFile("input.tsv", clonesTsv).
+		arg("-i").arg("input.tsv").
+		arg("-o").arg("output.fasta").
+		arg("--seq_col").arg("sequence").
+		arg("--id_col").arg("seqId").
+		saveFile("output.fasta").
+		saveFileContent("output.fasta").
+		run()
+	clonesFasta := clonesFastaRun.getFile("output.fasta")
+	clonesFastaContent := clonesFastaRun.getFileContent("output.fasta")
+
+	// Check if clones are empty before running mmseqs2
+	checkClonesResult := render.create(checkClonesEmptyTpl, {
+		content: clonesFastaContent
+	})
+	emptyOrNot := checkClonesResult.output("emptyOrNot")
+
 	// Run Analysis Template
 	analysisResult := render.create(analysisTpl, {
 		file: importFile.file,
 		xsvType: xsvType,
 		sequenceColumnHeader: args.sequenceColumnHeader,
-		clonesTsv: clonesTsv,
+		clonesFasta: clonesFasta,
+		emptyOrNot: emptyOrNot,
 		targetSequenceType: targetSequenceType,
 		assaySequenceType: assaySequenceType,
 		coverageThreshold: args.settings.coverageThreshold,
@@ -117,42 +142,34 @@ wf.body(func(args) {
 	assayDataTsv := analysisResult.output("assayDataTsv")
 	clonesDataTsv := analysisResult.output("clonesDataTsv")
 
-	//////// Extract unique values from String columns ////////
-	// Find all String columns
+	//////// Extract unique values & build outputs (skipped when clones are empty) ////////
 	stringColumns := []
 	for h in args.importColumns {
 		if h.type == "String" && h.header != args.sequenceColumnHeader {
 			stringColumns = append(stringColumns, h.header)
 		}
 	}
-	
-	// Split into get-unique-values (pt.workflow) and extract-unique-values (.getData())
-	getUniqueValuesResult := render.create(getUniqueValuesTpl, {
+
+	processOutputsResult := render.create(processOutputsTpl, {
+		emptyOrNot: emptyOrNot,
 		assayDataTsv: assayDataTsv,
-		stringColumns: stringColumns
-	})
-	uniqueValuesMap := getUniqueValuesResult.output("uniqueValuesMap")
-	
-	//////// Building outputs & exports ////////
-	buildOutputsResult := render.createEphemeral(buildOutputsTpl, {
+		bestAlignmentTsv: bestAlignmentTsv,
+		clonesDataTsv: clonesDataTsv,
+		stringColumns: stringColumns,
 		importColumns: args.importColumns,
 		selectedColumns: args.selectedColumns,
 		sequenceColumnHeader: args.sequenceColumnHeader,
 		sequenceColumnInfo: sequenceColumnInfo,
 		assaySequenceType: assaySequenceType,
 		datasetSpec: datasetSpec,
-		bestAlignmentTsv: bestAlignmentTsv,
-		assayDataTsv: assayDataTsv,
-		clonesDataTsv: clonesDataTsv,
-		uniqueValuesMap: uniqueValuesMap,
 		settings: args.settings,
 		customBlockLabel: args.customBlockLabel,
 		defaultBlockLabel: args.defaultBlockLabel,
 		blockId: blockId
 	})
-	assayPframe := buildOutputsResult.output("assayPframe")
-	epf := buildOutputsResult.output("epf")
-	assayLinkerPframe := buildOutputsResult.output("assayLinkerPframe")
+	assayPframe := processOutputsResult.output("assayPframe")
+	epf := processOutputsResult.output("epf")
+	assayLinkerPframe := processOutputsResult.output("assayLinkerPframe")
 
 	return {
 		outputs: {
