@@ -13,7 +13,7 @@ strings := import("@platforma-sdk/workflow-tengo:strings")
 
 analysisTpl := assets.importTemplate(":analysis")
 processOutputsTpl := assets.importTemplate(":process-outputs")
-checkClonesEmptyTpl := assets.importTemplate(":check-clones-empty")
+checkContentEmptyTpl := assets.importTemplate(":check-content-empty")
 prepareFastaSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.prepare-fasta:main")
 
 wf.prepare(func(args){
@@ -108,10 +108,11 @@ wf.body(func(args) {
 	clonesFastaContent := clonesFastaRun.getFileContent("output.fasta")
 
 	// Check if clones are empty before running mmseqs2
-	checkClonesResult := render.create(checkClonesEmptyTpl, {
-		content: clonesFastaContent
+	checkClonesResult := render.create(checkContentEmptyTpl, {
+		content: clonesFastaContent,
+		mode: "raw"
 	})
-	emptyOrNot := checkClonesResult.output("emptyOrNot")
+	emptyClonesInput := checkClonesResult.output("result")
 
 	// Run Analysis Template
 	analysisResult := render.create(analysisTpl, {
@@ -119,7 +120,7 @@ wf.body(func(args) {
 		xsvType: xsvType,
 		sequenceColumnHeader: args.sequenceColumnHeader,
 		clonesFasta: clonesFasta,
-		emptyOrNot: emptyOrNot,
+		emptyClonesInput: emptyClonesInput,
 		targetSequenceType: targetSequenceType,
 		assaySequenceType: assaySequenceType,
 		coverageThreshold: args.settings.coverageThreshold,
@@ -151,7 +152,7 @@ wf.body(func(args) {
 	}
 
 	processOutputsResult := render.create(processOutputsTpl, {
-		emptyOrNot: emptyOrNot,
+		emptyClonesInput: emptyClonesInput,
 		assayDataTsv: assayDataTsv,
 		bestAlignmentTsv: bestAlignmentTsv,
 		clonesDataTsv: clonesDataTsv,
@@ -178,7 +179,7 @@ wf.body(func(args) {
 			assayLinkerPframe: assayLinkerPframe,
 			mmseqsOutput: mmseqsOutput,
 			emptyResults: emptyResults,
-			emptyClonesInput: emptyOrNot
+			emptyClonesInput: emptyClonesInput
 		},
 		exports: {
 			epf: epf

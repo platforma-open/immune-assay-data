@@ -8,7 +8,7 @@ buildOutputsTpl := assets.importTemplate(":build-outputs")
 self.defineOutputs("assayPframe", "epf", "assayLinkerPframe")
 
 self.body(func(args) {
-	if string(args.emptyOrNot) == "empty" {
+	if args.emptyClonesInput {
 		return {
 			assayPframe: {},
 			epf: {},

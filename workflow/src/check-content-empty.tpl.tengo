@@ -1,0 +1,21 @@
+self := import("@platforma-sdk/workflow-tengo:tpl")
+text := import("text")
+
+self.defineOutputs("result")
+
+self.body(func(args) {
+    content := string(args.content.getData())
+    mode := args.mode
+
+    isEmpty := false
+    if mode == "raw" {
+        // No header line (e.g. FASTA): empty content means no data
+        isEmpty = text.trim_space(content) == ""
+    } else if mode == "headerOnly" {
+        // File has a header line (e.g. TSV with added header): empty means <= 1 line
+        lines := text.split(text.trim_space(content), "\n")
+        isEmpty = len(lines) <= 1
+    }
+
+    return { result: isEmpty }
+})

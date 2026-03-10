@@ -14,7 +14,7 @@ covModeCalcSw := assets.importSoftware("@platforma-open/milaboratories.immune-as
 xlsxToCsvSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.xlsx-to-csv:main")
 
 runAlignmentTpl := assets.importTemplate(":run-alignment")
-checkEmptyTpl := assets.importTemplate(":check-empty")
+checkContentEmptyTpl := assets.importTemplate(":check-content-empty")
 
 /**
  * Convert xlsx file to csv file
@@ -144,7 +144,7 @@ self.body(func(args) {
 	xsvType := args.xsvType
 	sequenceColumnHeader := args.sequenceColumnHeader
 	clonesFasta := args.clonesFasta
-	emptyOrNot := args.emptyOrNot
+	emptyClonesInput := args.emptyClonesInput
 	targetSequenceType := args.targetSequenceType
 	assaySequenceType := args.assaySequenceType
 	coverageThreshold := args.coverageThreshold
@@ -155,7 +155,7 @@ self.body(func(args) {
 	cpu := args.metaInputs.cpu
 
 	// Check if clones input is empty (resolved from upstream check template)
-	if string(emptyOrNot) == "empty" {
+	if emptyClonesInput {
 		return {
 			bestAlignmentTsv: {},
 			assayDataTsv: {},
@@ -250,10 +250,11 @@ self.body(func(args) {
 	mmseqsResultContent := addHeaderRun.getFileContent("results_with_header.tsv")
 
 	// Use subtemplate to check if file is empty
-	checkResult := render.create(checkEmptyTpl, {
-		content: mmseqsResultContent
+	checkResult := render.create(checkContentEmptyTpl, {
+		content: mmseqsResultContent,
+		mode: "headerOnly"
 	})
-	emptyResults := checkResult.output("isEmpty")
+	emptyResults := checkResult.output("result")
 
 	result := {
 		mmseqsOutput: mmseqsOutput,

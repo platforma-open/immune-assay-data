@@ -179,7 +179,7 @@ export const model = BlockModel.create()
   )
 
   .outputWithStatus('table', (ctx) => {
-    if (ctx.outputs?.resolve('emptyClonesInput')?.getDataAsJson<string>() === 'empty') {
+    if (ctx.outputs?.resolve('emptyClonesInput')?.getDataAsJson<boolean>() === true) {
       return undefined;
     }
     const cols = ctx.outputs?.resolve('table')?.getPColumns();
@@ -194,7 +194,7 @@ export const model = BlockModel.create()
   })
 
   .output('pf', (ctx) => {
-    if (ctx.outputs?.resolve('emptyClonesInput')?.getDataAsJson<string>() === 'empty') {
+    if (ctx.outputs?.resolve('emptyClonesInput')?.getDataAsJson<boolean>() === true) {
       return undefined;
     }
     const cols = ctx.outputs?.resolve('table')?.getPColumns();
@@ -205,7 +205,7 @@ export const model = BlockModel.create()
   })
 
   .output('assaySequenceSpec', (ctx): PColumnSpec | undefined => {
-    if (ctx.outputs?.resolve('emptyClonesInput')?.getDataAsJson<string>() === 'empty') {
+    if (ctx.outputs?.resolve('emptyClonesInput')?.getDataAsJson<boolean>() === true) {
       return undefined;
     }
     const cols = ctx.outputs?.resolve('table')?.getPColumns();
@@ -217,7 +217,7 @@ export const model = BlockModel.create()
   })
 
   .output('msaPf', (ctx) => {
-    if (ctx.outputs?.resolve('emptyClonesInput')?.getDataAsJson<string>() === 'empty') {
+    if (ctx.outputs?.resolve('emptyClonesInput')?.getDataAsJson<boolean>() === true) {
       return undefined;
     }
     const cols = ctx.outputs?.resolve('table')?.getPColumns();
@@ -236,7 +236,7 @@ export const model = BlockModel.create()
   })
 
   .output('emptyClonesInput', (ctx) =>
-    ctx.outputs?.resolve('emptyClonesInput')?.getDataAsJson<string>() === 'empty',
+    ctx.outputs?.resolve('emptyClonesInput')?.getDataAsJson<boolean>() === true,
   )
 
   .output('isRunning', (ctx) => ctx.outputs?.getIsReadyOrError() === false)
