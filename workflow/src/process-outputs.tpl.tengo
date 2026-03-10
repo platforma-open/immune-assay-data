@@ -16,8 +16,7 @@ self.body(func(args) {
 	}
 
 	buildOutputsResult := render.createEphemeral(buildOutputsTpl, {
-		importColumns: args.importColumns,
-		selectedColumns: args.selectedColumns,
+		columnsToImport: args.columnsToImport,
 		sequenceColumnHeader: args.sequenceColumnHeader,
 		sequenceColumnInfo: args.sequenceColumnInfo,
 		assaySequenceType: args.assaySequenceType,

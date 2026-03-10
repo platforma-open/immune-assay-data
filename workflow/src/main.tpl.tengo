@@ -115,14 +115,6 @@ wf.body(func(args) {
 	})
 	emptyClonesInput := checkClonesResult.output("result")
 
-	// Determine string columns for unique value extraction
-	stringColumns := []
-	for h in args.importColumns {
-		if h.type == "String" && h.header != args.sequenceColumnHeader {
-			stringColumns = append(stringColumns, h.header)
-		}
-	}
-
 	// Run Analysis Template
 	analysisResult := render.create(analysisTpl, {
 		file: importFile.file,
@@ -136,7 +128,8 @@ wf.body(func(args) {
 		identityThreshold: args.settings.identity,
 		similarityType: args.settings.similarityType,
 		lessSensitive: args.lessSensitive,
-		stringColumns: stringColumns
+		importColumns: args.importColumns,
+		selectedColumns: args.selectedColumns
 	}, {
 		metaInputs: {
 			mem: args.mem,
@@ -153,6 +146,7 @@ wf.body(func(args) {
 	assayDataTsv := analysisResult.output("assayDataTsv")
 	clonesDataTsv := analysisResult.output("clonesDataTsv")
 	uniqueValuesMap := analysisResult.output("uniqueValuesMap")
+	columnsToImport := analysisResult.output("columnsToImport")
 
 	//////// Build outputs  ////////
 	processOutputsResult := render.create(processOutputsTpl, {
@@ -160,8 +154,7 @@ wf.body(func(args) {
 		assayDataTsv: assayDataTsv,
 		bestAlignmentTsv: bestAlignmentTsv,
 		clonesDataTsv: clonesDataTsv,
-		importColumns: args.importColumns,
-		selectedColumns: args.selectedColumns,
+		columnsToImport: columnsToImport,
 		sequenceColumnHeader: args.sequenceColumnHeader,
 		sequenceColumnInfo: sequenceColumnInfo,
 		assaySequenceType: assaySequenceType,
@@ -187,7 +180,9 @@ wf.body(func(args) {
 			// Needed for deduplication
 			assayDataTsv: assayDataTsv,
 			bestAlignmentTsv: bestAlignmentTsv,
-			clonesDataTsv: clonesDataTsv
+			clonesDataTsv: clonesDataTsv,
+			uniqueValuesMap: uniqueValuesMap,
+			columnsToImport: columnsToImport
 		},
 		exports: {
 			epf: epf

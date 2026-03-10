@@ -138,7 +138,8 @@ self.defineOutputs(
 	"clonesDataTsv",
 	"mmseqsOutput",
 	"emptyResults",
-	"uniqueValuesMap"
+	"uniqueValuesMap",
+	"columnsToImport"
 )
 
 self.body(func(args) {
@@ -156,7 +157,31 @@ self.body(func(args) {
 	mem := args.metaInputs.mem
 	cpu := args.metaInputs.cpu
 
-	stringColumns := args.stringColumns
+	// Filter columns to import based on user selection
+	columnsToImport := args.importColumns
+	if args.selectedColumns != undefined && len(args.selectedColumns) > 0 {
+		selectedHeaders := {}
+		for header in args.selectedColumns {
+			selectedHeaders[header] = true
+		}
+
+		filteredColumns := []
+		for col in args.importColumns {
+			// Always include the main sequence column
+			if col.header == sequenceColumnHeader || selectedHeaders[col.header] {
+				filteredColumns = append(filteredColumns, col)
+			}
+		}
+		columnsToImport = filteredColumns
+	}
+
+	// Determine string columns for unique value extraction
+	stringColumns := []
+	for h in columnsToImport {
+		if h.type == "String" && h.header != sequenceColumnHeader {
+			stringColumns = append(stringColumns, h.header)
+		}
+	}
 
 	// Check if clones input is empty (resolved from upstream check template)
 	if emptyClonesInput {
@@ -166,7 +191,8 @@ self.body(func(args) {
 			clonesDataTsv: {},
 			mmseqsOutput: {},
 			emptyResults: true,
-			uniqueValuesMap: {}
+			uniqueValuesMap: {},
+			columnsToImport: columnsToImport
 		}
 	}
 
@@ -338,6 +364,7 @@ self.body(func(args) {
 		stringColumns: stringColumns
 	})
 	result.uniqueValuesMap = getUniqueValuesResult.output("uniqueValuesMap")
+	result.columnsToImport = columnsToImport
 
 	return result
 })
