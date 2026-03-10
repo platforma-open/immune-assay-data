@@ -179,7 +179,11 @@ wf.body(func(args) {
 			assayLinkerPframe: assayLinkerPframe,
 			mmseqsOutput: mmseqsOutput,
 			emptyResults: emptyResults,
-			emptyClonesInput: emptyClonesInput
+			emptyClonesInput: emptyClonesInput,
+			// Needed for deduplication
+			assayDataTsv: assayDataTsv,
+			bestAlignmentTsv: bestAlignmentTsv,
+			clonesDataTsv: clonesDataTsv
 		},
 		exports: {
 			epf: epf
