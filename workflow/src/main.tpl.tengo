@@ -14,7 +14,6 @@ strings := import("@platforma-sdk/workflow-tengo:strings")
 analysisTpl := assets.importTemplate(":analysis")
 processOutputsTpl := assets.importTemplate(":process-outputs")
 checkContentEmptyTpl := assets.importTemplate(":check-content-empty")
-getUniqueValuesTpl := assets.importTemplate(":get-unique-values")
 
 prepareFastaSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.prepare-fasta:main")
 
@@ -116,6 +115,14 @@ wf.body(func(args) {
 	})
 	emptyClonesInput := checkClonesResult.output("result")
 
+	// Determine string columns for unique value extraction
+	stringColumns := []
+	for h in args.importColumns {
+		if h.type == "String" && h.header != args.sequenceColumnHeader {
+			stringColumns = append(stringColumns, h.header)
+		}
+	}
+
 	// Run Analysis Template
 	analysisResult := render.create(analysisTpl, {
 		file: importFile.file,
@@ -128,7 +135,8 @@ wf.body(func(args) {
 		coverageThreshold: args.settings.coverageThreshold,
 		identityThreshold: args.settings.identity,
 		similarityType: args.settings.similarityType,
-		lessSensitive: args.lessSensitive
+		lessSensitive: args.lessSensitive,
+		stringColumns: stringColumns
 	}, {
 		metaInputs: {
 			mem: args.mem,
@@ -144,21 +152,7 @@ wf.body(func(args) {
 	bestAlignmentTsv := analysisResult.output("bestAlignmentTsv")
 	assayDataTsv := analysisResult.output("assayDataTsv")
 	clonesDataTsv := analysisResult.output("clonesDataTsv")
-
-	//////// Extract unique values  ////////
-	stringColumns := []
-	for h in args.importColumns {
-		if h.type == "String" && h.header != args.sequenceColumnHeader {
-			stringColumns = append(stringColumns, h.header)
-		}
-	}
-
-	getUniqueValuesResult := render.create(getUniqueValuesTpl, {
-		assayDataTsv: assayDataTsv,
-		stringColumns: stringColumns
-	})
-	uniqueValuesMap := getUniqueValuesResult.output("uniqueValuesMap")
-
+	uniqueValuesMap := analysisResult.output("uniqueValuesMap")
 
 	//////// Build outputs  ////////
 	processOutputsResult := render.create(processOutputsTpl, {

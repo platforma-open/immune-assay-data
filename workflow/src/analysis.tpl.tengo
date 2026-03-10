@@ -15,6 +15,7 @@ xlsxToCsvSw := assets.importSoftware("@platforma-open/milaboratories.immune-assa
 
 runAlignmentTpl := assets.importTemplate(":run-alignment")
 checkContentEmptyTpl := assets.importTemplate(":check-content-empty")
+getUniqueValuesTpl := assets.importTemplate(":get-unique-values")
 
 /**
  * Convert xlsx file to csv file
@@ -132,11 +133,12 @@ prepareAssayFile := func(file, xsvType, sequenceColumnHeader) {
 }
 
 self.defineOutputs(
-	"bestAlignmentTsv", 
-	"assayDataTsv", 
-	"clonesDataTsv", 
-	"mmseqsOutput", 
-	"emptyResults"
+	"bestAlignmentTsv",
+	"assayDataTsv",
+	"clonesDataTsv",
+	"mmseqsOutput",
+	"emptyResults",
+	"uniqueValuesMap"
 )
 
 self.body(func(args) {
@@ -154,6 +156,8 @@ self.body(func(args) {
 	mem := args.metaInputs.mem
 	cpu := args.metaInputs.cpu
 
+	stringColumns := args.stringColumns
+
 	// Check if clones input is empty (resolved from upstream check template)
 	if emptyClonesInput {
 		return {
@@ -161,7 +165,8 @@ self.body(func(args) {
 			assayDataTsv: {},
 			clonesDataTsv: {},
 			mmseqsOutput: {},
-			emptyResults: true
+			emptyResults: true,
+			uniqueValuesMap: {}
 		}
 	}
 
@@ -326,6 +331,13 @@ self.body(func(args) {
 	result.bestAlignmentTsv = ptRun2.getFile("best_alignment.tsv")
 	result.assayDataTsv = ptRun2.getFile("assay_data.tsv")
 	result.clonesDataTsv = ptRun2.getFile("clones_data.tsv")
+
+	// Extract unique values for string columns
+	getUniqueValuesResult := render.create(getUniqueValuesTpl, {
+		assayDataTsv: result.assayDataTsv,
+		stringColumns: stringColumns
+	})
+	result.uniqueValuesMap = getUniqueValuesResult.output("uniqueValuesMap")
 
 	return result
 })
