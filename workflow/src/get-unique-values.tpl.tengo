@@ -1,0 +1,51 @@
+self := import("@platforma-sdk/workflow-tengo:tpl")
+ll := import("@platforma-sdk/workflow-tengo:ll")
+pt := import("@platforma-sdk/workflow-tengo:pt")
+render := import("@platforma-sdk/workflow-tengo:render")
+assets := import("@platforma-sdk/workflow-tengo:assets")
+strings := import("@platforma-sdk/workflow-tengo:strings")
+
+extractUniqueValuesTpl := assets.importTemplate(":extract-unique-values")
+
+self.defineOutputs("uniqueValuesMap")
+
+self.body(func(inputs) {
+	assayDataTsv := inputs.assayDataTsv
+	stringColumns := inputs.stringColumns
+	
+	if len(stringColumns) == 0 {
+		return { uniqueValuesMap: {} }
+	}
+
+	uniqueValuesWf := pt.workflow().mem("4GiB").cpu(1)
+	baseDf := uniqueValuesWf.frame({
+		file: assayDataTsv,
+		xsvType: "tsv"
+	})
+
+	// Process each String column to extract unique values
+	for colHeader in stringColumns {
+		uniqueValuesDf := baseDf.select(pt.col(colHeader).alias("value")).groupBy("value").agg(pt.col("value").count().alias("_count"))
+		uniqueValuesDf = uniqueValuesDf.select("value")
+		fileName := "unique_values_" + strings.substituteSpecialCharacters(colHeader) + ".csv"
+		uniqueValuesDf.saveContent(fileName)
+	}
+
+	// Run once and collect all results
+	uniqueValuesResult := uniqueValuesWf.run()
+	
+	fileContentsMap := {}
+	for colHeader in stringColumns {
+		fileName := "unique_values_" + strings.substituteSpecialCharacters(colHeader) + ".csv"
+		fileContentsMap[colHeader] = uniqueValuesResult.getFileContent(fileName)
+	}
+
+	// Now call the extraction subtemplate which will use .getData() on these resources
+	extractResult := render.create(extractUniqueValuesTpl, {
+		fileContents: fileContentsMap
+	})
+
+	return {
+		uniqueValuesMap: extractResult.output("uniqueValuesMap")
+	}
+})

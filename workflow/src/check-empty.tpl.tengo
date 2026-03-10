@@ -1,0 +1,15 @@
+self := import("@platforma-sdk/workflow-tengo:tpl")
+text := import("text")
+
+self.defineOutputs("isEmpty")
+
+self.body(func(args) {
+    content := string(args.content.getData())
+    // File always has a header line from addHeaderSw, so empty means <= 1 line
+    lines := text.split(text.trim_space(content), "\n")
+    isEmpty := len(lines) <= 1
+
+    return {
+        isEmpty: isEmpty
+    }
+})

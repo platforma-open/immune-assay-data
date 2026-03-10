@@ -1,0 +1,320 @@
+self := import("@platforma-sdk/workflow-tengo:tpl")
+ll := import("@platforma-sdk/workflow-tengo:ll")
+exec := import("@platforma-sdk/workflow-tengo:exec")
+assets := import("@platforma-sdk/workflow-tengo:assets")
+pt := import("@platforma-sdk/workflow-tengo:pt")
+text := import("text")
+json := import("json")
+render := import("@platforma-sdk/workflow-tengo:render")
+
+prepareFastaSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.prepare-fasta:main")
+fastaToTsvSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.fasta-to-tsv:main")
+addHeaderSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.add-header:main")
+covModeCalcSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.coverage-mode-calc:main")
+xlsxToCsvSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.xlsx-to-csv:main")
+
+runAlignmentTpl := assets.importTemplate(":run-alignment")
+checkEmptyTpl := assets.importTemplate(":check-empty")
+
+/**
+ * Convert xlsx file to csv file
+ * @param fileXlsx - xlsx file
+ * @return csv file run result
+ */
+ runXlsxToCsv := func(fileXlsx) {
+	e := exec.builder().
+		software(xlsxToCsvSw).
+		mem("16GiB").
+		cpu(1).
+		addFile("input.xlsx", fileXlsx).
+		arg("-i").arg("input.xlsx").
+		arg("-o").arg("output.csv").
+		saveFile("output.csv")
+	return e.run()
+}
+
+/**
+ * Convert fasta file to tsv file
+ * @param fileFasta - fasta file
+ * @return tsv file run result
+ */
+runFastaToTsv := func(fileFasta) {
+	e := exec.builder().
+		software(fastaToTsvSw).
+		mem("8GiB").
+		cpu(1).
+		addFile("input.fasta", fileFasta).
+		arg("-i").arg("input.fasta").
+		arg("-o").arg("output.tsv").
+		saveFile("output.tsv")
+	return e.run()
+}
+
+/**
+ * Convert tsv file to fasta file
+ * @param fileTsv - tsv file
+ * @param idCol - id column header
+ * @param seqCol - sequence column header
+ * @return fasta file run result
+ */
+runTsvToFasta := func(fileTsv, idCol, seqCol) {
+	e := exec.builder().
+		software(prepareFastaSw).
+		mem("8GiB").
+		cpu(1).
+		addFile("input.tsv", fileTsv).
+		arg("-i").arg("input.tsv").
+		arg("-o").arg("output.fasta").
+		arg("--seq_col").arg(seqCol).
+		arg("--id_col").arg(idCol).
+		saveFile("output.fasta")
+	return e.run()
+}
+
+prepareAssayFile := func(file, xsvType, sequenceColumnHeader) {
+    // assign ids to assay sequences
+    ptw := pt.workflow()
+    df := ptw.frame({
+        file: file,
+        xsvType: xsvType
+    })
+
+    //////// calculate sequence id ////////
+    // Create unique seqId for each row by combining sequence with row index
+    // First add row index using ordinal rank
+    df = df.withColumns(
+        pt.rank(pt.col(sequenceColumnHeader)).
+            over(pt.col(sequenceColumnHeader)).
+            alias("rowIndex")
+    )
+    // Concatenate sequence with row index and then hash
+    df = df.withColumns(
+        pt.when(pt.col("rowIndex").gt(pt.lit(1))).
+            then(pt.concatStr([pt.col(sequenceColumnHeader), pt.col("rowIndex").cast("String")], 
+            {delimiter: "_"})).
+            otherwise(pt.col(sequenceColumnHeader)).
+            alias("uniqueKey")
+    )
+    // Create hash from the unique key
+    df = df.addColumns(
+        pt.col("uniqueKey").hash("sha256", "base64_alphanumeric", 120).alias("seqId")
+    )
+    df = df.withoutColumns("uniqueKey", "rowIndex")
+    //////// add label to ids ////////
+    df = df.withColumns(
+        pt.col("seqId").
+            strReplace("\\d", "", { replaceAll: true }).
+            strSlice(0, 5).               // Take first 5 characters
+            strToUpper().                 // Convert to uppercase
+            alias("tmpLabel")
+    )
+    df = df.withColumns(
+        pt.rank(pt.col("seqId")).  // Rank based on clonotypeKeyCol (default ascending)
+            over(pt.col("tmpLabel")).   // Partition by prefixTempCol
+            alias("rank")
+    )
+    df = df.withColumns(
+        pt.when(pt.col("rank").gt(pt.lit(1))).
+            then(pt.concatStr([pt.lit("A"), pt.col("tmpLabel"), pt.col("rank").cast("String")], { 
+            delimiter: "-" })).
+            otherwise(pt.concatStr([pt.lit("A"), pt.col("tmpLabel")], { delimiter: "-" })).
+            alias("seqIdLabel")
+    )
+    df = df.withoutColumns("rank", "tmpLabel")
+
+    //////// add sequence column ////////
+    df = df.addColumns(
+        pt.col(sequenceColumnHeader).alias("sequence")
+    )
+    df.save("output.tsv")
+    
+    return ptw.run().getFile("output.tsv")
+}
+
+self.defineOutputs(
+	"bestAlignmentTsv", 
+	"assayDataTsv", 
+	"clonesDataTsv", 
+	"mmseqsOutput", 
+	"emptyResults"
+)
+
+self.body(func(args) {
+	file := args.file
+	xsvType := args.xsvType
+	sequenceColumnHeader := args.sequenceColumnHeader
+	clonesTsv := args.clonesTsv
+	targetSequenceType := args.targetSequenceType
+	assaySequenceType := args.assaySequenceType
+	coverageThreshold := args.coverageThreshold
+	identityThreshold := args.identityThreshold
+	similarityType := args.similarityType
+	lessSensitive := args.lessSensitive
+	mem := args.metaInputs.mem
+	cpu := args.metaInputs.cpu
+
+	// Handle XLSX files (convert to CSV)
+	if xsvType == "xlsx" {
+		xlsxToCsvRun := runXlsxToCsv(file)
+		file = xlsxToCsvRun.getFile("output.csv")
+		xsvType = "csv"
+	}
+
+	// Handle FASTA files (convert to TSV)
+	if xsvType == "fasta" || xsvType == "fa" {
+		fastaToTsvRun := runFastaToTsv(file)
+		file = fastaToTsvRun.getFile("output.tsv")
+		xsvType = "tsv"
+	}
+
+	assayTsv := prepareAssayFile(file, xsvType, sequenceColumnHeader)
+
+	// Prepare FASTA
+	clonesFastaRun := runTsvToFasta(clonesTsv, "seqId", "sequence")
+	assayFastaRun := runTsvToFasta(assayTsv, "seqId", "sequence")
+	clonesFasta := clonesFastaRun.getFile("output.fasta")
+	assayFasta := assayFastaRun.getFile("output.fasta")
+
+	// Dynamically determine coverage mode by comparing average sequence lengths
+	coverageModeRun := exec.builder().
+		software(covModeCalcSw).
+		mem("16GiB").
+		cpu(1).
+		addFile("clones.fasta", clonesFasta).
+		addFile("assay.fasta", assayFasta).
+		arg("--clones-fasta").arg("clones.fasta").
+		arg("--assay-fasta").arg("assay.fasta").
+		arg("--output").arg("coverage_mode.txt").
+		saveFileContent("coverage_mode.txt").
+		run()
+
+	covMode := coverageModeRun.getFileContent("coverage_mode.txt")
+
+	// MMseqs2 Alignment
+	mmseqsSearchType := "0"
+    if targetSequenceType == "aminoacid" && assaySequenceType == "aminoacid" {
+        //1: amino acid
+        mmseqsSearchType = "1"
+    } else if targetSequenceType == "nucleotide" && assaySequenceType == "nucleotide" {
+        // 3: nucleotide
+        mmseqsSearchType = "3"
+    } else if targetSequenceType == "nucleotide" && assaySequenceType == "aminoacid" {
+        // 4: translated nucleotide alignment
+        mmseqsSearchType = "4"
+    } else if targetSequenceType == "aminoacid" && assaySequenceType == "nucleotide"  {
+        // 2: nucleotide
+        mmseqsSearchType = "2"
+    }
+
+	runMmseqs := render.create(runAlignmentTpl, {
+		covMode: covMode,
+		mmseqsSearchType: mmseqsSearchType,
+		coverageThreshold: coverageThreshold,
+		identityThreshold: identityThreshold,
+		similarityType: similarityType,
+		clonesFasta: clonesFasta,
+		assayFasta: assayFasta,
+		lessSensitive: lessSensitive
+	}, {
+		metaInputs: {
+			mem: mem,
+			cpu: cpu
+		}
+	})
+
+	mmseqsOutput := runMmseqs.output("mmseqsOutput")
+
+	// @TODO remove header stuff and replace with pt when available (!)
+	addHeaderRun := exec.builder().
+		software(addHeaderSw).
+		mem("16GiB").
+		cpu(1).
+		arg("-i").arg("results.tsv").
+		arg("-o").arg("results_with_header.tsv").
+		addFile("results.tsv", mmseqsOutput).
+		saveFile("results_with_header.tsv").
+		saveFileContent("results_with_header.tsv").
+		run()
+
+	mmseqsResultTsv := addHeaderRun.getFile("results_with_header.tsv")
+	mmseqsResultContent := addHeaderRun.getFileContent("results_with_header.tsv")
+	
+	// Use subtemplate to check if file is empty
+	checkResult := render.create(checkEmptyTpl, {
+		content: mmseqsResultContent
+	})
+	emptyResults := checkResult.output("isEmpty")
+
+	result := {
+		mmseqsOutput: mmseqsOutput,
+		emptyResults: emptyResults
+	}
+
+	// Post-processing with PT
+	ptw2 := pt.workflow()
+	dfRes := ptw2.frame({
+		file: mmseqsResultTsv,
+		xsvType: "tsv"
+	})
+
+	// Cast columns to ensure correct types for aggregation
+	dfRes = dfRes.withColumns(
+		pt.col("evalue").cast("Float64").alias("evalue"),
+		pt.col("bits").cast("Float64").alias("bits")
+	)
+
+	cols := []
+	for _, col in ["bits", "evalue", "query", "pident", "alnlen", "mismatch",
+	"gapopen", "qstart", "qend", "tstart", "tend"] {
+		cols = append(cols,
+			pt.col(col).maxBy(
+				pt.col("evalue").multiply(-1),
+				pt.col("bits")
+			).alias(col)
+		)
+	}
+	
+	dfRes = dfRes.groupBy("target").agg(cols...)
+	// Add link column for linker pFrame (assayLinkerPframe)
+	dfRes = dfRes.withColumns(
+		pt.lit(1).cast("Int64").alias("link")
+	)
+	dfRes.save("best_alignment.tsv")
+
+	// Assay data summary
+	assayDf := ptw2.frame({
+		file: assayTsv,
+		xsvType: "tsv"
+	})
+	
+	// import how many matches per assay sequence found
+	assayDf = assayDf.join(
+		dfRes.groupBy("query").agg(
+			pt.col("target").count().alias("queryCount")
+		),
+		{
+			how: "left",
+			leftOn: "seqId",
+			rightOn: "query"
+		}
+	)
+	assayDf.save("assay_data.tsv")
+
+	// Clones data
+	clonesDf := dfRes.join(assayDf,
+		{
+			how: "left",
+			leftOn: "query",
+			rightOn: "seqId"
+		}
+	)
+	clonesDf.save("clones_data.tsv")
+
+	ptRun2 := ptw2.run()
+	
+	result.bestAlignmentTsv = ptRun2.getFile("best_alignment.tsv")
+	result.assayDataTsv = ptRun2.getFile("assay_data.tsv")
+	result.clonesDataTsv = ptRun2.getFile("clones_data.tsv")
+
+	return result
+})

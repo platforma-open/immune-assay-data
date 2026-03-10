@@ -18,11 +18,11 @@ self.body(func(args) {
 
 	mem := "8GiB"
 	cpu := 1
-	if !is_undefined(args.mem) {
-		mem = string(args.mem) + "GiB"
+	if !is_undefined(args.metaInputs.mem) {
+		mem = string(args.metaInputs.mem) + "GiB"
 	}
-	if !is_undefined(args.cpu) {
-		cpu = args.cpu
+	if !is_undefined(args.metaInputs.cpu) {
+		cpu = args.metaInputs.cpu
 	}
 
 	mmseqs := exec.builder().
