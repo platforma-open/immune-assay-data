@@ -11,11 +11,12 @@
     "watch": "turbo watch build",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "update-sdk": "block-tools update-deps"
+    "update-sdk": "pl-blocks-deps-updater"
   },
   "devDependencies": {
     "@changesets/cli": "catalog:",
     "@platforma-sdk/block-tools": "catalog:",
+    "@platforma-sdk/blocks-deps-updater": "catalog:",
     "turbo": "catalog:",
     "typescript": "catalog:"
   },
