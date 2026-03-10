@@ -2,7 +2,6 @@ self := import("@platforma-sdk/workflow-tengo:tpl")
 render := import("@platforma-sdk/workflow-tengo:render")
 assets := import("@platforma-sdk/workflow-tengo:assets")
 
-getUniqueValuesTpl := assets.importTemplate(":get-unique-values")
 buildOutputsTpl := assets.importTemplate(":build-outputs")
 
 self.defineOutputs("assayPframe", "epf", "assayLinkerPframe")
@@ -16,12 +15,6 @@ self.body(func(args) {
 		}
 	}
 
-	getUniqueValuesResult := render.create(getUniqueValuesTpl, {
-		assayDataTsv: args.assayDataTsv,
-		stringColumns: args.stringColumns
-	})
-	uniqueValuesMap := getUniqueValuesResult.output("uniqueValuesMap")
-
 	buildOutputsResult := render.createEphemeral(buildOutputsTpl, {
 		importColumns: args.importColumns,
 		selectedColumns: args.selectedColumns,
@@ -32,7 +25,7 @@ self.body(func(args) {
 		bestAlignmentTsv: args.bestAlignmentTsv,
 		assayDataTsv: args.assayDataTsv,
 		clonesDataTsv: args.clonesDataTsv,
-		uniqueValuesMap: uniqueValuesMap,
+		uniqueValuesMap: args.uniqueValuesMap,
 		settings: args.settings,
 		customBlockLabel: args.customBlockLabel,
 		defaultBlockLabel: args.defaultBlockLabel,

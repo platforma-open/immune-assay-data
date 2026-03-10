@@ -14,6 +14,8 @@ strings := import("@platforma-sdk/workflow-tengo:strings")
 analysisTpl := assets.importTemplate(":analysis")
 processOutputsTpl := assets.importTemplate(":process-outputs")
 checkContentEmptyTpl := assets.importTemplate(":check-content-empty")
+getUniqueValuesTpl := assets.importTemplate(":get-unique-values")
+
 prepareFastaSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.prepare-fasta:main")
 
 wf.prepare(func(args){
@@ -143,7 +145,7 @@ wf.body(func(args) {
 	assayDataTsv := analysisResult.output("assayDataTsv")
 	clonesDataTsv := analysisResult.output("clonesDataTsv")
 
-	//////// Extract unique values & build outputs (skipped when clones are empty) ////////
+	//////// Extract unique values  ////////
 	stringColumns := []
 	for h in args.importColumns {
 		if h.type == "String" && h.header != args.sequenceColumnHeader {
@@ -151,18 +153,26 @@ wf.body(func(args) {
 		}
 	}
 
+	getUniqueValuesResult := render.create(getUniqueValuesTpl, {
+		assayDataTsv: assayDataTsv,
+		stringColumns: stringColumns
+	})
+	uniqueValuesMap := getUniqueValuesResult.output("uniqueValuesMap")
+
+
+	//////// Build outputs  ////////
 	processOutputsResult := render.create(processOutputsTpl, {
 		emptyClonesInput: emptyClonesInput,
 		assayDataTsv: assayDataTsv,
 		bestAlignmentTsv: bestAlignmentTsv,
 		clonesDataTsv: clonesDataTsv,
-		stringColumns: stringColumns,
 		importColumns: args.importColumns,
 		selectedColumns: args.selectedColumns,
 		sequenceColumnHeader: args.sequenceColumnHeader,
 		sequenceColumnInfo: sequenceColumnInfo,
 		assaySequenceType: assaySequenceType,
 		datasetSpec: datasetSpec,
+		uniqueValuesMap: uniqueValuesMap,
 		settings: args.settings,
 		customBlockLabel: args.customBlockLabel,
 		defaultBlockLabel: args.defaultBlockLabel,
