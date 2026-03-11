@@ -1,5 +1,12 @@
 # @platforma-open/milaboratories.immune-assay-data
 
+## 1.2.21
+
+### Patch Changes
+
+- Updated dependencies [cc7794e]
+  - @platforma-open/milaboratories.immune-assay-data.workflow@1.7.1
+
 ## 1.2.20
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.workflow
 
+## 1.7.1
+
+### Patch Changes
+
+- cc7794e: Update mmseqs binary
+
 ## 1.7.0
 
 ### Minor Changes
