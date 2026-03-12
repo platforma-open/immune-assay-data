@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.workflow
 
+## 1.8.0
+
+### Minor Changes
+
+- de02090: Allow deduplication and minor fixes
+
 ## 1.7.1
 
 ### Patch Changes

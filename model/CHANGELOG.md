@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.model
 
+## 1.7.0
+
+### Minor Changes
+
+- de02090: Allow deduplication and minor fixes
+
 ## 1.6.0
 
 ### Minor Changes
