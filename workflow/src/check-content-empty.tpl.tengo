@@ -4,18 +4,6 @@ text := import("text")
 self.defineOutputs("result")
 
 self.body(func(args) {
-    mode := args.mode
-
-    if mode == "raw" {
-        // In this case, 'content' is the stdout of the check software (already a "true"/"false" string)
-        return { result: text.trim_space(string(args.content.getData())) == "true" }
-    } else if mode == "headerOnly" {
-        // File has a header line (e.g. TSV with added header): empty means <= 1 line
-        content := string(args.content.getData())
-        lines := text.split(text.trim_space(content), "\n")
-        isEmpty := len(lines) <= 1
-        return { result: isEmpty }
-    }
-
-    return { result: false }
+    // 'content' is the stdout of the check-software (already a "true"/"false" string)
+    return { result: text.trim_space(string(args.content.getData())) == "true" }
 })

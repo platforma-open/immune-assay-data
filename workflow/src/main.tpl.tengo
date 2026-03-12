@@ -111,6 +111,7 @@ wf.body(func(args) {
 	checkClonesRun := exec.builder().
 		software(checkContentEmptySw).
 		arg("-i").arg("input.file").
+		arg("-n").arg("1").
 		addFile("input.file", clonesFasta).
 		saveStdoutContent().
 		mem("8GiB").
@@ -119,8 +120,7 @@ wf.body(func(args) {
 		run()
 
 	checkClonesResult := render.create(checkContentEmptyTpl, {
-		content: checkClonesRun.getStdoutContent(),
-		mode: "raw"
+		content: checkClonesRun.getStdoutContent()
 	})
 	emptyClonesInput := checkClonesResult.output("result")
 
