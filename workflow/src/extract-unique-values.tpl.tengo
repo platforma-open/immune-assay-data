@@ -10,8 +10,7 @@ self.body(func(inputs) {
 	uniqueValuesMap := {}
 
 	for header, contentField in fileContents {
-		// In subtemplate, we can call getData() directly on exec fileContent fields
-		// (following clonotype-enrichment pattern)
+		// In subtemplate, we can call getData() directly on inputs
 		contentBytes := contentField.getData()
 		content := string(contentBytes)
 		lines := text.split(text.trim_space(content), "\n")
@@ -20,8 +19,7 @@ self.body(func(inputs) {
 			// Skip header and collect values
 			values := lines[1:]
 			// JSON encode the array of strings and convert to string
-			encodedBytes := json.encode(values)
-			uniqueValuesMap[header] = string(encodedBytes)
+			uniqueValuesMap[header] = string(json.encode(values))
 		}
 	}
 
@@ -29,4 +27,3 @@ self.body(func(inputs) {
 		uniqueValuesMap: uniqueValuesMap
 	}
 })
-

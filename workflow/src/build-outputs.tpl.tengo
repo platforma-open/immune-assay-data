@@ -57,24 +57,7 @@ self.body(func(inputs) {
 		}
 	]
 	
-	columnsToImport := inputs.importColumns
-	if inputs.selectedColumns != undefined && len(inputs.selectedColumns) > 0 {
-		selectedHeaders := {}
-		for header in inputs.selectedColumns {
-			selectedHeaders[header] = true
-		}
-		
-		filteredColumns := []
-		for col in inputs.importColumns {
-			// Always include the main sequence column
-			if col.header == inputs.sequenceColumnHeader || selectedHeaders[col.header] {
-				filteredColumns = append(filteredColumns, col)
-			}
-		}
-		columnsToImport = filteredColumns
-	}
-
-	for h in columnsToImport {
+	for h in inputs.columnsToImport {
 		if h.header == inputs.sequenceColumnHeader {
 			continue
 		}
@@ -160,7 +143,7 @@ self.body(func(inputs) {
 		}
 	}]
 
-	for h in columnsToImport {
+	for h in inputs.columnsToImport {
 		annotations := {
 			"pl7.app/label": h.header,
 			"pl7.app/table/visibility": h.header == inputs.sequenceColumnHeader ? "optional" : "default"

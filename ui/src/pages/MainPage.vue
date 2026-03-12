@@ -13,6 +13,7 @@ import {
 } from '@platforma-sdk/model';
 import {
   PlAgDataTableV2,
+  PlAlert,
   PlBlockPage,
   PlBtnGhost,
   PlAccordionSection,
@@ -218,6 +219,11 @@ const similarityTypeOptions = [
         </template>
       </PlBtnGhost>
     </template>
+    <PlAlert v-if="app.model.outputs.emptyClonesInput === true" type="warn" icon>
+      <template #title>Empty dataset selection</template>
+      The input dataset you have selected is empty or has no clonotype sequences.
+      Please choose a different dataset or check your input data.
+    </PlAlert>
     <PlAgDataTableV2
       v-model="app.model.ui.tableState"
       v-model:selection="selectionAssay"

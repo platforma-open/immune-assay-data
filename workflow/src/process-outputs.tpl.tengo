@@ -1,0 +1,39 @@
+self := import("@platforma-sdk/workflow-tengo:tpl")
+render := import("@platforma-sdk/workflow-tengo:render")
+assets := import("@platforma-sdk/workflow-tengo:assets")
+
+buildOutputsTpl := assets.importTemplate(":build-outputs")
+
+self.defineOutputs("assayPframe", "epf", "assayLinkerPframe")
+
+self.body(func(args) {
+	if args.emptyClonesInput {
+		return {
+			assayPframe: {},
+			epf: {},
+			assayLinkerPframe: {}
+		}
+	}
+
+	buildOutputsResult := render.createEphemeral(buildOutputsTpl, {
+		columnsToImport: args.columnsToImport,
+		sequenceColumnHeader: args.sequenceColumnHeader,
+		sequenceColumnInfo: args.sequenceColumnInfo,
+		assaySequenceType: args.assaySequenceType,
+		datasetSpec: args.datasetSpec,
+		bestAlignmentTsv: args.bestAlignmentTsv,
+		assayDataTsv: args.assayDataTsv,
+		clonesDataTsv: args.clonesDataTsv,
+		uniqueValuesMap: args.uniqueValuesMap,
+		settings: args.settings,
+		customBlockLabel: args.customBlockLabel,
+		defaultBlockLabel: args.defaultBlockLabel,
+		blockId: args.blockId
+	})
+
+	return {
+		assayPframe: buildOutputsResult.output("assayPframe"),
+		epf: buildOutputsResult.output("epf"),
+		assayLinkerPframe: buildOutputsResult.output("assayLinkerPframe")
+	}
+})
