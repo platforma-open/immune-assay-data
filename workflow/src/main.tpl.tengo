@@ -16,6 +16,7 @@ processOutputsTpl := assets.importTemplate(":process-outputs")
 checkContentEmptyTpl := assets.importTemplate(":check-content-empty")
 
 prepareFastaSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.prepare-fasta:main")
+checkContentEmptySw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.check-content-empty:main")
 
 wf.prepare(func(args){
 	bundleBuilder := wf.createPBundleBuilder()
@@ -103,14 +104,22 @@ wf.body(func(args) {
 		arg("--seq_col").arg("sequence").
 		arg("--id_col").arg("seqId").
 		saveFile("output.fasta").
-		saveFileContent("output.fasta").
 		run()
 	clonesFasta := clonesFastaRun.getFile("output.fasta")
-	clonesFastaContent := clonesFastaRun.getFileContent("output.fasta")
 
 	// Check if clones are empty before running mmseqs2
+	checkClonesRun := exec.builder().
+		software(checkContentEmptySw).
+		arg("-i").arg("input.file").
+		addFile("input.file", clonesFasta).
+		saveStdoutContent().
+		mem("8GiB").
+		cpu(1).
+		inLightQueue().
+		run()
+
 	checkClonesResult := render.create(checkContentEmptyTpl, {
-		content: clonesFastaContent,
+		content: checkClonesRun.getStdoutContent(),
 		mode: "raw"
 	})
 	emptyClonesInput := checkClonesResult.output("result")
