@@ -1,5 +1,13 @@
 # @platforma-open/milaboratories.immune-assay-data.workflow
 
+## 1.8.1
+
+### Patch Changes
+
+- 36ed105: Improve empty input detection
+- Updated dependencies [36ed105]
+  - @platforma-open/milaboratories.immune-assay-data.check-content-empty@1.0.1
+
 ## 1.8.0
 
 ### Minor Changes
