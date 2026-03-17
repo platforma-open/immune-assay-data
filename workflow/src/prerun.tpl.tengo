@@ -10,7 +10,11 @@ wf.body(func(args) {
 
 	return {
 		outputs: {
-			assayFile: file.exportFile(importedFile.file)
+			assayFile: file.exportFile(importedFile.file),
+			// Expose the import handle so the model can call getImportProgress() on it.
+			// This registers with the UploadDriver and triggers the actual file upload
+			// for local (upload://) handles — without it the prerun waits forever.
+			assayFileImport: importedFile.handle
 		},
 		exports: {}
 	}

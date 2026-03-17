@@ -177,6 +177,15 @@ export const model = BlockModel.create()
     (ctx) => ctx.prerun?.resolveAny({ field: 'assayFile' })?.getFileHandle(),
   )
 
+  // Drives upload of local (upload://) files into the prerun.
+  // getImportProgress() registers with the UploadDriver, triggering the actual
+  // blob upload. Without this active output, the prerun waits forever for local files.
+  .output(
+    'assayFileImport',
+    (ctx) => ctx.prerun?.resolveAny({ field: 'assayFileImport' })?.getImportProgress(),
+    { isActive: true },
+  )
+
   .output(
     'dataImportHandle',
     (ctx) => ctx.outputs?.resolve('dataImportHandle')?.getImportProgress(),
