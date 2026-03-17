@@ -172,6 +172,11 @@ export const model = BlockModel.create()
       });
   })
 
+  .retentiveOutput(
+    'assayFileHandle',
+    (ctx) => ctx.prerun?.resolveAny({ field: 'assayFile' })?.getFileHandle(),
+  )
+
   .output(
     'dataImportHandle',
     (ctx) => ctx.outputs?.resolve('dataImportHandle')?.getImportProgress(),
