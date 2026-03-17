@@ -186,6 +186,7 @@ watch(
 );
 
 const sequenceColumnOptions = computed(() => {
+  if (!app.model.args.fileHandle) return [];
   return app.model.args.importColumns
     ?.filter((c) => c.sequenceType !== undefined)
     ?.map((c) => ({
@@ -195,6 +196,7 @@ const sequenceColumnOptions = computed(() => {
 });
 
 const otherColumnOptions = computed(() => {
+  if (!app.model.args.fileHandle) return [];
   return app.model.args.importColumns
     ?.filter((c) => c.header !== app.model.args.sequenceColumnHeader)
     ?.map((c) => ({
