@@ -127,23 +127,17 @@ watch(assayFileBytes, (bytes) => {
 });
 
 const setFile = (file: ImportFileHandle | undefined) => {
-  if (!file) {
-    app.model.args.fileHandle = undefined;
-    app.model.args.importColumns = undefined;
-    app.model.args.sequenceColumnHeader = undefined;
-    app.model.args.selectedColumns = [];
-    app.model.args.fileExtension = undefined;
-    app.model.args.detectedXsvType = undefined;
-    app.model.ui.fileImportError = undefined;
-    return;
-  }
-
-  // Reset dependent fields before switching file
   app.model.args.importColumns = undefined;
   app.model.args.sequenceColumnHeader = undefined;
   app.model.args.selectedColumns = [];
   app.model.args.detectedXsvType = undefined;
   app.model.ui.fileImportError = undefined;
+
+  if (!file) {
+    app.model.args.fileHandle = undefined;
+    app.model.args.fileExtension = undefined;
+    return;
+  }
 
   const fileName = getFileNameFromHandle(file);
   app.model.args.fileExtension = fileName.split('.').pop()?.toLowerCase();
@@ -160,7 +154,7 @@ watch(
       return;
     }
 
-    // Skip uniqueness check for FASTA — entries are inherently unique
+    // Skip uniqueness check for FASTA — bytes are FASTA-encoded, not XLSX-parseable
     const ext = app.model.args.fileExtension;
     if (ext === 'fasta' || ext === 'fa') return;
 
