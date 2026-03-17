@@ -3,12 +3,15 @@ import { PlMultiSequenceAlignment } from '@milaboratories/multi-sequence-alignme
 import type {
   AxisId,
   ImportFileHandle,
+  LocalImportFileHandle,
   PlRef,
   PlSelectionModel,
   PTableKey,
 } from '@platforma-sdk/model';
 import {
   getFileNameFromHandle,
+  getRawPlatformaInstance,
+  isImportFileHandleUpload,
 } from '@platforma-sdk/model';
 import {
   PlAgDataTableV2,
@@ -120,13 +123,15 @@ const assayFileBytes = computed(() => {
   return reactiveFileContent.getContentBytes(handle.handle).value;
 });
 
-// Detect columns reactively once bytes arrive from the prerun
+// For remote files: detect columns once the prerun has imported the file and bytes arrive.
+// Guarded so it doesn't re-run if a local file already processed bytes synchronously.
 watch(assayFileBytes, (bytes) => {
   if (!bytes || !app.model.args.fileHandle) return;
+  if (app.model.args.importColumns !== undefined) return;
   processFileBytes(bytes, app.model.args.fileExtension);
 });
 
-const setFile = (file: ImportFileHandle | undefined) => {
+const setFile = async (file: ImportFileHandle | undefined) => {
   app.model.args.importColumns = undefined;
   app.model.args.sequenceColumnHeader = undefined;
   app.model.args.selectedColumns = [];
@@ -140,9 +145,21 @@ const setFile = (file: ImportFileHandle | undefined) => {
   }
 
   const fileName = getFileNameFromHandle(file);
-  app.model.args.fileExtension = fileName.split('.').pop()?.toLowerCase();
-  // Setting fileHandle triggers the prerun, which fetches the file and populates assayFileBytes
+  const extension = fileName.split('.').pop()?.toLowerCase();
+  app.model.args.fileExtension = extension;
+  // Setting fileHandle triggers the prerun (needed for remote files and the workflow)
   app.model.args.fileHandle = file;
+
+  // For local (upload://) files: process bytes immediately from disk — no prerun round-trip needed.
+  // Remote (index://) files fall through to the assayFileBytes watch above.
+  if (isImportFileHandleUpload(file)) {
+    try {
+      const data = await getRawPlatformaInstance().lsDriver.getLocalFileContent(file as LocalImportFileHandle);
+      processFileBytes(data, extension);
+    } catch (e) {
+      console.error('Failed to read local file content:', e);
+    }
+  }
 };
 
 // Watch for when the user selects a sequence column to validate uniqueness
