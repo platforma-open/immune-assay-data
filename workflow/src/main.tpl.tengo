@@ -11,12 +11,15 @@ text := import("text")
 render := import("@platforma-sdk/workflow-tengo:render")
 strings := import("@platforma-sdk/workflow-tengo:strings")
 
+prerunTpl := assets.importTemplate(":prerun")
 analysisTpl := assets.importTemplate(":analysis")
 processOutputsTpl := assets.importTemplate(":process-outputs")
 checkContentEmptyTpl := assets.importTemplate(":check-content-empty")
 
 prepareFastaSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.prepare-fasta:main")
 checkContentEmptySw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.check-content-empty:main")
+
+wf.setPreRun(prerunTpl)
 
 wf.prepare(func(args){
 	bundleBuilder := wf.createPBundleBuilder()

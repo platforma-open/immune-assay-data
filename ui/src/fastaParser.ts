@@ -1,6 +1,3 @@
-import type { LocalImportFileHandle } from '@platforma-sdk/model';
-import { getRawPlatformaInstance } from '@platforma-sdk/model';
-
 export interface FastaRecord {
   header: string;
   sequence: string;
@@ -123,28 +120,4 @@ export function fastaToTable(records: FastaRecord[]): string {
 
   // Combine header and data
   return [headerRow, ...dataRows].join('\n');
-}
-
-/**
- * Process FASTA file and convert to table format
- */
-export async function processFastaFile(file: LocalImportFileHandle): Promise<{ content: string; error?: string }> {
-  try {
-    const rawContent = await getRawPlatformaInstance().lsDriver.getLocalFileContent(file);
-    const content = new TextDecoder().decode(rawContent);
-
-    const parseResult = parseFastaContent(content);
-
-    if (parseResult.error) {
-      return { content: '', error: parseResult.error };
-    }
-
-    const tableContent = fastaToTable(parseResult.records);
-    return { content: tableContent };
-  } catch (error) {
-    return {
-      content: '',
-      error: `Failed to read FASTA file: ${error instanceof Error ? error.message : 'Unknown error'}`,
-    };
-  }
 }

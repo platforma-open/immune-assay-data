@@ -1,10 +1,8 @@
-import { getFileNameFromHandle, getRawPlatformaInstance, type LocalImportFileHandle } from '@platforma-sdk/model';
-
 import { useApp } from './app';
 
 import type { ImportColumnInfo } from '@platforma-open/milaboratories.immune-assay-data.model';
 import * as XLSX from 'xlsx';
-import { processFastaFile } from './fastaParser';
+import { parseFastaContent, fastaToTable } from './fastaParser';
 
 // Define a more specific type for raw Excel data
 type TableRow = string[];
@@ -136,38 +134,35 @@ function inferSequenceType(values: unknown[]): 'nucleotide' | 'aminoacid' | unde
   }
 }
 
-export async function importFile(file: LocalImportFileHandle) {
+/**
+ * Process raw file bytes to detect columns and update block args.
+ * Works for both local and remote files — bytes are provided by ReactiveFileContent.
+ */
+export function processFileBytes(bytes: Uint8Array, extension: string | undefined): void {
   const app = useApp();
-
-  app.model.args.fileHandle = file;
 
   // clear state
   app.model.args.importColumns = undefined;
   app.model.ui.fileImportError = undefined;
-  const fileName = getFileNameFromHandle(file);
-  const extension = fileName.split('.').pop()?.toLowerCase();
-  app.model.args.fileExtension = extension;
   app.model.args.detectedXsvType = undefined;
 
   let rawData: TableData;
 
   // Handle FASTA files
   if (extension === 'fasta' || extension === 'fa') {
-    const fastaResult = await processFastaFile(file);
+    const content = new TextDecoder().decode(bytes);
+    const parseResult = parseFastaContent(content);
 
-    if (fastaResult.error) {
-      app.model.ui.fileImportError = fastaResult.error;
+    if (parseResult.error) {
+      app.model.ui.fileImportError = parseResult.error;
       return;
     }
 
-    // Convert tab-delimited string to table data
-    const lines = fastaResult.content.split('\n');
+    const tableContent = fastaToTable(parseResult.records);
+    const lines = tableContent.split('\n');
     rawData = lines.map((line) => line.split('\t'));
   } else {
-    // Handle Excel/CSV files as before
-    const data = await getRawPlatformaInstance().lsDriver.getLocalFileContent(file);
-
-    const wb = XLSX.read(data);
+    const wb = XLSX.read(bytes);
 
     // @TODO: allow user to select worksheet
     const worksheet = wb.Sheets[wb.SheetNames[0]];
@@ -182,7 +177,7 @@ export async function importFile(file: LocalImportFileHandle) {
     // XLSX auto-detects internally via guess_sep but doesn't expose the result,
     // so we check the first line of the already-in-memory data buffer.
     if (extension === 'csv' || extension === 'tsv') {
-      const firstLine = new TextDecoder().decode(new Uint8Array(data).slice(0, 4096)).split('\n')[0] ?? '';
+      const firstLine = new TextDecoder().decode(bytes.slice(0, 4096)).split('\n')[0] ?? '';
       app.model.args.detectedXsvType = firstLine.includes('\t') ? 'tsv' : 'csv';
     }
   }

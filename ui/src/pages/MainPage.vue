@@ -3,13 +3,12 @@ import { PlMultiSequenceAlignment } from '@milaboratories/multi-sequence-alignme
 import type {
   AxisId,
   ImportFileHandle,
-  LocalImportFileHandle,
   PlRef,
   PlSelectionModel,
   PTableKey,
 } from '@platforma-sdk/model';
 import {
-  getRawPlatformaInstance,
+  getFileNameFromHandle,
 } from '@platforma-sdk/model';
 import {
   PlAgDataTableV2,
@@ -27,6 +26,7 @@ import {
   PlSectionSeparator,
   PlSlideModal,
   PlTooltip,
+  ReactiveFileContent,
   usePlDataTableSettingsV2,
 } from '@platforma-sdk/ui-vue';
 import strings from '@milaboratories/strings';
@@ -41,13 +41,14 @@ import {
   useApp,
 } from '../app';
 
-import { importFile } from '../importFile';
+import { processFileBytes } from '../importFile';
 import {
   isAssayColumn,
   isSequenceColumn,
 } from '../util';
 
 const app = useApp();
+const reactiveFileContent = ReactiveFileContent.useGlobal();
 
 function setDataset(ref: PlRef | undefined) {
   app.model.args.datasetRef = ref;
@@ -112,38 +113,61 @@ const onRowDoubleClicked = reactive((key?: PTableKey) => {
   multipleSequenceAlignmentClonotypesOpen.value = true;
 });
 
-const setFile = async (file: ImportFileHandle | undefined) => {
+// Reactive file bytes — available once the prerun imports the file (works for both local and remote).
+const assayFileBytes = computed(() => {
+  const handle = app.model.outputs.assayFileHandle;
+  if (!handle) return undefined;
+  return reactiveFileContent.getContentBytes(handle.handle).value;
+});
+
+// Detect columns once the prerun has imported the file and bytes arrive.
+// { immediate: true } also handles the case where the block is reloaded with an existing file.
+watch(assayFileBytes, (bytes) => {
+  if (bytes === undefined) return;
+  if (!app.model.args.fileHandle) return;
+  if (app.model.args.importColumns !== undefined) return;
+  processFileBytes(bytes, app.model.args.fileExtension);
+}, { immediate: true });
+
+const setFile = (file: ImportFileHandle | undefined) => {
+  // Clear all dependent state so the new file's columns are detected fresh.
+  app.model.args.importColumns = undefined;
+  app.model.args.sequenceColumnHeader = undefined;
+  app.model.args.selectedColumns = [];
+  app.model.args.detectedXsvType = undefined;
+  app.model.ui.fileImportError = undefined;
+
   if (!file) {
+    app.model.args.fileExtension = undefined;
     return;
   }
-  importFile(file as LocalImportFileHandle);
+
+  // Store extension so processFileBytes knows how to parse the bytes.
+  const fileName = getFileNameFromHandle(file);
+  app.model.args.fileExtension = fileName.split('.').pop()?.toLowerCase();
+  // fileHandle is already set by v-model; setting it here again triggers the prerun.
+  app.model.args.fileHandle = file;
 };
 
-// Watch for when the file is removed to reset dependent fields
-watch(
-  () => app.model.args.fileHandle,
-  (newFileHandle) => {
-    if (!newFileHandle) {
-      app.model.args.sequenceColumnHeader = undefined;
-      app.model.args.selectedColumns = [];
-    }
-  },
-);
-
-// Watch for when the user selects a sequence column to validate it
+// Watch for when the user selects a sequence column to validate uniqueness.
+// Uses assayFileBytes (already loaded) so this works for both local and remote files.
 watch(
   () => app.model.args.sequenceColumnHeader,
-  async (newHeader) => {
+  (newHeader) => {
     if (!newHeader || !app.model.args.fileHandle) {
       app.model.ui.fileImportError = undefined;
       return;
     }
 
+    // Skip uniqueness check for FASTA — bytes are FASTA-encoded, not XLSX-parseable
+    const ext = app.model.args.fileExtension;
+    if (ext === 'fasta' || ext === 'fa') return;
+
+    const bytes = assayFileBytes.value;
+    if (!bytes) return;
+
     try {
-      const data = await getRawPlatformaInstance().lsDriver.getLocalFileContent(
-        app.model.args.fileHandle as LocalImportFileHandle,
-      );
-      const wb = XLSX.read(data);
+      const wb = XLSX.read(bytes);
       const worksheet = wb.Sheets[wb.SheetNames[0]];
       const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: true, blankrows: false }) as string[][];
 
@@ -161,7 +185,7 @@ watch(
       }
     } catch (e) {
       console.error('Failed to validate sequence uniqueness:', e);
-      app.model.ui.fileImportError = 'Could not read file to validate sequence uniqueness.';
+      app.model.ui.fileImportError = 'Could not validate sequence uniqueness.';
     }
   },
 );
