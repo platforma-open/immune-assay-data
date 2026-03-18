@@ -172,9 +172,11 @@ export const model = BlockModel.create()
       });
   })
 
-  .retentiveOutput(
+  .output(
     'assayFileHandle',
-    (ctx) => ctx.prerun?.resolveAny({ field: 'assayFile' })?.getFileHandle(),
+    (ctx) => ctx.prerun
+      ?.resolveAny({ field: 'assayFile' })
+      ?.getFileHandle(),
   )
 
   .output(

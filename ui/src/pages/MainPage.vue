@@ -3,15 +3,12 @@ import { PlMultiSequenceAlignment } from '@milaboratories/multi-sequence-alignme
 import type {
   AxisId,
   ImportFileHandle,
-  LocalImportFileHandle,
   PlRef,
   PlSelectionModel,
   PTableKey,
 } from '@platforma-sdk/model';
 import {
   getFileNameFromHandle,
-  getRawPlatformaInstance,
-  isImportFileHandleUpload,
 } from '@platforma-sdk/model';
 import {
   PlAgDataTableV2,
@@ -123,15 +120,17 @@ const assayFileBytes = computed(() => {
   return reactiveFileContent.getContentBytes(handle.handle).value;
 });
 
-// For remote files: detect columns once the prerun has imported the file and bytes arrive.
-// Guarded so it doesn't re-run if a local file already processed bytes synchronously.
+// Detect columns once the prerun has imported the file and bytes arrive.
+// { immediate: true } also handles the case where the block is reloaded with an existing file.
 watch(assayFileBytes, (bytes) => {
-  if (!bytes || !app.model.args.fileHandle) return;
+  if (bytes === undefined) return;
+  if (!app.model.args.fileHandle) return;
   if (app.model.args.importColumns !== undefined) return;
   processFileBytes(bytes, app.model.args.fileExtension);
-});
+}, { immediate: true });
 
-const setFile = async (file: ImportFileHandle | undefined) => {
+const setFile = (file: ImportFileHandle | undefined) => {
+  // Clear all dependent state so the new file's columns are detected fresh.
   app.model.args.importColumns = undefined;
   app.model.args.sequenceColumnHeader = undefined;
   app.model.args.selectedColumns = [];
@@ -139,27 +138,15 @@ const setFile = async (file: ImportFileHandle | undefined) => {
   app.model.ui.fileImportError = undefined;
 
   if (!file) {
-    app.model.args.fileHandle = undefined;
     app.model.args.fileExtension = undefined;
     return;
   }
 
+  // Store extension so processFileBytes knows how to parse the bytes.
   const fileName = getFileNameFromHandle(file);
-  const extension = fileName.split('.').pop()?.toLowerCase();
-  app.model.args.fileExtension = extension;
-  // Setting fileHandle triggers the prerun (needed for remote files and the workflow)
+  app.model.args.fileExtension = fileName.split('.').pop()?.toLowerCase();
+  // fileHandle is already set by v-model; setting it here again triggers the prerun.
   app.model.args.fileHandle = file;
-
-  // For local (upload://) files: process bytes immediately from disk — no prerun round-trip needed.
-  // Remote (index://) files fall through to the assayFileBytes watch above.
-  if (isImportFileHandleUpload(file)) {
-    try {
-      const data = await getRawPlatformaInstance().lsDriver.getLocalFileContent(file as LocalImportFileHandle);
-      processFileBytes(data, extension);
-    } catch (e) {
-      console.error('Failed to read local file content:', e);
-    }
-  }
 };
 
 // Watch for when the user selects a sequence column to validate uniqueness
