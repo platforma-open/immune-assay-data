@@ -9,7 +9,9 @@ import type {
   PTableKey,
 } from '@platforma-sdk/model';
 import {
+  getFileNameFromHandle,
   getRawPlatformaInstance,
+  isImportFileHandleUpload,
 } from '@platforma-sdk/model';
 import {
   PlAgDataTableV2,
@@ -27,6 +29,7 @@ import {
   PlSectionSeparator,
   PlSlideModal,
   PlTooltip,
+  ReactiveFileContent,
   usePlDataTableSettingsV2,
 } from '@platforma-sdk/ui-vue';
 import strings from '@milaboratories/strings';
@@ -41,13 +44,14 @@ import {
   useApp,
 } from '../app';
 
-import { importFile } from '../importFile';
+import { processFileBytes } from '../importFile';
 import {
   isAssayColumn,
   isSequenceColumn,
 } from '../util';
 
 const app = useApp();
+const reactiveFileContent = ReactiveFileContent.useGlobal();
 
 function setDataset(ref: PlRef | undefined) {
   app.model.args.datasetRef = ref;
@@ -112,38 +116,71 @@ const onRowDoubleClicked = reactive((key?: PTableKey) => {
   multipleSequenceAlignmentClonotypesOpen.value = true;
 });
 
+// Reactive file bytes — available once the prerun imports the file (works for local + remote)
+const assayFileBytes = computed(() => {
+  const handle = app.model.outputs.assayFileHandle;
+  if (!handle) return undefined;
+  return reactiveFileContent.getContentBytes(handle.handle).value;
+});
+
+// For remote files: detect columns once the prerun has imported the file and bytes arrive.
+// Guarded so it doesn't re-run if a local file already processed bytes synchronously.
+watch(assayFileBytes, (bytes) => {
+  if (!bytes || !app.model.args.fileHandle) return;
+  if (app.model.args.importColumns !== undefined) return;
+  processFileBytes(bytes, app.model.args.fileExtension);
+});
+
 const setFile = async (file: ImportFileHandle | undefined) => {
+  // Clear all dependent state so the new file's columns are detected fresh.
+  app.model.args.importColumns = undefined;
+  app.model.args.sequenceColumnHeader = undefined;
+  app.model.args.selectedColumns = [];
+  app.model.args.detectedXsvType = undefined;
+  app.model.ui.fileImportError = undefined;
+
   if (!file) {
+    app.model.args.fileHandle = undefined;
+    app.model.args.fileExtension = undefined;
     return;
   }
-  importFile(file as LocalImportFileHandle);
+
+  const fileName = getFileNameFromHandle(file);
+  const extension = fileName.split('.').pop()?.toLowerCase();
+  app.model.args.fileExtension = extension;
+  // Setting fileHandle triggers the prerun (needed for remote files and the workflow).
+  app.model.args.fileHandle = file;
+
+  // For local (upload://) files: process bytes immediately from disk — no prerun round-trip needed.
+  // Remote (index://) files fall through to the assayFileBytes watch above.
+  if (isImportFileHandleUpload(file)) {
+    try {
+      const data = await getRawPlatformaInstance().lsDriver.getLocalFileContent(file as LocalImportFileHandle);
+      processFileBytes(data, extension);
+    } catch (e) {
+      console.error('Failed to read local file content:', e);
+    }
+  }
 };
 
-// Watch for when the file is removed to reset dependent fields
-watch(
-  () => app.model.args.fileHandle,
-  (newFileHandle) => {
-    if (!newFileHandle) {
-      app.model.args.sequenceColumnHeader = undefined;
-      app.model.args.selectedColumns = [];
-    }
-  },
-);
-
-// Watch for when the user selects a sequence column to validate it
+// Watch for when the user selects a sequence column to validate uniqueness
 watch(
   () => app.model.args.sequenceColumnHeader,
-  async (newHeader) => {
+  (newHeader) => {
     if (!newHeader || !app.model.args.fileHandle) {
       app.model.ui.fileImportError = undefined;
       return;
     }
 
+    // Skip uniqueness check for FASTA — bytes are FASTA-encoded, not XLSX-parseable
+    const ext = app.model.args.fileExtension;
+    if (ext === 'fasta' || ext === 'fa') return;
+
+    const bytes = assayFileBytes.value;
+    if (!bytes) return;
+
     try {
-      const data = await getRawPlatformaInstance().lsDriver.getLocalFileContent(
-        app.model.args.fileHandle as LocalImportFileHandle,
-      );
-      const wb = XLSX.read(data);
+      const wb = XLSX.read(bytes);
       const worksheet = wb.Sheets[wb.SheetNames[0]];
       const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: true, blankrows: false }) as string[][];
 
@@ -161,12 +198,13 @@ watch(
       }
     } catch (e) {
       console.error('Failed to validate sequence uniqueness:', e);
-      app.model.ui.fileImportError = 'Could not read file to validate sequence uniqueness.';
+      app.model.ui.fileImportError = 'Could not validate sequence uniqueness.';
     }
   },
 );
 
 const sequenceColumnOptions = computed(() => {
+  if (!app.model.args.fileHandle) return [];
   return app.model.args.importColumns
     ?.filter((c) => c.sequenceType !== undefined)
     ?.map((c) => ({
@@ -176,6 +214,7 @@ const sequenceColumnOptions = computed(() => {
 });
 
 const otherColumnOptions = computed(() => {
+  if (!app.model.args.fileHandle) return [];
   return app.model.args.importColumns
     ?.filter((c) => c.header !== app.model.args.sequenceColumnHeader)
     ?.map((c) => ({

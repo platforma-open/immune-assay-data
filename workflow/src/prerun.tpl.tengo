@@ -1,0 +1,17 @@
+wf := import("@platforma-sdk/workflow-tengo:workflow")
+file := import("@platforma-sdk/workflow-tengo:file")
+
+wf.body(func(args) {
+	if is_undefined(args.fileHandle) {
+		return { outputs: {}, exports: {} }
+	}
+
+	importedFile := file.importFile(args.fileHandle)
+
+	return {
+		outputs: {
+			assayFile: file.exportFile(importedFile.file)
+		},
+		exports: {}
+	}
+})

@@ -173,6 +173,13 @@ export const model = BlockModel.create()
   })
 
   .output(
+    'assayFileHandle',
+    (ctx) => ctx.prerun
+      ?.resolveAny({ field: 'assayFile' })
+      ?.getFileHandle(),
+  )
+
+  .output(
     'dataImportHandle',
     (ctx) => ctx.outputs?.resolve('dataImportHandle')?.getImportProgress(),
     { isActive: true },
