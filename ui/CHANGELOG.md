@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.ui
 
+## 1.7.1
+
+### Patch Changes
+
+- 002abd6: update dependencies
+
 ## 1.7.0
 
 ### Minor Changes
