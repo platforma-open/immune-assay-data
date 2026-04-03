@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.workflow
 
+## 1.10.0
+
+### Minor Changes
+
+- 29a44a2: Improved performance on large datasets
+
 ## 1.9.0
 
 ### Minor Changes
