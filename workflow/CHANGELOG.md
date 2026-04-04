@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.workflow
 
+## 1.11.0
+
+### Minor Changes
+
+- ac74170: Improved performance on large datasets, eliminating disk and memory pressure
+
 ## 1.10.0
 
 ### Minor Changes
