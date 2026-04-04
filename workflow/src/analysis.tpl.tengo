@@ -315,7 +315,7 @@ self.body(func(args) {
 	)
 
 	cols := []
-	for _, col in ["bits", "evalue", "query", "pident", "alnlen", "mismatch",
+	for _, col in ["bits", "evalue", "target", "pident", "alnlen", "mismatch",
 	"gapopen", "qstart", "qend", "tstart", "tend"] {
 		cols = append(cols,
 			pt.col(col).maxBy(
@@ -325,7 +325,7 @@ self.body(func(args) {
 		)
 	}
 
-	dfRes = dfRes.groupBy("target").agg(cols...)
+	dfRes = dfRes.groupBy("query").agg(cols...)
 	// Add link column for linker pFrame (assayLinkerPframe)
 	dfRes = dfRes.withColumns(
 		pt.lit(1).cast("Int64").alias("link")
@@ -340,13 +340,13 @@ self.body(func(args) {
 
 	// import how many matches per assay sequence found
 	assayDf = assayDf.join(
-		dfRes.groupBy("query").agg(
-			pt.col("target").count().alias("queryCount")
+		dfRes.groupBy("target").agg(
+			pt.col("query").count().alias("queryCount")
 		),
 		{
 			how: "left",
 			leftOn: "seqId",
-			rightOn: "query"
+			rightOn: "target"
 		}
 	)
 	assayDf.save("assay_data.tsv")
@@ -355,7 +355,7 @@ self.body(func(args) {
 	clonesDf := dfRes.join(assayDf,
 		{
 			how: "left",
-			leftOn: "query",
+			leftOn: "target",
 			rightOn: "seqId"
 		}
 	)
