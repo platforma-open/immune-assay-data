@@ -1,5 +1,12 @@
 # @platforma-open/milaboratories.immune-assay-data.workflow
 
+## 1.12.1
+
+### Patch Changes
+
+- Updated dependencies [2eff9dc]
+  - @platforma-open/milaboratories.immune-assay-data.split-fasta@1.2.0
+
 ## 1.12.0
 
 ### Minor Changes

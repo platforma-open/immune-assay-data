@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data
 
+## 1.3.5
+
+### Patch Changes
+
+- @platforma-open/milaboratories.immune-assay-data.workflow@1.12.1
+
 ## 1.3.4
 
 ### Patch Changes
