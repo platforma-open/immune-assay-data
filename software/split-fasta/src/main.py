@@ -2,30 +2,6 @@ import argparse
 import json
 
 
-def count_sequences(path):
-    count = 0
-    with open(path) as f:
-        for line in f:
-            if line.startswith('>'):
-                count += 1
-    return count
-
-
-def split_stream(input_path, chunk1_path, chunk2_path, split_at):
-    """Stream sequences from input, writing first split_at to chunk1, rest to chunk2."""
-    seq_index = 0
-    with open(input_path) as f, \
-         open(chunk1_path, 'w') as out1, \
-         open(chunk2_path, 'w') as out2:
-        current_out = out1
-        for line in f:
-            if line.startswith('>'):
-                seq_index += 1
-                if seq_index > split_at:
-                    current_out = out2
-            current_out.write(line)
-
-
 def main():
     parser = argparse.ArgumentParser(description="Split a FASTA file into two equal chunks.")
     parser.add_argument("-i", "--input", required=True, help="Input FASTA file.")
@@ -34,16 +10,31 @@ def main():
     parser.add_argument("--counts", required=True, help="Output JSON with sequence counts.")
     args = parser.parse_args()
 
-    total = count_sequences(args.input)
-    split_at = (total + 1) // 2  # chunk1 gets ceil(total/2)
+    chunk1_count = 0
+    chunk2_count = 0
+    seq_index = 0
+    current_out = None
 
-    split_stream(args.input, args.chunk1, args.chunk2, split_at)
+    with open(args.input) as f, \
+         open(args.chunk1, 'w') as out1, \
+         open(args.chunk2, 'w') as out2:
+        for line in f:
+            if line.startswith('>'):
+                seq_index += 1
+                if seq_index % 2 == 1:  # odd sequences → chunk1
+                    current_out = out1
+                    chunk1_count += 1
+                else:                    # even sequences → chunk2
+                    current_out = out2
+                    chunk2_count += 1
+            current_out.write(line)
 
-    counts = {"total": total, "chunk1": split_at, "chunk2": total - split_at}
+    total = chunk1_count + chunk2_count
+    counts = {"total": total, "chunk1": chunk1_count, "chunk2": chunk2_count}
     with open(args.counts, 'w') as f:
         json.dump(counts, f)
 
-    print(f"Split {total} sequences into chunks of {split_at} and {total - split_at}")
+    print(f"Split {total} sequences into chunks of {chunk1_count} and {chunk2_count}")
 
 
 if __name__ == "__main__":
