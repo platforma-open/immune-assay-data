@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.coverage-mode-calc
 
+## 1.3.0
+
+### Minor Changes
+
+- 5f43c2b: Improved scalability for large datasets
+
 ## 1.2.0
 
 ### Minor Changes
