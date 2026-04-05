@@ -2,31 +2,28 @@ import argparse
 import json
 
 
-def read_fasta(path):
-    sequences = []
-    current_header = None
-    current_lines = []
+def count_sequences(path):
+    count = 0
     with open(path) as f:
         for line in f:
-            line = line.rstrip('\n')
             if line.startswith('>'):
-                if current_header is not None:
-                    sequences.append((current_header, current_lines))
-                current_header = line
-                current_lines = []
-            elif line:
-                current_lines.append(line)
-    if current_header is not None:
-        sequences.append((current_header, current_lines))
-    return sequences
+                count += 1
+    return count
 
 
-def write_fasta(path, sequences):
-    with open(path, 'w') as f:
-        for header, lines in sequences:
-            f.write(header + '\n')
-            for line in lines:
-                f.write(line + '\n')
+def split_stream(input_path, chunk1_path, chunk2_path, split_at):
+    """Stream sequences from input, writing first split_at to chunk1, rest to chunk2."""
+    seq_index = 0
+    with open(input_path) as f, \
+         open(chunk1_path, 'w') as out1, \
+         open(chunk2_path, 'w') as out2:
+        current_out = out1
+        for line in f:
+            if line.startswith('>'):
+                seq_index += 1
+                if seq_index > split_at:
+                    current_out = out2
+            current_out.write(line)
 
 
 def main():
@@ -37,21 +34,16 @@ def main():
     parser.add_argument("--counts", required=True, help="Output JSON with sequence counts.")
     args = parser.parse_args()
 
-    sequences = read_fasta(args.input)
-    total = len(sequences)
-    split = (total + 1) // 2  # chunk1 gets ceil(total/2)
+    total = count_sequences(args.input)
+    split_at = (total + 1) // 2  # chunk1 gets ceil(total/2)
 
-    chunk1 = sequences[:split]
-    chunk2 = sequences[split:]
+    split_stream(args.input, args.chunk1, args.chunk2, split_at)
 
-    write_fasta(args.chunk1, chunk1)
-    write_fasta(args.chunk2, chunk2)
-
-    counts = {"total": total, "chunk1": len(chunk1), "chunk2": len(chunk2)}
+    counts = {"total": total, "chunk1": split_at, "chunk2": total - split_at}
     with open(args.counts, 'w') as f:
         json.dump(counts, f)
 
-    print(f"Split {total} sequences into chunks of {len(chunk1)} and {len(chunk2)}")
+    print(f"Split {total} sequences into chunks of {split_at} and {total - split_at}")
 
 
 if __name__ == "__main__":
