@@ -5,6 +5,8 @@ packages:
   - software/fasta-to-tsv
   - software/xlsx-to-csv
   - software/check-content-empty
+  - software/split-fasta
+  - software/merge-results
   - workflow
   - model
   - ui

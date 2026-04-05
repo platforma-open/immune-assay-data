@@ -32,8 +32,8 @@ self.body(func(args) {
 		mem(mem).
 		cpu(cpu).
 		arg("easy-search").
-		arg("clones.fasta").
 		arg("assay.fasta").
+		arg("clones.fasta").
 		arg("results.tsv").
 		arg("tmp").
 		arg("--threads").arg(string(cpu)).
