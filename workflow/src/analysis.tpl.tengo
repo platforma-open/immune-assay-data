@@ -9,10 +9,11 @@ render := import("@platforma-sdk/workflow-tengo:render")
 
 prepareFastaSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.prepare-fasta:main")
 fastaToTsvSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.fasta-to-tsv:main")
-addHeaderSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.add-header:main")
 covModeCalcSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.coverage-mode-calc:main")
 xlsxToCsvSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.xlsx-to-csv:main")
 checkContentEmptySw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.check-content-empty:main")
+splitFastaSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.split-fasta:main")
+mergeResultsSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.merge-results:main")
 
 runAlignmentTpl := assets.importTemplate(":run-alignment")
 checkContentEmptyTpl := assets.importTemplate(":check-content-empty")
@@ -232,6 +233,27 @@ self.body(func(args) {
 
 	covMode := coverageModeRun.getFileContent("coverage_mode.txt")
 
+	// Split clone FASTA into 2 equal chunks to limit mmseqs2 index disk usage.
+	// Running two searches against 25M sequences each uses half the peak disk
+	// of a single 50M search. E-values are normalized to the full database size.
+	splitRun := exec.builder().
+		software(splitFastaSw).
+		mem("8GiB").
+		cpu(1).
+		addFile("clones.fasta", clonesFasta).
+		arg("-i").arg("clones.fasta").
+		arg("--chunk1").arg("chunk_1.fasta").
+		arg("--chunk2").arg("chunk_2.fasta").
+		arg("--counts").arg("counts.json").
+		saveFile("chunk_1.fasta").
+		saveFile("chunk_2.fasta").
+		saveFile("counts.json").
+		run()
+
+	chunk1Fasta := splitRun.getFile("chunk_1.fasta")
+	chunk2Fasta := splitRun.getFile("chunk_2.fasta")
+	splitCounts := splitRun.getFile("counts.json")
+
 	// MMseqs2 Alignment
 	mmseqsSearchType := "0"
     if targetSequenceType == "aminoacid" && assaySequenceType == "aminoacid" {
@@ -248,13 +270,28 @@ self.body(func(args) {
         mmseqsSearchType = "2"
     }
 
-	runMmseqs := render.create(runAlignmentTpl, {
+	runMmseqs1 := render.create(runAlignmentTpl, {
 		covMode: covMode,
 		mmseqsSearchType: mmseqsSearchType,
 		coverageThreshold: coverageThreshold,
 		identityThreshold: identityThreshold,
 		similarityType: similarityType,
-		clonesFasta: clonesFasta,
+		clonesFasta: chunk1Fasta,
+		assayFasta: assayFasta,
+		lessSensitive: lessSensitive
+	}, {
+		metaInputs: {
+			mem: mem,
+			cpu: cpu
+		}
+	})
+	runMmseqs2 := render.create(runAlignmentTpl, {
+		covMode: covMode,
+		mmseqsSearchType: mmseqsSearchType,
+		coverageThreshold: coverageThreshold,
+		identityThreshold: identityThreshold,
+		similarityType: similarityType,
+		clonesFasta: chunk2Fasta,
 		assayFasta: assayFasta,
 		lessSensitive: lessSensitive
 	}, {
@@ -264,20 +301,25 @@ self.body(func(args) {
 		}
 	})
 
-	mmseqsOutput := runMmseqs.output("mmseqsOutput")
+	mmseqsOutput1 := runMmseqs1.output("mmseqsOutput")
+	mmseqsOutput2 := runMmseqs2.output("mmseqsOutput")
 
-	// @TODO remove header stuff and replace with pt when available (!)
-	addHeaderRun := exec.builder().
-		software(addHeaderSw).
+	// Merge both raw results, add header, and normalize e-values to full database size
+	mergeRun := exec.builder().
+		software(mergeResultsSw).
 		mem("16GiB").
 		cpu(1).
-		arg("-i").arg("results.tsv").
+		addFile("results_1.tsv", mmseqsOutput1).
+		addFile("results_2.tsv", mmseqsOutput2).
+		addFile("counts.json", splitCounts).
+		arg("-i1").arg("results_1.tsv").
+		arg("-i2").arg("results_2.tsv").
+		arg("--counts").arg("counts.json").
 		arg("-o").arg("results_with_header.tsv").
-		addFile("results.tsv", mmseqsOutput).
 		saveFile("results_with_header.tsv").
 		run()
 
-	mmseqsResultTsv := addHeaderRun.getFile("results_with_header.tsv")
+	mmseqsResultTsv := mergeRun.getFile("results_with_header.tsv")
 
 	// Check if results are empty (only header line or nothing)
 	checkResultsRun := exec.builder().
@@ -297,7 +339,7 @@ self.body(func(args) {
 	emptyResults := checkResult.output("result")
 
 	result := {
-		mmseqsOutput: mmseqsOutput,
+		mmseqsOutput: mmseqsResultTsv,
 		emptyResults: emptyResults
 	}
 
@@ -315,7 +357,7 @@ self.body(func(args) {
 	)
 
 	cols := []
-	for _, col in ["bits", "evalue", "target", "pident", "alnlen", "mismatch",
+	for _, col in ["bits", "evalue", "query", "pident", "alnlen", "mismatch",
 	"gapopen", "qstart", "qend", "tstart", "tend"] {
 		cols = append(cols,
 			pt.col(col).maxBy(
@@ -325,7 +367,7 @@ self.body(func(args) {
 		)
 	}
 
-	dfRes = dfRes.groupBy("query").agg(cols...)
+	dfRes = dfRes.groupBy("target").agg(cols...)
 	// Add link column for linker pFrame (assayLinkerPframe)
 	dfRes = dfRes.withColumns(
 		pt.lit(1).cast("Int64").alias("link")
@@ -340,13 +382,13 @@ self.body(func(args) {
 
 	// import how many matches per assay sequence found
 	assayDf = assayDf.join(
-		dfRes.groupBy("target").agg(
-			pt.col("query").count().alias("queryCount")
+		dfRes.groupBy("query").agg(
+			pt.col("target").count().alias("queryCount")
 		),
 		{
 			how: "left",
 			leftOn: "seqId",
-			rightOn: "target"
+			rightOn: "query"
 		}
 	)
 	assayDf.save("assay_data.tsv")
@@ -355,7 +397,7 @@ self.body(func(args) {
 	clonesDf := dfRes.join(assayDf,
 		{
 			how: "left",
-			leftOn: "target",
+			leftOn: "query",
 			rightOn: "seqId"
 		}
 	)
