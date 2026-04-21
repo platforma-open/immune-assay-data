@@ -1,11 +1,14 @@
 self := import("@platforma-sdk/workflow-tengo:tpl")
-ll := import("@platforma-sdk/workflow-tengo:ll")
 exec := import("@platforma-sdk/workflow-tengo:exec")
 assets:= import("@platforma-sdk/workflow-tengo:assets")
 math := import("math")
 mmseqsSw := assets.importSoftware("@platforma-open/soedinglab.software-mmseqs2:main")
 
 self.defineOutputs("mmseqsOutput")
+
+// Suffixes of files produced by `mmseqs createdb <prefix>`. The Tengo SDK
+// has no addFileSet, so each file is shuttled between steps explicitly.
+dbFileSuffixes := ["", ".dbtype", ".index", ".lookup", ".source", "_h", "_h.dbtype", "_h.index"]
 
 self.body(func(args) {
 
@@ -27,14 +30,48 @@ self.body(func(args) {
 		cpu = args.metaInputs.cpu
 	}
 
-	mmseqs := exec.builder().
+	// MMseqs2 `easy-search` is implemented via a generated shell script that
+	// the binary invokes with system(). On Windows that invocation is
+	// unreliable and fails with "Failed to execute ...easysearch.sh with error 2".
+	// We run the equivalent subcommands directly to stay portable.
+
+	// 1. Build query DB from assay.fasta
+	queryDbBuilder := exec.builder().
 		software(mmseqsSw).
 		mem(mem).
 		cpu(cpu).
-		arg("easy-search").
+		arg("createdb").
 		arg("assay.fasta").
+		arg("queryDB").
+		addFile("assay.fasta", assayFasta)
+	for suffix in dbFileSuffixes {
+		queryDbBuilder = queryDbBuilder.saveFile("queryDB" + suffix)
+	}
+	queryDbRun := queryDbBuilder.run()
+
+	// 2. Build target DB from clones.fasta
+	targetDbBuilder := exec.builder().
+		software(mmseqsSw).
+		mem(mem).
+		cpu(cpu).
+		arg("createdb").
 		arg("clones.fasta").
-		arg("results.tsv").
+		arg("targetDB").
+		addFile("clones.fasta", clonesFasta)
+	for suffix in dbFileSuffixes {
+		targetDbBuilder = targetDbBuilder.saveFile("targetDB" + suffix)
+	}
+	targetDbRun := targetDbBuilder.run()
+
+	// 3. Run search against the two DBs
+	searchBuilder := exec.builder().
+		software(mmseqsSw).
+		mem(mem).
+		cpu(cpu).
+		arg("search").
+		arg("queryDB").
+		arg("targetDB").
+		arg("resultDB").
 		arg("tmp").
 		arg("--threads").arg(string(cpu)).
 		arg("--max-seqs").arg("10000").
@@ -44,27 +81,54 @@ self.body(func(args) {
 		arg("--min-seq-id").arg(string(identityThreshold))
 
 	if similarityType == "sequence-identity" {
-		mmseqs = mmseqs.arg("--alignment-mode").arg("3")
+		searchBuilder = searchBuilder.arg("--alignment-mode").arg("3")
 	}
 
 	lessSensitive := is_undefined(args.lessSensitive) ? false : args.lessSensitive
 	if lessSensitive {
-		mmseqs = mmseqs.
+		searchBuilder = searchBuilder.
 			arg("--comp-bias-corr").arg("0").
 			arg("--mask").arg("0").
 			arg("--exact-kmer-matching").arg("1").
 			arg("-k").arg("7")
 	}
 
-	mmseqs = mmseqs.
-		addFile("clones.fasta", clonesFasta).
-		addFile("assay.fasta", assayFasta).
+	for suffix in dbFileSuffixes {
+		searchBuilder = searchBuilder.
+			addFile("queryDB" + suffix, queryDbRun.getFile("queryDB" + suffix)).
+			addFile("targetDB" + suffix, targetDbRun.getFile("targetDB" + suffix))
+	}
+	searchRun := searchBuilder.
+		saveFile("resultDB").
+		saveFile("resultDB.dbtype").
+		saveFile("resultDB.index").
+		run()
+
+	// 4. Convert result DB to TSV (matches easy-search default format)
+	convertBuilder := exec.builder().
+		software(mmseqsSw).
+		mem(mem).
+		cpu(cpu).
+		arg("convertalis").
+		arg("queryDB").
+		arg("targetDB").
+		arg("resultDB").
+		arg("results.tsv").
+		arg("--threads").arg(string(cpu))
+
+	for suffix in dbFileSuffixes {
+		convertBuilder = convertBuilder.
+			addFile("queryDB" + suffix, queryDbRun.getFile("queryDB" + suffix)).
+			addFile("targetDB" + suffix, targetDbRun.getFile("targetDB" + suffix))
+	}
+	convertRun := convertBuilder.
+		addFile("resultDB", searchRun.getFile("resultDB")).
+		addFile("resultDB.dbtype", searchRun.getFile("resultDB.dbtype")).
+		addFile("resultDB.index", searchRun.getFile("resultDB.index")).
 		saveFile("results.tsv").
 		run()
 
-    mmseqsOutput := mmseqs.getFile("results.tsv")
-
     return {
-        mmseqsOutput: mmseqsOutput
+        mmseqsOutput: convertRun.getFile("results.tsv")
     }
 })
