@@ -13,7 +13,6 @@ dbFileSuffixes := ["", ".dbtype", ".index", ".lookup", ".source", "_h", "_h.dbty
 self.body(func(args) {
 
     covMode := args.covMode.getDataAsJson()
-    mmseqsSearchType := args.mmseqsSearchType
     coverageThreshold := args.coverageThreshold
     identityThreshold := args.identityThreshold
     similarityType := string(args.similarityType)
@@ -30,10 +29,14 @@ self.body(func(args) {
 		cpu = args.metaInputs.cpu
 	}
 
-	// MMseqs2 `easy-search` is implemented via a generated shell script that
-	// the binary invokes with system(). On Windows that invocation is
-	// unreliable and fails with "Failed to execute ...easysearch.sh with error 2".
-	// We run the equivalent subcommands directly to stay portable.
+	// MMseqs2 high-level commands (`easy-search`, `search`) are implemented
+	// via generated shell scripts (`easysearch.sh`, `blastp.sh`) that the
+	// binary invokes with system(). On Windows those invocations fail with
+	// "Failed to execute ...sh with error 2". We run the primitive
+	// subcommands directly (`createdb`, `prefilter`, `align`, `convertalis`)
+	// to stay portable.
+
+	lessSensitive := is_undefined(args.lessSensitive) ? false : args.lessSensitive
 
 	// 1. Build query DB from assay.fasta
 	queryDbBuilder := exec.builder().
@@ -63,30 +66,23 @@ self.body(func(args) {
 	}
 	targetDbRun := targetDbBuilder.run()
 
-	// 3. Run search against the two DBs
-	searchBuilder := exec.builder().
+	// 3. Prefilter: k-mer hash matches between query and target
+	prefilterBuilder := exec.builder().
 		software(mmseqsSw).
 		mem(mem).
 		cpu(cpu).
-		arg("search").
+		arg("prefilter").
 		arg("queryDB").
 		arg("targetDB").
-		arg("resultDB").
-		arg("tmp").
+		arg("prefDB").
 		arg("--threads").arg(string(cpu)).
-		arg("--max-seqs").arg("10000").
-		arg("--search-type").arg(mmseqsSearchType).
-		arg("--cov-mode").arg(string(covMode)).
-		arg("-c").arg(string(coverageThreshold)).
-		arg("--min-seq-id").arg(string(identityThreshold))
+		arg("--max-seqs").arg("10000")
+	// `--search-type` exists only on the high-level `search`/`easy-search`
+	// commands; prefilter infers protein vs. nucleotide from the dbtype set
+	// by `createdb`, so we don't pass it here.
 
-	if similarityType == "sequence-identity" {
-		searchBuilder = searchBuilder.arg("--alignment-mode").arg("3")
-	}
-
-	lessSensitive := is_undefined(args.lessSensitive) ? false : args.lessSensitive
 	if lessSensitive {
-		searchBuilder = searchBuilder.
+		prefilterBuilder = prefilterBuilder.
 			arg("--comp-bias-corr").arg("0").
 			arg("--mask").arg("0").
 			arg("--exact-kmer-matching").arg("1").
@@ -94,17 +90,54 @@ self.body(func(args) {
 	}
 
 	for suffix in dbFileSuffixes {
-		searchBuilder = searchBuilder.
+		prefilterBuilder = prefilterBuilder.
 			addFile("queryDB" + suffix, queryDbRun.getFile("queryDB" + suffix)).
 			addFile("targetDB" + suffix, targetDbRun.getFile("targetDB" + suffix))
 	}
-	searchRun := searchBuilder.
+	prefilterRun := prefilterBuilder.
+		saveFile("prefDB").
+		saveFile("prefDB.dbtype").
+		saveFile("prefDB.index").
+		run()
+
+	// 4. Align: Smith-Waterman alignment of prefilter hits
+	alignBuilder := exec.builder().
+		software(mmseqsSw).
+		mem(mem).
+		cpu(cpu).
+		arg("align").
+		arg("queryDB").
+		arg("targetDB").
+		arg("prefDB").
+		arg("resultDB").
+		arg("--threads").arg(string(cpu)).
+		arg("--cov-mode").arg(string(covMode)).
+		arg("-c").arg(string(coverageThreshold)).
+		arg("--min-seq-id").arg(string(identityThreshold))
+
+	if similarityType == "sequence-identity" {
+		alignBuilder = alignBuilder.arg("--alignment-mode").arg("3")
+	}
+
+	if lessSensitive {
+		alignBuilder = alignBuilder.arg("--comp-bias-corr").arg("0")
+	}
+
+	for suffix in dbFileSuffixes {
+		alignBuilder = alignBuilder.
+			addFile("queryDB" + suffix, queryDbRun.getFile("queryDB" + suffix)).
+			addFile("targetDB" + suffix, targetDbRun.getFile("targetDB" + suffix))
+	}
+	searchRun := alignBuilder.
+		addFile("prefDB", prefilterRun.getFile("prefDB")).
+		addFile("prefDB.dbtype", prefilterRun.getFile("prefDB.dbtype")).
+		addFile("prefDB.index", prefilterRun.getFile("prefDB.index")).
 		saveFile("resultDB").
 		saveFile("resultDB.dbtype").
 		saveFile("resultDB.index").
 		run()
 
-	// 4. Convert result DB to TSV (matches easy-search default format)
+	// 5. Convert result DB to TSV (matches easy-search default format)
 	convertBuilder := exec.builder().
 		software(mmseqsSw).
 		mem(mem).
