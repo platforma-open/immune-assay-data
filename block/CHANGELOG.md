@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data
 
+## 1.3.6
+
+### Patch Changes
+
+- 9608716: Update ts-builder version (for opportunity to build block on Windows), add supported platforms (block is not available on Windows Built-In)
+
 ## 1.3.5
 
 ### Patch Changes
