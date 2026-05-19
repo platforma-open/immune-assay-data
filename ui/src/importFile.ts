@@ -135,16 +135,16 @@ function inferSequenceType(values: unknown[]): 'nucleotide' | 'aminoacid' | unde
 }
 
 /**
- * Process raw file bytes to detect columns and update block args.
+ * Process raw file bytes to detect columns and update block data.
  * Called reactively once the file bytes are available via ReactiveFileContent.
  */
 export function processFileBytes(bytes: Uint8Array, extension: string | undefined): void {
   const app = useApp();
 
   // clear state
-  app.model.args.importColumns = undefined;
-  app.model.ui.fileImportError = undefined;
-  app.model.args.detectedXsvType = undefined;
+  app.model.data.importColumns = undefined;
+  app.model.data.fileImportError = undefined;
+  app.model.data.detectedXsvType = undefined;
 
   let rawData: TableData;
 
@@ -154,7 +154,7 @@ export function processFileBytes(bytes: Uint8Array, extension: string | undefine
     const parseResult = parseFastaContent(content);
 
     if (parseResult.error) {
-      app.model.ui.fileImportError = parseResult.error;
+      app.model.data.fileImportError = parseResult.error;
       return;
     }
 
@@ -178,18 +178,18 @@ export function processFileBytes(bytes: Uint8Array, extension: string | undefine
     // so we check the first line of the already-in-memory data buffer.
     if (extension === 'csv' || extension === 'tsv') {
       const firstLine = new TextDecoder().decode(bytes.slice(0, 4096)).split('\n')[0] ?? '';
-      app.model.args.detectedXsvType = firstLine.includes('\t') ? 'tsv' : 'csv';
+      app.model.data.detectedXsvType = firstLine.includes('\t') ? 'tsv' : 'csv';
     }
   }
 
   const header = rawData[0];
   if (!header) {
-    app.model.ui.fileImportError = 'File does not contain any data';
+    app.model.data.fileImportError = 'File does not contain any data';
     return;
   }
 
   if (new Set(header).size !== header.length) {
-    app.model.ui.fileImportError = 'Headers in the input file must be unique';
+    app.model.data.fileImportError = 'Headers in the input file must be unique';
     return;
   }
 
@@ -209,9 +209,9 @@ export function processFileBytes(bytes: Uint8Array, extension: string | undefine
     });
   }
 
-  app.model.args.importColumns = importColumns;
+  app.model.data.importColumns = importColumns;
   if (!importColumns.some((c) => c.sequenceType !== undefined)) {
-    app.model.ui.fileImportError = 'No sequence columns found';
+    app.model.data.fileImportError = 'No sequence columns found';
     return;
   }
 }
