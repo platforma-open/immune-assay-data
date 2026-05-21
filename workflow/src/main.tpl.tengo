@@ -23,8 +23,15 @@ checkContentEmptySw := assets.importSoftware("@platforma-open/milaboratories.imm
 
 wf.prepare(func(args){
 	bundleBuilder := wf.createPBundleBuilder()
-	bundleBuilder.addAnchor("main", args.datasetRef) 
+	bundleBuilder.addAnchor("main", args.datasetRef)
 	bundleBuilder.addSingle(args.targetRef)
+	// Peptide-only: per-peptide length column drives the short-peptide k-mer
+	// override in run-alignment. Empty bundle slot on VDJ inputs.
+	bundleBuilder.addMulti({
+		axes: [{ anchor: "main", idx: 1 }],
+		name: "pl7.app/sequenceLength",
+		domain: { "pl7.app/feature": "peptide" }
+	}, "peptideSequenceLength")
 	return {
 		columns: bundleBuilder.build()
 	}
@@ -48,6 +55,45 @@ wf.body(func(args) {
 	importFile := file.importFile(args.fileHandle)
 	datasetSpec := args.columns.getSpec(args.datasetRef)
 	targetSpec := args.columns.getSpec(args.targetRef)
+
+	// Detect peptide modality and compute min peptide length when applicable.
+	// Drives the short-peptide k-mer override in run-alignment (k=5 + relaxed
+	// mmseqs2 prefilter for inputs below the auto-tune floor of ~6).
+	isPeptide := datasetSpec.axesSpec[1].name == "pl7.app/variantKey"
+	minPeptideLength := undefined
+	if isPeptide {
+		peptideLenCols := args.columns.getColumns("peptideSequenceLength")
+		if len(peptideLenCols) == 0 {
+			ll.panic("Peptide input is missing required pl7.app/sequenceLength column")
+		}
+		// Peptide-extraction emits both aa and nt length columns under the same
+		// name + feature domain; pick the one matching the target's alphabet so
+		// the k-mer threshold reflects the actual search-side sequence length.
+		targetAlphabet := targetSpec.domain["pl7.app/alphabet"]
+		matchedLenCol := undefined
+		for col in peptideLenCols {
+			if col.spec.domain["pl7.app/alphabet"] == targetAlphabet {
+				matchedLenCol = col
+				break
+			}
+		}
+		if is_undefined(matchedLenCol) {
+			ll.panic("No peptide length column matches target alphabet: ", targetAlphabet)
+		}
+		// pt's `min` is a window function — bare `select(min())` doesn't fold the
+		// whole frame. Use `groupBy` with a constant key to aggregate across all
+		// rows. Filter `len > 0` because peptide-extraction emits 0-length rows
+		// for some variants (see peptide-extraction/compute-qc-sample.tpl.tengo:60).
+		minLenWf := pt.workflow()
+		minLenWf.frame(pt.p.column("len", { spec: matchedLenCol.spec, data: matchedLenCol.data })).
+			filter(pt.col("len").gt(pt.lit(0))).
+			withColumns(pt.lit(1).alias("_g")).
+			groupBy("_g").
+			agg(pt.col("len").min().alias("min_len")).
+			saveContent("min_len.ndjson")
+		minLenResult := minLenWf.run()
+		minPeptideLength = minLenResult.getFileContent("min_len.ndjson")
+	}
 	
 	// aminoacid or nucleotide
 	sequenceColumnInfo := undefined
@@ -141,7 +187,9 @@ wf.body(func(args) {
 		similarityType: args.settings.similarityType,
 		lessSensitive: args.lessSensitive,
 		importColumns: args.importColumns,
-		selectedColumns: args.selectedColumns
+		selectedColumns: args.selectedColumns,
+		isPeptide: isPeptide,
+		minPeptideLength: minPeptideLength
 	}, {
 		metaInputs: {
 			mem: args.mem,

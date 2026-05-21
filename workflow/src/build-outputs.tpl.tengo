@@ -11,7 +11,7 @@ self.awaitState("assaySequenceType", "ResourceReady")
 self.awaitState("sequenceColumnInfo", "ResourceReady")
 
 assayColumnName := func(header) {
-	return "pl7.app/vdj/assay-data/" + strings.substituteSpecialCharacters(header)
+	return "pl7.app/assay-data/" + strings.substituteSpecialCharacters(header)
 }
 
 self.body(func(inputs) {
@@ -31,19 +31,19 @@ self.body(func(inputs) {
 		{
 			column: "queryCount",
 			spec: {
-				name: "pl7.app/vdj/assay/queryCount",
+				name: "pl7.app/assay/queryCount",
 				valueType: "Int",
 				annotations: {
 					"pl7.app/label": "Matched Clones",
 					"pl7.app/table/orderPriority": "9000"
 				}
 			}
-		},	
+		},
 		{
 			column: inputs.sequenceColumnInfo.header,
 			id: strings.substituteSpecialCharacters(inputs.sequenceColumnInfo.header),
 			spec: {
-				name: "pl7.app/vdj/sequence",
+				name: "pl7.app/sequence",
 				valueType: "String",
 				domain: {
 					"pl7.app/alphabet": inputs.assaySequenceType
@@ -79,7 +79,7 @@ self.body(func(inputs) {
 		axes: [{
 			column: "seqId",
 			spec: {
-				name: "pl7.app/vdj/assay/sequenceId",
+				name: "pl7.app/assay/sequenceId",
 				type: "String",
 				domain: {
 					"pl7.app/blockId": inputs.blockId
@@ -100,7 +100,7 @@ self.body(func(inputs) {
 	{
 		column: "seqIdLabel",
 		spec: {
-			name: "pl7.app/vdj/assay/sequenceIdLabel",
+			name: "pl7.app/assay/sequenceIdLabel",
 			valueType: "String",
 			annotations: {
 				"pl7.app/label": "Assay Sequence Id",
@@ -195,7 +195,7 @@ self.body(func(inputs) {
 				{
 					column: "query",
 					spec: {
-						name: "pl7.app/vdj/assay/sequenceId",
+						name: "pl7.app/assay/sequenceId",
 						type: "String",
 						domain: {
 							"pl7.app/blockId": inputs.blockId
@@ -210,7 +210,7 @@ self.body(func(inputs) {
 			columns: [{
 				column: "link",
 				spec: {
-					name: "pl7.app/vdj/link",
+					name: "pl7.app/link",
 					valueType: "Int",
 					annotations: {
 						"pl7.app/isLinkerColumn": "true",

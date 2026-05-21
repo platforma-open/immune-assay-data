@@ -52,8 +52,58 @@ self.body(func(args) {
 		mmseqs = mmseqs.
 			arg("--comp-bias-corr").arg("0").
 			arg("--mask").arg("0").
-			arg("--exact-kmer-matching").arg("1").
-			arg("-k").arg("7")
+			arg("--exact-kmer-matching").arg("1")
+		// -k determined below: peptide-min-length override may win over Fast mode's k=7.
+	}
+
+	// MMseqs2's `-k 0` auto-tune floors at ~6 and Fast mode's `-k 7` has the
+	// same problem: sub-k-aa peptides produce zero k-mers and silently miss
+	// every match (no error, just empty results). Force `-k 5` whenever the
+	// shortest input peptide is below 10 aa, taking precedence over Fast mode.
+	//
+	// The spec called only for `-k 5`, but empirically that's not enough —
+	// MMseqs2 has several other defaults that quietly filter short alignments,
+	// so the additional flags below mirror clonotype-clustering's
+	// "highPrecision" mode (clonotype-clustering/workflow/src/clustering.tpl.tengo)
+	// which solves the same problem for short CDRs.
+	isPeptide := is_undefined(args.isPeptide) ? false : args.isPeptide
+	shortPeptide := false
+	if isPeptide && !is_undefined(args.minPeptideLength) {
+		parsed := args.minPeptideLength.getDataAsJson()
+		ml := int(parsed.min_len)
+		if ml < 10 {
+			shortPeptide = true
+		}
+	}
+	kValue := undefined
+	if shortPeptide {
+		kValue = "5"
+		mmseqs = mmseqs.
+			// Default `--spaced-kmer-mode 1` (spaced k-mers) requires informative
+			// positions spread over a span longer than k, so with k=5 and a
+			// 7-aa peptide no valid k-mer can be formed. `0` switches to
+			// consecutive k-mers so every length-k substring is a candidate hit.
+			arg("--spaced-kmer-mode").arg("0").
+			// Default `--min-ungapped-score 15` filters very short alignments
+			// after the k-mer prefilter. For sub-7-aa hits BLOSUM62 ungapped
+			// scores can fall below 15 even for exact matches. `0` disables
+			// the floor.
+			arg("--min-ungapped-score").arg("0").
+			// Default `-s` is around 5.7. Higher sensitivity widens the
+			// prefilter, which we need at k=5 to ensure short-peptide hits
+			// propagate from prefilter to alignment.
+			arg("-s").arg("7.5").
+			// Default `-e 1e-3` rejects alignments with high e-value. e-value
+			// scales with database size and inversely with bit score, so even
+			// an exact 7-aa hit can exceed the threshold against a large
+			// peptide DB. `inf` removes the filter; `--min-seq-id 1.0` + full
+			// coverage already constrain the match to true exact identity.
+			arg("-e").arg("inf")
+	} else if lessSensitive {
+		kValue = "7"
+	}
+	if !is_undefined(kValue) {
+		mmseqs = mmseqs.arg("-k").arg(kValue)
 	}
 
 	mmseqs = mmseqs.

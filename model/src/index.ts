@@ -22,6 +22,7 @@ import type {
   BlockPrerunArgs,
   LegacyBlockArgs,
   LegacyBlockUiState,
+  Modality,
   Settings,
 } from './types';
 
@@ -52,6 +53,9 @@ const blockDataModel = new DataModelBuilder()
     fileImportError: uiState?.fileImportError,
     tableState: uiState?.tableState ?? createPlDataTableStateV2(),
     alignmentModel: uiState?.alignmentModel ?? {},
+    // Pre-peptide-support projects are always antibody/TCR; seeding this prevents
+    // the modality-reset watcher from clobbering user-tuned thresholds on reopen.
+    lastAppliedModality: 'antibody_tcr',
   }))
   .init(() => ({
     customBlockLabel: '',
@@ -70,6 +74,7 @@ const blockDataModel = new DataModelBuilder()
     fileImportError: undefined,
     tableState: createPlDataTableStateV2(),
     alignmentModel: {},
+    lastAppliedModality: undefined,
   }));
 
 function deriveDefaultLabel(data: BlockData): string {
@@ -100,7 +105,7 @@ export const platforma = BlockModelV3.create(blockDataModel)
 
   .args<BlockArgs>((data) => {
     if (data.datasetRef === undefined) throw new Error('Dataset is required');
-    if (data.targetRef === undefined) throw new Error('Target clonotype sequence is required');
+    if (data.targetRef === undefined) throw new Error('Sequence column to match is required');
     if (data.fileHandle === undefined) throw new Error('Assay file is required');
     if (data.importColumns === undefined) throw new Error('Assay file has not been parsed yet');
     if (data.sequenceColumnHeader === undefined) throw new Error('Assay sequence column is required');
@@ -140,22 +145,39 @@ export const platforma = BlockModelV3.create(blockDataModel)
         { name: 'pl7.app/vdj/scClonotypeKey' },
       ],
       annotations: { 'pl7.app/isAnchor': 'true' },
+    }, {
+      axes: [
+        { name: 'pl7.app/sampleId' },
+        { name: 'pl7.app/variantKey' },
+      ],
+      annotations: { 'pl7.app/isAnchor': 'true' },
     }], {}),
   )
+
+  .output('modality', (ctx): Modality | undefined => {
+    if (ctx.data.datasetRef === undefined) return undefined;
+    const spec = ctx.resultPool.getPColumnSpecByRef(ctx.data.datasetRef);
+    if (spec === undefined) return undefined;
+    return spec.axesSpec[1]?.name === 'pl7.app/variantKey' ? 'peptide' : 'antibody_tcr';
+  }, { retentive: true })
 
   .output('targetOptions', (ctx) => {
     const ref = ctx.data.datasetRef;
     if (ref === undefined) return undefined;
 
-    const isSingleCell = ctx.resultPool.getPColumnSpecByRef(ref)?.axesSpec[1].name === 'pl7.app/vdj/scClonotypeKey';
+    const datasetAxis = ctx.resultPool.getPColumnSpecByRef(ref)?.axesSpec[1]?.name;
     const sequenceMatchers = [];
-    if (isSingleCell) {
+    if (datasetAxis === 'pl7.app/variantKey') {
+      sequenceMatchers.push({
+        axes: [{ anchor: 'main', idx: 1 }],
+        name: 'pl7.app/sequence',
+        domain: { 'pl7.app/feature': 'peptide' },
+      });
+    } else if (datasetAxis === 'pl7.app/vdj/scClonotypeKey') {
       sequenceMatchers.push({
         axes: [{ anchor: 'main', idx: 1 }],
         name: 'pl7.app/vdj/sequence',
-        domain: {
-          'pl7.app/vdj/scClonotypeChain/index': 'primary',
-        },
+        domain: { 'pl7.app/vdj/scClonotypeChain/index': 'primary' },
       });
     } else {
       sequenceMatchers.push({
@@ -213,8 +235,8 @@ export const platforma = BlockModelV3.create(blockDataModel)
     }
     const cols = ctx.outputs?.resolve('table')?.getPColumns();
     if (cols === undefined) return undefined;
-    return cols.find((c) => c.spec.name === 'pl7.app/vdj/sequence'
-      && c.spec.axesSpec[0].name === 'pl7.app/vdj/assay/sequenceId')?.spec;
+    return cols.find((c) => c.spec.name === 'pl7.app/sequence'
+      && c.spec.axesSpec[0].name === 'pl7.app/assay/sequenceId')?.spec;
   })
 
   .output('msaPf', (ctx) => {
@@ -239,7 +261,7 @@ export const platforma = BlockModelV3.create(blockDataModel)
 
   .output('isRunning', (ctx) => ctx.outputs?.getIsReadyOrError() === false)
 
-  .title(() => 'Immune Assay Data')
+  .title(() => 'Sequence Assay Data')
 
   .subtitle((ctx) => ctx.data.customBlockLabel || deriveDefaultLabel(ctx.data))
 
