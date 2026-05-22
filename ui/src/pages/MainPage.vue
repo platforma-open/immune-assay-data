@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { PlMultiSequenceAlignment } from '@milaboratories/multi-sequence-alignment';
+import strings from '@milaboratories/strings';
+import { getDefaultBlockLabel, type Settings } from '@platforma-open/milaboratories.immune-assay-data.model';
 import type {
   AxisId,
   ImportFileHandle,
@@ -12,13 +14,12 @@ import {
   getRawPlatformaInstance,
   isImportFileHandleUpload,
 } from '@platforma-sdk/model';
-import { getDefaultBlockLabel } from '@platforma-open/milaboratories.immune-assay-data.model';
 import {
+  PlAccordionSection,
   PlAgDataTableV2,
   PlAlert,
   PlBlockPage,
   PlBtnGhost,
-  PlAccordionSection,
   PlCheckbox,
   PlDropdown,
   PlDropdownMulti,
@@ -32,7 +33,6 @@ import {
   ReactiveFileContent,
   usePlDataTableSettingsV2,
 } from '@platforma-sdk/ui-vue';
-import strings from '@milaboratories/strings';
 import {
   computed,
   reactive,
@@ -52,6 +52,12 @@ import {
 
 const app = useApp();
 const reactiveFileContent = ReactiveFileContent.useGlobal();
+
+// Modality-aware threshold defaults. Applied by the watcher below when the
+// resolved modality changes; switching between two datasets of the same
+// modality preserves user-tuned thresholds.
+const ANTIBODY_DEFAULTS: Settings = { similarityType: 'alignment-score', identity: 0.9, coverageThreshold: 0.95 };
+const PEPTIDE_DEFAULTS: Settings = { similarityType: 'sequence-identity', identity: 1.0, coverageThreshold: 1.0 };
 
 const defaultLabel = computed(() =>
   getDefaultBlockLabel({
@@ -76,6 +82,17 @@ watch(
   },
 );
 
+// Apply modality-aware threshold defaults when the resolved modality flips.
+watch(
+  () => app.model.outputs.modality,
+  (modality) => {
+    if (!modality) return;
+    if (app.model.data.lastAppliedModality === modality) return;
+    app.model.data.settings = modality === 'peptide' ? PEPTIDE_DEFAULTS : ANTIBODY_DEFAULTS;
+    app.model.data.lastAppliedModality = modality;
+  },
+);
+
 const tableSettings = usePlDataTableSettingsV2({
   model: () => app.model.outputs.table,
 });
@@ -95,13 +112,13 @@ const assayAxis = computed<AxisId>(() => {
   if (app.model.outputs.assaySequenceSpec?.axesSpec[0] === undefined) {
     return {
       type: 'String',
-      name: 'pl7.app/vdj/assay/sequenceId',
+      name: 'pl7.app/assay/sequenceId',
       domain: {},
     };
   } else {
     return {
       type: 'String',
-      name: 'pl7.app/vdj/assay/sequenceId',
+      name: 'pl7.app/assay/sequenceId',
       domain: app.model.outputs.assaySequenceSpec.axesSpec[0].domain,
     };
   }
@@ -241,7 +258,7 @@ const similarityTypeOptions = [
   <PlBlockPage
     v-model:subtitle="app.model.data.customBlockLabel"
     :subtitle-placeholder="defaultLabel"
-    title="Immune Assay Data"
+    title="Sequence Assay Data"
   >
     <template #append>
       <PlBtnGhost
@@ -259,7 +276,7 @@ const similarityTypeOptions = [
     </template>
     <PlAlert v-if="app.model.outputs.emptyClonesInput === true" type="warn" icon>
       <template #title>Empty dataset selection</template>
-      The input dataset you have selected is empty or has no clonotype sequences.
+      The input dataset you have selected is empty or has no sequences.
       Please choose a different dataset or check your input data.
     </PlAlert>
     <PlAgDataTableV2
@@ -284,12 +301,12 @@ const similarityTypeOptions = [
       />
       <PlDropdown
         v-model="app.model.data.targetRef" :options="app.model.outputs.targetOptions"
-        label="Clonotype sequence to match" clearable required
+        label="Sequence column to match" clearable required
       >
         <template #tooltip>
-          Select the sequence column used to match the assay data sequence with. If you select amino acid sequence and
-          the assay data sequence is nucleotide, the assay data sequence will be converted to amino acid sequence
-          automatically.
+          Select the sequence column to align against the assay sequences. If the alphabets differ
+          (e.g., amino acid input vs nucleotide assay), MMseqs2 translates automatically using the
+          appropriate search mode.
         </template>
       </PlDropdown>
       <PlFileInput
@@ -351,7 +368,8 @@ const similarityTypeOptions = [
         :max-value="1.0"
       >
         <template #tooltip>
-          Select min fraction of aligned (covered) residues of clonotypes in the cluster.
+          Minimum fraction of residues that must align between the input sequence and the assay
+          sequence to count as a match.
         </template>
       </PlNumberField>
 

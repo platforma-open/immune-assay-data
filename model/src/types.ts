@@ -14,6 +14,8 @@ export type Settings = {
   similarityType: 'sequence-identity' | 'alignment-score';
 };
 
+export type Modality = 'antibody_tcr' | 'peptide';
+
 export type ImportColumnInfo = {
   header: string;
   type: 'Int' | 'Double' | 'String';
@@ -39,6 +41,8 @@ export type BlockData = {
   fileImportError?: string;
   tableState: PlDataTableStateV2;
   alignmentModel: PlMultiSequenceAlignmentModel;
+  // Last modality the UI applied defaults for
+  lastAppliedModality?: Modality;
 };
 
 /** Projected args consumed by the main workflow. */
