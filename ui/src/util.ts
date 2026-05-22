@@ -13,11 +13,11 @@ export const isSequenceColumn: PColumnPredicate = ({ spec }) => {
   ) return false;
   if (spec.axesSpec[0]?.name === 'pl7.app/assay/sequenceId') return false;
   if (readDomain(spec, Domain.Alphabet) !== 'aminoacid') return false;
-  if (
-    spec.axesSpec[0]?.name === PAxisName.VDJ.ScClonotypeKey
-    && readDomain(spec, Domain.VDJ.ScClonotypeChain.Index) !== 'primary'
-  ) {
-    return false;
+  if (spec.axesSpec[0]?.name === PAxisName.VDJ.ScClonotypeKey) {
+    const chainIndex = readDomain(spec, Domain.VDJ.ScClonotypeChain.Index);
+    // Reject non-primary chains (e.g. light), but keep chain-less constructs
+    // like scFv where the domain field is absent entirely.
+    if (chainIndex !== undefined && chainIndex !== 'primary') return false;
   }
   // TODO: replace direct access with `readAnnotationJson(spec, Annotation.IsAssemblingFeature)` after SDK rename.
   const isAssemblingFeature
