@@ -6,7 +6,11 @@ export const isAssayColumn: PColumnPredicate = ({ spec }) =>
   && spec.axesSpec[0]?.name === 'pl7.app/assay/sequenceId';
 
 export const isSequenceColumn: PColumnPredicate = ({ spec }) => {
-  if (spec.name === 'pl7.app/vdj/sequenceLength' || spec.name === 'pl7.app/vdj/sequence/annotation') return false;
+  if (
+    spec.name === 'pl7.app/vdj/sequenceLength'
+    || spec.name === 'pl7.app/sequenceLength'
+    || spec.name === 'pl7.app/vdj/sequence/annotation'
+  ) return false;
   if (spec.axesSpec[0]?.name === 'pl7.app/assay/sequenceId') return false;
   if (readDomain(spec, Domain.Alphabet) !== 'aminoacid') return false;
   if (
