@@ -80,16 +80,9 @@ wf.body(func(args) {
 		if is_undefined(matchedLenCol) {
 			ll.panic("No peptide length column matches target alphabet: ", targetAlphabet)
 		}
-		// pt's `min` is a window function — bare `select(min())` doesn't fold the
-		// whole frame. Use `groupBy` with a constant key to aggregate across all
-		// rows. Filter `len > 0` because peptide-extraction emits 0-length rows
-		// for some variants (see peptide-extraction/compute-qc-sample.tpl.tengo:60).
 		minLenWf := pt.workflow()
 		minLenWf.frame(pt.p.column("len", { spec: matchedLenCol.spec, data: matchedLenCol.data })).
-			filter(pt.col("len").gt(pt.lit(0))).
-			withColumns(pt.lit(1).alias("_g")).
-			groupBy("_g").
-			agg(pt.col("len").min().alias("min_len")).
+			select(pt.col("len").min().alias("min_len")).
 			saveContent("min_len.ndjson")
 		minLenResult := minLenWf.run()
 		minPeptideLength = minLenResult.getFileContent("min_len.ndjson")

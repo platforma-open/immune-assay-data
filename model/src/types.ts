@@ -41,11 +41,7 @@ export type BlockData = {
   fileImportError?: string;
   tableState: PlDataTableStateV2;
   alignmentModel: PlMultiSequenceAlignmentModel;
-  /**
-   * Last modality the UI applied defaults for. Modality-change reset (R5) fires
-   * only when `outputs.modality` differs from this value, so picking a different
-   * dataset of the same modality preserves user-tuned thresholds.
-   */
+  // Last modality the UI applied defaults for
   lastAppliedModality?: Modality;
 };
 

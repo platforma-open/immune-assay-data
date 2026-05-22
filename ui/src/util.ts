@@ -19,10 +19,6 @@ export const isSequenceColumn: PColumnPredicate = ({ spec }) => {
   ) {
     return false;
   }
-  // `readAnnotationJson` enforces a runtime schema lookup that fails for keys not
-  // registered in the SDK's AnnotationJson map; the error is caught upstream and
-  // returns undefined. So we read the neutral form by direct annotation access
-  // until the SDK ships a typed constant for it.
   // TODO: replace direct access with `readAnnotationJson(spec, Annotation.IsAssemblingFeature)` after SDK rename.
   const isAssemblingFeature
     = readAnnotationJson(spec, Annotation.VDJ.IsAssemblingFeature)

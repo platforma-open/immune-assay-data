@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { PlMultiSequenceAlignment } from '@milaboratories/multi-sequence-alignment';
+import strings from '@milaboratories/strings';
+import { getDefaultBlockLabel, type Settings } from '@platforma-open/milaboratories.immune-assay-data.model';
 import type {
   AxisId,
   ImportFileHandle,
@@ -12,13 +14,12 @@ import {
   getRawPlatformaInstance,
   isImportFileHandleUpload,
 } from '@platforma-sdk/model';
-import { getDefaultBlockLabel, type Settings } from '@platforma-open/milaboratories.immune-assay-data.model';
 import {
+  PlAccordionSection,
   PlAgDataTableV2,
   PlAlert,
   PlBlockPage,
   PlBtnGhost,
-  PlAccordionSection,
   PlCheckbox,
   PlDropdown,
   PlDropdownMulti,
@@ -32,7 +33,6 @@ import {
   ReactiveFileContent,
   usePlDataTableSettingsV2,
 } from '@platforma-sdk/ui-vue';
-import strings from '@milaboratories/strings';
 import {
   computed,
   reactive,
@@ -83,11 +83,6 @@ watch(
 );
 
 // Apply modality-aware threshold defaults when the resolved modality flips.
-// `lastAppliedModality` guards the watcher so picking a different dataset of
-// the same modality preserves user-tuned thresholds. The harness flags any
-// `outputs → data` watcher as a hairpin; the multi-client write race is muted
-// here because both clients compute identical writes (same modality → same
-// defaults constant), making the writes idempotent.
 watch(
   () => app.model.outputs.modality,
   (modality) => {
