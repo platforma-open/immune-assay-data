@@ -261,7 +261,7 @@ export const platforma = BlockModelV3.create(blockDataModel)
 
   .output('isRunning', (ctx) => ctx.outputs?.getIsReadyOrError() === false)
 
-  .title(() => 'Sequence Assay Data')
+  .title(() => 'Import Assay Data')
 
   .subtitle((ctx) => ctx.data.customBlockLabel || deriveDefaultLabel(ctx.data))
 

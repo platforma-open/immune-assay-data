@@ -23,7 +23,7 @@
       "ui": "@platforma-open/milaboratories.immune-assay-data.ui/dist"
     },
     "meta": {
-      "title": "Sequence Assay Data",
+      "title": "Import Assay Data",
       "logo": "file:../logos/block-logo.png",
       "url": "https://github.com/platforma-open/immune-assay-data",
       "docs": "https://docs.platforma.bio/guides/antibody-discovery/functinal-assay-data/",

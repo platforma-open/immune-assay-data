@@ -258,7 +258,7 @@ const similarityTypeOptions = [
   <PlBlockPage
     v-model:subtitle="app.model.data.customBlockLabel"
     :subtitle-placeholder="defaultLabel"
-    title="Sequence Assay Data"
+    title="Import Assay Data"
   >
     <template #append>
       <PlBtnGhost
