@@ -278,7 +278,9 @@ self.body(func(args) {
 		similarityType: similarityType,
 		clonesFasta: chunk1Fasta,
 		assayFasta: assayFasta,
-		lessSensitive: lessSensitive
+		lessSensitive: lessSensitive,
+		isPeptide: args.isPeptide,
+		minPeptideLength: args.minPeptideLength
 	}, {
 		metaInputs: {
 			mem: mem,
@@ -293,7 +295,9 @@ self.body(func(args) {
 		similarityType: similarityType,
 		clonesFasta: chunk2Fasta,
 		assayFasta: assayFasta,
-		lessSensitive: lessSensitive
+		lessSensitive: lessSensitive,
+		isPeptide: args.isPeptide,
+		minPeptideLength: args.minPeptideLength
 	}, {
 		metaInputs: {
 			mem: mem,

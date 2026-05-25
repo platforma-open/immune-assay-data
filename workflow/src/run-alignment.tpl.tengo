@@ -52,8 +52,34 @@ self.body(func(args) {
 		mmseqs = mmseqs.
 			arg("--comp-bias-corr").arg("0").
 			arg("--mask").arg("0").
-			arg("--exact-kmer-matching").arg("1").
-			arg("-k").arg("7")
+			arg("--exact-kmer-matching").arg("1")
+	}
+
+	// MMseqs2's `-k 0` auto-tune floors at ~6, force `-k 5` whenever the
+	// shortest input peptide is below 10 aa,
+	isPeptide := is_undefined(args.isPeptide) ? false : args.isPeptide
+	shortPeptide := false
+	if isPeptide && !is_undefined(args.minPeptideLength) {
+		parsed := args.minPeptideLength.getDataAsJson()
+		ml := int(parsed.min_len)
+		if ml < 10 {
+			shortPeptide = true
+		}
+	}
+	kValue := undefined
+	if shortPeptide {
+		// Set default parameters adapted for short sequences
+		kValue = "5"
+		mmseqs = mmseqs.
+			arg("--spaced-kmer-mode").arg("0").
+			arg("--min-ungapped-score").arg("0").
+			arg("-s").arg("7.5").
+			arg("-e").arg("inf")
+	} else if lessSensitive {
+		kValue = "7"
+	}
+	if !is_undefined(kValue) {
+		mmseqs = mmseqs.arg("-k").arg(kValue)
 	}
 
 	mmseqs = mmseqs.

@@ -23,18 +23,19 @@
       "ui": "@platforma-open/milaboratories.immune-assay-data.ui/dist"
     },
     "meta": {
-      "title": "Immune Assay Data",
+      "title": "Import Assay Data",
       "logo": "file:../logos/block-logo.png",
       "url": "https://github.com/platforma-open/immune-assay-data",
       "docs": "https://docs.platforma.bio/guides/antibody-discovery/functinal-assay-data/",
       "support": "mailto:support@milaboratories.com",
-      "description": "Imports immune assay data and aligns clonotypes with assay sequences using MMseqs2 to assign functional annotations.",
+      "description": "Imports assay data and uses MMseqs2 to align its sequences to clonotypes or peptides and assign functional annotations.",
       "longDescription": "file:../docs/description.md",
       "changelog": "file:../CHANGELOG.md",
       "tags": [
         "airr",
         "downstream",
-        "assay"
+        "assay",
+        "peptide"
       ],
       "organization": {
         "name": "MiLaboratories Inc",

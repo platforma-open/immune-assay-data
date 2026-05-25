@@ -1,121 +1,136 @@
 import type {
   DataInfo,
-  ImportFileHandle,
+  InferOutputsType,
   PColumn,
   PColumnSpec,
   PColumnValues,
-  PlDataTableStateV2,
-  PlMultiSequenceAlignmentModel,
-  PlRef,
-  RenderCtxLegacy,
-  SUniversalPColumnId,
+  RenderCtxBase,
   TreeNodeAccessor,
 } from '@platforma-sdk/model';
 import {
-  BlockModel,
+  BlockModelV3,
   createPFrameForGraphs,
   createPlDataTableStateV2,
   createPlDataTableV2,
+  DataModelBuilder,
+  getFileNameFromHandle,
 } from '@platforma-sdk/model';
 import { getDefaultBlockLabel } from './label';
-
-type Settings = {
-  coverageThreshold: number; // fraction of aligned residues required
-  identity: number;
-  similarityType: 'sequence-identity' | 'alignment-score';
-};
-
-export type ImportColumnInfo = {
-  header: string;
-  type: 'Int' | 'Double' | 'String';
-  /** If this column is a sequence column, the type of the sequence */
-  sequenceType?: 'nucleotide' | 'aminoacid';
-};
-
-export type BlockArgs = {
-  defaultBlockLabel: string;
-  customBlockLabel: string;
-  datasetRef?: PlRef;
-  targetRef?: SUniversalPColumnId;
-  fileHandle?: ImportFileHandle;
-  fileExtension?: string;
-  detectedXsvType?: 'csv' | 'tsv';
-  importColumns?: ImportColumnInfo[];
-  sequenceColumnHeader?: string;
-  selectedColumns: string[];
-  settings: Settings;
-  lessSensitive: boolean;
-  mem?: number;
-  cpu?: number;
-};
-
-export type UiState = {
-  fileImportError?: string;
-  tableState: PlDataTableStateV2;
-  alignmentModel: PlMultiSequenceAlignmentModel;
-};
+import type {
+  BlockArgs,
+  BlockData,
+  BlockPrerunArgs,
+  LegacyBlockArgs,
+  LegacyBlockUiState,
+  Modality,
+  Settings,
+} from './types';
 
 type Column = PColumn<DataInfo<TreeNodeAccessor> | TreeNodeAccessor | PColumnValues>;
 
-type Columns = {
-  props: Column[];
-};
+const defaultSettings = (): Settings => ({
+  coverageThreshold: 0.95,
+  identity: 0.9,
+  similarityType: 'alignment-score',
+});
 
-function getColumns(ctx: RenderCtxLegacy<BlockArgs, UiState>): Columns | undefined {
-  const anchor = ctx.args.datasetRef;
-  if (anchor === undefined)
-    return undefined;
-
-  const anchorSpec = ctx.resultPool.getPColumnSpecByRef(anchor);
-  if (anchorSpec === undefined)
-    return undefined;
-
-  // all clone properties
-  const props = (ctx.resultPool.getAnchoredPColumns(
-    { main: anchor },
-    [
-      {
-        axes: [{ anchor: 'main', idx: 1 }],
-      },
-    ]) ?? [])
-    .filter((p) => p.spec.annotations?.['pl7.app/sequence/isAnnotation'] !== 'true');
-
-  return {
-    props: props,
-  };
-}
-
-export const model = BlockModel.create()
-
-  .withArgs<BlockArgs>({
-    defaultBlockLabel: getDefaultBlockLabel({
-      similarityType: 'alignment-score',
-      identity: 0.9,
-      coverageThreshold: 0.95,
-    }),
+const blockDataModel = new DataModelBuilder()
+  .from<BlockData>('V20260519')
+  .upgradeLegacy<LegacyBlockArgs, LegacyBlockUiState>(({ args, uiState }) => ({
+    customBlockLabel: args?.customBlockLabel ?? '',
+    datasetRef: args?.datasetRef,
+    targetRef: args?.targetRef,
+    fileHandle: args?.fileHandle,
+    fileExtension: args?.fileExtension,
+    detectedXsvType: args?.detectedXsvType,
+    importColumns: args?.importColumns,
+    sequenceColumnHeader: args?.sequenceColumnHeader,
+    selectedColumns: args?.selectedColumns ?? [],
+    settings: args?.settings ?? defaultSettings(),
+    lessSensitive: args?.lessSensitive ?? false,
+    mem: args?.mem,
+    cpu: args?.cpu,
+    fileImportError: uiState?.fileImportError,
+    tableState: uiState?.tableState ?? createPlDataTableStateV2(),
+    alignmentModel: uiState?.alignmentModel ?? {},
+    // Pre-peptide-support projects are always antibody/TCR; seeding this prevents
+    // the modality-reset watcher from clobbering user-tuned thresholds on reopen.
+    lastAppliedModality: 'antibody_tcr',
+  }))
+  .init(() => ({
     customBlockLabel: '',
-    settings: {
-      coverageThreshold: 0.95, // default value matching MMseqs2 default
-      identity: 0.9,
-      similarityType: 'alignment-score',
-    },
+    datasetRef: undefined,
+    targetRef: undefined,
+    fileHandle: undefined,
+    fileExtension: undefined,
+    detectedXsvType: undefined,
+    importColumns: undefined,
+    sequenceColumnHeader: undefined,
     selectedColumns: [],
+    settings: defaultSettings(),
     lessSensitive: false,
-  })
-
-  .withUiState<UiState>({
+    mem: undefined,
+    cpu: undefined,
+    fileImportError: undefined,
     tableState: createPlDataTableStateV2(),
     alignmentModel: {},
+    lastAppliedModality: undefined,
+  }));
+
+function deriveDefaultLabel(data: BlockData): string {
+  return getDefaultBlockLabel({
+    fileName: data.fileHandle ? getFileNameFromHandle(data.fileHandle) : undefined,
+    similarityType: data.settings.similarityType,
+    identity: data.settings.identity,
+    coverageThreshold: data.settings.coverageThreshold,
+  });
+}
+
+function getAnchoredClonotypeProps(
+  ctx: Pick<RenderCtxBase<BlockArgs, BlockData>, 'data' | 'resultPool'>,
+): Column[] | undefined {
+  const anchor = ctx.data.datasetRef;
+  if (anchor === undefined) return undefined;
+  const anchorSpec = ctx.resultPool.getPColumnSpecByRef(anchor);
+  if (anchorSpec === undefined) return undefined;
+  return (ctx.resultPool.getAnchoredPColumns(
+    { main: anchor },
+    [{ axes: [{ anchor: 'main', idx: 1 }] }],
+  ) ?? []).filter(
+    (p) => p.spec.annotations?.['pl7.app/sequence/isAnnotation'] !== 'true',
+  );
+}
+
+export const platforma = BlockModelV3.create(blockDataModel)
+
+  .args<BlockArgs>((data) => {
+    if (data.datasetRef === undefined) throw new Error('Dataset is required');
+    if (data.targetRef === undefined) throw new Error('Sequence column to match is required');
+    if (data.fileHandle === undefined) throw new Error('Assay file is required');
+    if (data.importColumns === undefined) throw new Error('Assay file has not been parsed yet');
+    if (data.sequenceColumnHeader === undefined) throw new Error('Assay sequence column is required');
+    if (data.fileImportError !== undefined) throw new Error(data.fileImportError);
+
+    return {
+      defaultBlockLabel: deriveDefaultLabel(data),
+      customBlockLabel: data.customBlockLabel,
+      datasetRef: data.datasetRef,
+      targetRef: data.targetRef,
+      fileHandle: data.fileHandle,
+      detectedXsvType: data.detectedXsvType,
+      importColumns: data.importColumns,
+      sequenceColumnHeader: data.sequenceColumnHeader,
+      selectedColumns: data.selectedColumns,
+      settings: data.settings,
+      lessSensitive: data.lessSensitive,
+      mem: data.mem,
+      cpu: data.cpu,
+    };
   })
 
-  .argsValid((ctx) =>
-    ctx.args.datasetRef !== undefined
-    && ctx.args.fileHandle !== undefined
-    && ctx.args.importColumns !== undefined
-    && ctx.args.sequenceColumnHeader !== undefined
-    && ctx.args.targetRef !== undefined
-    && ctx.uiState.fileImportError === undefined,
-  )
+  .prerunArgs((data): BlockPrerunArgs => ({
+    fileHandle: data.fileHandle,
+  }))
 
   .output('datasetOptions', (ctx) =>
     ctx.resultPool.getOptions([{
@@ -130,34 +145,45 @@ export const model = BlockModel.create()
         { name: 'pl7.app/vdj/scClonotypeKey' },
       ],
       annotations: { 'pl7.app/isAnchor': 'true' },
+    }, {
+      axes: [
+        { name: 'pl7.app/sampleId' },
+        { name: 'pl7.app/variantKey' },
+      ],
+      annotations: { 'pl7.app/isAnchor': 'true' },
     }], {}),
   )
 
+  .output('modality', (ctx): Modality | undefined => {
+    if (ctx.data.datasetRef === undefined) return undefined;
+    const spec = ctx.resultPool.getPColumnSpecByRef(ctx.data.datasetRef);
+    if (spec === undefined) return undefined;
+    return spec.axesSpec[1]?.name === 'pl7.app/variantKey' ? 'peptide' : 'antibody_tcr';
+  }, { retentive: true })
+
   .output('targetOptions', (ctx) => {
-    const ref = ctx.args.datasetRef;
+    const ref = ctx.data.datasetRef;
     if (ref === undefined) return undefined;
 
-    const isSingleCell = ctx.resultPool.getPColumnSpecByRef(ref)?.axesSpec[1].name === 'pl7.app/vdj/scClonotypeKey';
+    const datasetAxis = ctx.resultPool.getPColumnSpecByRef(ref)?.axesSpec[1]?.name;
     const sequenceMatchers = [];
-    // const allowedFeatures = ['CDR1', 'CDR2', 'CDR3', 'FR1', 'FR2',
-    //   'FR3', 'FR4', 'VDJRegion'];
-    // for (const feature of allowedFeatures) {
-    if (isSingleCell) {
+    if (datasetAxis === 'pl7.app/variantKey') {
+      sequenceMatchers.push({
+        axes: [{ anchor: 'main', idx: 1 }],
+        name: 'pl7.app/sequence',
+        domain: { 'pl7.app/feature': 'peptide' },
+      });
+    } else if (datasetAxis === 'pl7.app/vdj/scClonotypeKey') {
       sequenceMatchers.push({
         axes: [{ anchor: 'main', idx: 1 }],
         name: 'pl7.app/vdj/sequence',
-        domain: {
-          // 'pl7.app/vdj/feature': feature,
-          'pl7.app/vdj/scClonotypeChain/index': 'primary',
-        },
+        domain: { 'pl7.app/vdj/scClonotypeChain/index': 'primary' },
       });
     } else {
       sequenceMatchers.push({
         axes: [{ anchor: 'main', idx: 1 }],
         name: 'pl7.app/vdj/sequence',
-        domain: {
-          // 'pl7.app/vdj/feature': feature,
-        },
+        domain: {},
       });
     }
 
@@ -190,14 +216,8 @@ export const model = BlockModel.create()
       return undefined;
     }
     const cols = ctx.outputs?.resolve('table')?.getPColumns();
-    if (cols === undefined)
-      return undefined;
-
-    return createPlDataTableV2(
-      ctx,
-      cols,
-      ctx.uiState.tableState,
-    );
+    if (cols === undefined) return undefined;
+    return createPlDataTableV2(ctx, cols, ctx.data.tableState);
   })
 
   .output('pf', (ctx) => {
@@ -205,9 +225,7 @@ export const model = BlockModel.create()
       return undefined;
     }
     const cols = ctx.outputs?.resolve('table')?.getPColumns();
-    if (cols === undefined)
-      return undefined;
-
+    if (cols === undefined) return undefined;
     return createPFrameForGraphs(ctx, cols);
   })
 
@@ -216,11 +234,9 @@ export const model = BlockModel.create()
       return undefined;
     }
     const cols = ctx.outputs?.resolve('table')?.getPColumns();
-    if (cols === undefined)
-      return undefined;
-    // Return only sequence column
-    return cols.find((c) => c.spec.name === 'pl7.app/vdj/sequence'
-      && c.spec.axesSpec[0].name === 'pl7.app/vdj/assay/sequenceId')?.spec;
+    if (cols === undefined) return undefined;
+    return cols.find((c) => c.spec.name === 'pl7.app/sequence'
+      && c.spec.axesSpec[0].name === 'pl7.app/assay/sequenceId')?.spec;
   })
 
   .output('msaPf', (ctx) => {
@@ -228,18 +244,15 @@ export const model = BlockModel.create()
       return undefined;
     }
     const cols = ctx.outputs?.resolve('table')?.getPColumns();
-    if (cols === undefined)
-      return undefined;
+    if (cols === undefined) return undefined;
 
     const msaCols = ctx.outputs?.resolve('assayLinkerPframe')?.getPColumns();
     if (!msaCols) return undefined;
 
-    const columns = getColumns(ctx);
-    if (columns === undefined) {
-      return undefined;
-    }
+    const props = getAnchoredClonotypeProps(ctx);
+    if (!props) return undefined;
 
-    return createPFrameForGraphs(ctx, [...msaCols, ...cols, ...columns.props]);
+    return createPFrameForGraphs(ctx, [...msaCols, ...cols, ...props]);
   })
 
   .output('emptyClonesInput', (ctx) =>
@@ -248,14 +261,18 @@ export const model = BlockModel.create()
 
   .output('isRunning', (ctx) => ctx.outputs?.getIsReadyOrError() === false)
 
-  .title(() => 'Immune Assay Data')
+  .title(() => 'Import Assay Data')
 
-  .subtitle((ctx) => ctx.args.customBlockLabel || ctx.args.defaultBlockLabel)
+  .subtitle((ctx) => ctx.data.customBlockLabel || deriveDefaultLabel(ctx.data))
 
   .sections((_ctx) => ([
-    { type: 'link', href: '/', label: 'Main' },
+    { type: 'link' as const, href: '/' as const, label: 'Main' },
   ]))
 
-  .done(2);
+  .done();
+
+export type Platforma = typeof platforma;
+export type BlockOutputs = InferOutputsType<typeof platforma>;
 
 export { getDefaultBlockLabel } from './label';
+export * from './types';
