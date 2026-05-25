@@ -23,10 +23,15 @@ self.body(func(inputs) {
 		xsvType: "tsv"
 	})
 
-	// Process each String column to extract unique values
+	// Process each String column to extract unique values.
+	// Sort before saving so the CSV bytes — and therefore the cached file CID —
+	// are stable. Polars `groupBy` output row order is implementation-defined;
+	// without an explicit sort the downstream `extract-unique-values` pure
+	// template would receive different input CIDs across re-executions and
+	// dedup would silently fail.
 	for colHeader in stringColumns {
 		uniqueValuesDf := baseDf.select(pt.col(colHeader).alias("value")).groupBy("value").agg(pt.col("value").count().alias("_count"))
-		uniqueValuesDf = uniqueValuesDf.select("value")
+		uniqueValuesDf = uniqueValuesDf.select("value").sort(["value"])
 		fileName := "unique_values_" + strings.substituteSpecialCharacters(colHeader) + ".csv"
 		uniqueValuesDf.saveContent(fileName)
 	}
