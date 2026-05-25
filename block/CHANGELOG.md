@@ -1,5 +1,13 @@
 # @platforma-open/milaboratories.immune-assay-data
 
+## 1.4.1
+
+### Patch Changes
+
+- 2816b0f: Fix unstable CIDs from non-canonical Tengo map iteration in `extract-unique-values.tpl.tengo`.
+- Updated dependencies [2816b0f]
+  - @platforma-open/milaboratories.immune-assay-data.workflow@1.13.1
+
 ## 1.4.0
 
 ### Minor Changes
