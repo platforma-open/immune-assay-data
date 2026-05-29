@@ -1,6 +1,6 @@
 export function getDefaultBlockLabel(data: {
   fileName?: string;
-  similarityType: 'alignment-score' | 'sequence-identity';
+  similarityType: 'alignment-score' | 'sequence-identity' | 'exact-match';
   identity: number;
   coverageThreshold: number;
 }) {
@@ -9,6 +9,12 @@ export function getDefaultBlockLabel(data: {
   // Add file name if available
   if (data.fileName) {
     parts.push(data.fileName);
+  }
+
+  // Exact-match mode has no identity/coverage thresholds — they are meaningless.
+  if (data.similarityType === 'exact-match') {
+    parts.push('Identical sequences');
+    return parts.filter(Boolean).join(', ');
   }
 
   // Add similarity type label

@@ -248,10 +248,24 @@ const otherColumnOptions = computed(() => {
     }));
 });
 
-const similarityTypeOptions = [
-  { label: 'BLOSUM', value: 'alignment-score' },
-  { label: 'Exact Match', value: 'sequence-identity' },
-];
+// Matching method options. The exact-equality option ("Identical sequences")
+// is gated: exact string matching cannot work across alphabets (MMseqs2 does
+// that via translated search). Hide it only when we know the assay and target
+// alphabets differ — the workflow asserts as the hard backstop.
+const similarityTypeOptions = computed(() => {
+  const opts = [
+    { label: 'BLOSUM', value: 'alignment-score' },
+    { label: 'Exact Match', value: 'sequence-identity' },
+  ];
+  const assayAlphabet = app.model.data.importColumns
+    ?.find((c) => c.header === app.model.data.sequenceColumnHeader)?.sequenceType;
+  const targetAlphabet = app.model.outputs.targetSequenceType;
+  const knownAndDiffer = !!assayAlphabet && !!targetAlphabet && assayAlphabet !== targetAlphabet;
+  if (!knownAndDiffer) {
+    opts.push({ label: 'Identical sequences', value: 'exact-match' });
+  }
+  return opts;
+});
 </script>
 
 <template>
@@ -346,12 +360,15 @@ const similarityTypeOptions = [
         label="Alignment Score"
       >
         <template #tooltip>
-          Select the similarity metric used for matching thresholds. BLOSUM considers biochemical similarity while Exact
-          Match counts only identical residues.
+          Select how assay and target sequences are matched. BLOSUM considers biochemical similarity;
+          Exact Match counts only identical residues — both run alignment (MMseqs2) and may miss some
+          matches on difficult sequences. Identical sequences reports only byte-identical sequences with
+          no alignment and guaranteed recall (same alphabet only).
         </template>
       </PlDropdown>
 
       <PlNumberField
+        v-if="app.model.data.settings.similarityType !== 'exact-match'"
         v-model="app.model.data.settings.identity"
         label="Score threshold" :min-value="0.1" :step="0.1" :max-value="1.0"
       >
@@ -361,6 +378,7 @@ const similarityTypeOptions = [
       </PlNumberField>
 
       <PlNumberField
+        v-if="app.model.data.settings.similarityType !== 'exact-match'"
         v-model="app.model.data.settings.coverageThreshold"
         label="Coverage threshold"
         :min-value="0.1"
@@ -374,7 +392,10 @@ const similarityTypeOptions = [
       </PlNumberField>
 
       <PlAccordionSection :label="strings.titles.advancedSettings">
-        <PlCheckbox v-model="app.model.data.lessSensitive">
+        <PlCheckbox
+          v-if="app.model.data.settings.similarityType !== 'exact-match'"
+          v-model="app.model.data.lessSensitive"
+        >
           Fast mode
           <PlTooltip class="info" position="top">
             <template #tooltip>Prioritizes speed over sensitivity. Reduces prefiltering precision, which may miss some weaker matches but significantly speeds up alignment for large datasets.</template>

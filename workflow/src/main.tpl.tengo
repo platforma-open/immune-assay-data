@@ -109,6 +109,15 @@ wf.body(func(args) {
 		ll.panic("Assay sequence type is undefined")
 	}
 
+	// Backstop for the exact-match (Identical sequences) mode. String equality
+	// cannot match across alphabets — MMseqs2 handles that via translated
+	// search, exact mode does not. The UI gates the option, this guards the
+	// edge case of a persisted exact-match selection over a now-mismatched
+	// target (defence in depth).
+	if args.settings.similarityType == "exact-match" && targetSequenceType != assaySequenceType {
+		ll.panic("Exact matching requires the assay and target to use the same alphabet (both amino acid or both nucleotide); got target=%v, assay=%v. Use an alignment mode for cross-alphabet matching.", targetSequenceType, assaySequenceType)
+	}
+
 	handleUrl := ll.parseUrl(args.fileHandle)
 	jsonPayload := handleUrl.Path[1:]
 	fileInfo := json.decode(jsonPayload)
@@ -172,6 +181,7 @@ wf.body(func(args) {
 		xsvType: xsvType,
 		sequenceColumnHeader: args.sequenceColumnHeader,
 		clonesFasta: clonesFasta,
+		clonesTsv: clonesTsv,
 		emptyClonesInput: emptyClonesInput,
 		targetSequenceType: targetSequenceType,
 		assaySequenceType: assaySequenceType,

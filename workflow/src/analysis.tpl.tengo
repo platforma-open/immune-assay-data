@@ -134,6 +134,72 @@ prepareAssayFile := func(file, xsvType, sequenceColumnHeader) {
     return ptw.run().getFile("output.tsv")
 }
 
+/**
+ * Exact-match ("Identical sequences") path. Reports only byte-identical
+ * sequences between assay and clones — no alignment, recall guaranteed.
+ * Emits a BLAST-tab TSV with the same columns the MMseqs2 path produces, so the
+ * downstream post-processing runs unchanged. Sequences are upper-cased on both
+ * sides before equality so case differences in user assay files still match.
+ * The join is a hash equi-join (O(N+M)) — no k-mer index, no chunking.
+ */
+runExactMatch := func(assayTsv, clonesTsv, mem, cpu) {
+	ptw := pt.workflow()
+	ptMem := "16GiB"
+	if !is_undefined(mem) {
+		ptMem = string(mem) + "GiB"
+	}
+	ptw.mem(ptMem)
+	if !is_undefined(cpu) {
+		ptw.cpu(cpu)
+	}
+
+	// Assay side: seqId -> query, normalized sequence, and alignment length.
+	assayDf := ptw.frame({ file: assayTsv, xsvType: "tsv" }).
+		select(
+			pt.col("seqId").alias("query"),
+			pt.col("sequence").strToUpper().alias("assaySeq"),
+			pt.col("sequence").strLenChars().cast("Int64").alias("alnlen")
+		)
+
+	// Clones side: seqId -> target, normalized sequence.
+	clonesDf := ptw.frame({ file: clonesTsv, xsvType: "tsv" }).
+		select(
+			pt.col("seqId").alias("target"),
+			pt.col("sequence").strToUpper().alias("cloneSeq")
+		)
+
+	// Inner join on exact (normalized) sequence equality.
+	joined := assayDf.join(clonesDf, {
+		how: "inner",
+		leftOn: "assaySeq",
+		rightOn: "cloneSeq"
+	})
+
+	// Fabricate the BLAST-tab columns the downstream expects. Exact match has no
+	// alignment: 100% identity, full span, zero mismatches/gaps, best e-value.
+	// bits = alnlen keeps the downstream max-bits tiebreak well-defined.
+	joined = joined.withColumns(
+		pt.lit(100.0).cast("Float64").alias("pident"),
+		pt.lit(0).cast("Int64").alias("mismatch"),
+		pt.lit(0).cast("Int64").alias("gapopen"),
+		pt.lit(1).cast("Int64").alias("qstart"),
+		pt.lit(1).cast("Int64").alias("tstart"),
+		pt.lit(0.0).cast("Float64").alias("evalue"),
+		pt.col("alnlen").alias("qend"),
+		pt.col("alnlen").alias("tend"),
+		pt.col("alnlen").cast("Float64").alias("bits")
+	)
+
+	// Deterministic order so the output is canonical for pure-template dedup.
+	joined = joined.select(
+		"target", "query", "evalue", "bits", "pident",
+		"alnlen", "mismatch", "gapopen", "qstart", "qend", "tstart", "tend"
+	).sort(["target", "query"])
+
+	joined.save("results_with_header.tsv")
+	return ptw.run().getFile("results_with_header.tsv")
+}
+
 self.defineOutputs(
 	"bestAlignmentTsv",
 	"assayDataTsv",
@@ -149,6 +215,7 @@ self.body(func(args) {
 	xsvType := args.xsvType
 	sequenceColumnHeader := args.sequenceColumnHeader
 	clonesFasta := args.clonesFasta
+	clonesTsv := args.clonesTsv
 	emptyClonesInput := args.emptyClonesInput
 	targetSequenceType := args.targetSequenceType
 	assaySequenceType := args.assaySequenceType
@@ -214,116 +281,125 @@ self.body(func(args) {
 
 	assayTsv := prepareAssayFile(file, xsvType, sequenceColumnHeader)
 
-	// Prepare assay FASTA (clones FASTA already prepared upstream)
-	assayFastaRun := runTsvToFasta(assayTsv, "seqId", "sequence")
-	assayFasta := assayFastaRun.getFile("output.fasta")
+	// Build the raw results TSV (BLAST-tab + header). Two paths produce the same
+	// schema, so everything downstream is identical regardless of mode.
+	mmseqsResultTsv := undefined
+	if string(similarityType) == "exact-match" {
+		// Exact ("Identical sequences") mode — recall-guaranteed string equality.
+		// No alignment, no MMseqs2: skip cov-mode calc, clone chunking, and merge.
+		mmseqsResultTsv = runExactMatch(assayTsv, clonesTsv, mem, cpu)
+	} else {
+		// Prepare assay FASTA (clones FASTA already prepared upstream)
+		assayFastaRun := runTsvToFasta(assayTsv, "seqId", "sequence")
+		assayFasta := assayFastaRun.getFile("output.fasta")
 
-	// Dynamically determine coverage mode by comparing average sequence lengths
-	coverageModeRun := exec.builder().
-		software(covModeCalcSw).
-		mem("16GiB").
-		cpu(1).
-		addFile("clones.fasta", clonesFasta).
-		addFile("assay.fasta", assayFasta).
-		arg("--clones-fasta").arg("clones.fasta").
-		arg("--assay-fasta").arg("assay.fasta").
-		arg("--output").arg("coverage_mode.txt").
-		saveFileContent("coverage_mode.txt").
-		run()
+		// Dynamically determine coverage mode by comparing average sequence lengths
+		coverageModeRun := exec.builder().
+			software(covModeCalcSw).
+			mem("16GiB").
+			cpu(1).
+			addFile("clones.fasta", clonesFasta).
+			addFile("assay.fasta", assayFasta).
+			arg("--clones-fasta").arg("clones.fasta").
+			arg("--assay-fasta").arg("assay.fasta").
+			arg("--output").arg("coverage_mode.txt").
+			saveFileContent("coverage_mode.txt").
+			run()
 
-	covMode := coverageModeRun.getFileContent("coverage_mode.txt")
+		covMode := coverageModeRun.getFileContent("coverage_mode.txt")
 
-	// Split clone FASTA into 2 equal chunks to limit mmseqs2 index disk usage.
-	// Running two searches against 25M sequences each uses half the peak disk
-	// of a single 50M search. E-values are normalized to the full database size.
-	splitRun := exec.builder().
-		software(splitFastaSw).
-		mem("8GiB").
-		cpu(1).
-		addFile("clones.fasta", clonesFasta).
-		arg("-i").arg("clones.fasta").
-		arg("--chunk1").arg("chunk_1.fasta").
-		arg("--chunk2").arg("chunk_2.fasta").
-		arg("--counts").arg("counts.json").
-		saveFile("chunk_1.fasta").
-		saveFile("chunk_2.fasta").
-		saveFile("counts.json").
-		run()
+		// Split clone FASTA into 2 equal chunks to limit mmseqs2 index disk usage.
+		// Running two searches against 25M sequences each uses half the peak disk
+		// of a single 50M search. E-values are normalized to the full database size.
+		splitRun := exec.builder().
+			software(splitFastaSw).
+			mem("8GiB").
+			cpu(1).
+			addFile("clones.fasta", clonesFasta).
+			arg("-i").arg("clones.fasta").
+			arg("--chunk1").arg("chunk_1.fasta").
+			arg("--chunk2").arg("chunk_2.fasta").
+			arg("--counts").arg("counts.json").
+			saveFile("chunk_1.fasta").
+			saveFile("chunk_2.fasta").
+			saveFile("counts.json").
+			run()
 
-	chunk1Fasta := splitRun.getFile("chunk_1.fasta")
-	chunk2Fasta := splitRun.getFile("chunk_2.fasta")
-	splitCounts := splitRun.getFile("counts.json")
+		chunk1Fasta := splitRun.getFile("chunk_1.fasta")
+		chunk2Fasta := splitRun.getFile("chunk_2.fasta")
+		splitCounts := splitRun.getFile("counts.json")
 
-	// MMseqs2 Alignment
-	mmseqsSearchType := "0"
-    if targetSequenceType == "aminoacid" && assaySequenceType == "aminoacid" {
-        //1: amino acid
-        mmseqsSearchType = "1"
-    } else if targetSequenceType == "nucleotide" && assaySequenceType == "nucleotide" {
-        // 3: nucleotide
-        mmseqsSearchType = "3"
-    } else if targetSequenceType == "nucleotide" && assaySequenceType == "aminoacid" {
-        // 4: translated nucleotide alignment
-        mmseqsSearchType = "4"
-    } else if targetSequenceType == "aminoacid" && assaySequenceType == "nucleotide"  {
-        // 2: nucleotide
-        mmseqsSearchType = "2"
-    }
-
-	runMmseqs1 := render.create(runAlignmentTpl, {
-		covMode: covMode,
-		mmseqsSearchType: mmseqsSearchType,
-		coverageThreshold: coverageThreshold,
-		identityThreshold: identityThreshold,
-		similarityType: similarityType,
-		clonesFasta: chunk1Fasta,
-		assayFasta: assayFasta,
-		lessSensitive: lessSensitive,
-		isPeptide: args.isPeptide,
-		minPeptideLength: args.minPeptideLength
-	}, {
-		metaInputs: {
-			mem: mem,
-			cpu: cpu
+		// MMseqs2 Alignment
+		mmseqsSearchType := "0"
+		if targetSequenceType == "aminoacid" && assaySequenceType == "aminoacid" {
+			//1: amino acid
+			mmseqsSearchType = "1"
+		} else if targetSequenceType == "nucleotide" && assaySequenceType == "nucleotide" {
+			// 3: nucleotide
+			mmseqsSearchType = "3"
+		} else if targetSequenceType == "nucleotide" && assaySequenceType == "aminoacid" {
+			// 4: translated nucleotide alignment
+			mmseqsSearchType = "4"
+		} else if targetSequenceType == "aminoacid" && assaySequenceType == "nucleotide"  {
+			// 2: nucleotide
+			mmseqsSearchType = "2"
 		}
-	})
-	runMmseqs2 := render.create(runAlignmentTpl, {
-		covMode: covMode,
-		mmseqsSearchType: mmseqsSearchType,
-		coverageThreshold: coverageThreshold,
-		identityThreshold: identityThreshold,
-		similarityType: similarityType,
-		clonesFasta: chunk2Fasta,
-		assayFasta: assayFasta,
-		lessSensitive: lessSensitive,
-		isPeptide: args.isPeptide,
-		minPeptideLength: args.minPeptideLength
-	}, {
-		metaInputs: {
-			mem: mem,
-			cpu: cpu
-		}
-	})
 
-	mmseqsOutput1 := runMmseqs1.output("mmseqsOutput")
-	mmseqsOutput2 := runMmseqs2.output("mmseqsOutput")
+		runMmseqs1 := render.create(runAlignmentTpl, {
+			covMode: covMode,
+			mmseqsSearchType: mmseqsSearchType,
+			coverageThreshold: coverageThreshold,
+			identityThreshold: identityThreshold,
+			similarityType: similarityType,
+			clonesFasta: chunk1Fasta,
+			assayFasta: assayFasta,
+			lessSensitive: lessSensitive,
+			isPeptide: args.isPeptide,
+			minPeptideLength: args.minPeptideLength
+		}, {
+			metaInputs: {
+				mem: mem,
+				cpu: cpu
+			}
+		})
+		runMmseqs2 := render.create(runAlignmentTpl, {
+			covMode: covMode,
+			mmseqsSearchType: mmseqsSearchType,
+			coverageThreshold: coverageThreshold,
+			identityThreshold: identityThreshold,
+			similarityType: similarityType,
+			clonesFasta: chunk2Fasta,
+			assayFasta: assayFasta,
+			lessSensitive: lessSensitive,
+			isPeptide: args.isPeptide,
+			minPeptideLength: args.minPeptideLength
+		}, {
+			metaInputs: {
+				mem: mem,
+				cpu: cpu
+			}
+		})
 
-	// Merge both raw results, add header, and normalize e-values to full database size
-	mergeRun := exec.builder().
-		software(mergeResultsSw).
-		mem("16GiB").
-		cpu(1).
-		addFile("results_1.tsv", mmseqsOutput1).
-		addFile("results_2.tsv", mmseqsOutput2).
-		addFile("counts.json", splitCounts).
-		arg("-i1").arg("results_1.tsv").
-		arg("-i2").arg("results_2.tsv").
-		arg("--counts").arg("counts.json").
-		arg("-o").arg("results_with_header.tsv").
-		saveFile("results_with_header.tsv").
-		run()
+		mmseqsOutput1 := runMmseqs1.output("mmseqsOutput")
+		mmseqsOutput2 := runMmseqs2.output("mmseqsOutput")
 
-	mmseqsResultTsv := mergeRun.getFile("results_with_header.tsv")
+		// Merge both raw results, add header, and normalize e-values to full database size
+		mergeRun := exec.builder().
+			software(mergeResultsSw).
+			mem("16GiB").
+			cpu(1).
+			addFile("results_1.tsv", mmseqsOutput1).
+			addFile("results_2.tsv", mmseqsOutput2).
+			addFile("counts.json", splitCounts).
+			arg("-i1").arg("results_1.tsv").
+			arg("-i2").arg("results_2.tsv").
+			arg("--counts").arg("counts.json").
+			arg("-o").arg("results_with_header.tsv").
+			saveFile("results_with_header.tsv").
+			run()
+
+		mmseqsResultTsv = mergeRun.getFile("results_with_header.tsv")
+	}
 
 	// Check if results are empty (only header line or nothing)
 	checkResultsRun := exec.builder().
