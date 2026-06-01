@@ -1,6 +1,5 @@
 self := import("@platforma-sdk/workflow-tengo:tpl")
 maps := import("@platforma-sdk/workflow-tengo:maps")
-slices := import("@platforma-sdk/workflow-tengo:slices")
 json := import("json")
 text := import("text")
 
@@ -18,10 +17,13 @@ self.body(func(inputs) {
 		lines := text.split(text.trim_space(content), "\n")
 
 		if len(lines) > 1 {
-			// Skip header and sort values so the JSON-encoded array is
-			// canonical (polars groupBy output order is implementation-
-			// defined; sorting here makes the spec annotation stable).
-			values := slices.quickSortInPlace(lines[1:])
+			// Values arrive already sorted from get-unique-values (polars
+			// `.sort(["value"])`), so the file lines are in canonical order —
+			// skip the header and use them as-is. Do NOT re-sort here: the
+			// recursive quickSort overflows the Tengo VM value stack (size 2048)
+			// on already-sorted input once a column has a few hundred unique
+			// values (O(n) recursion depth).
+			values := lines[1:]
 			// JSON encode the array of strings and convert to string
 			uniqueValuesMap[header] = string(json.encode(values))
 		}

@@ -11,7 +11,12 @@ export type Settings = {
   coverageThreshold: number;
   /** Identity threshold (0-1). */
   identity: number;
-  similarityType: 'sequence-identity' | 'alignment-score';
+  /**
+   * Matching method. `alignment-score`/`sequence-identity` run MMseqs2;
+   * `exact-match` reports only byte-identical sequences (no alignment,
+   * guaranteed recall) and ignores identity/coverage/fast-mode.
+   */
+  similarityType: 'sequence-identity' | 'alignment-score' | 'exact-match';
 };
 
 export type Modality = 'antibody_tcr' | 'peptide';

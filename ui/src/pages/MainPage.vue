@@ -20,6 +20,7 @@ import {
   PlAlert,
   PlBlockPage,
   PlBtnGhost,
+  PlBtnGroup,
   PlCheckbox,
   PlDropdown,
   PlDropdownMulti,
@@ -248,6 +249,44 @@ const otherColumnOptions = computed(() => {
     }));
 });
 
+// Top-level matching approach: Alignment (MMseqs2) vs Sequence Match (exact,
+// byte-identical, recall-guaranteed). Derived from settings.similarityType —
+// 'exact-match' is Sequence Match; the other two are Alignment sub-modes.
+const matchingApproach = computed(() =>
+  app.model.data.settings.similarityType === 'exact-match' ? 'sequence-match' : 'alignment',
+);
+
+// Remember the last Alignment sub-mode so toggling back from Sequence Match
+// restores the user's choice instead of always resetting to BLOSUM.
+const lastAlignmentType = ref<'alignment-score' | 'sequence-identity'>(
+  app.model.data.settings.similarityType === 'sequence-identity' ? 'sequence-identity' : 'alignment-score',
+);
+watch(
+  () => app.model.data.settings.similarityType,
+  (t) => {
+    if (t === 'alignment-score' || t === 'sequence-identity') lastAlignmentType.value = t;
+  },
+);
+
+function setMatchingApproach(value: string) {
+  app.model.data.settings.similarityType
+    = value === 'sequence-match' ? 'exact-match' : lastAlignmentType.value;
+}
+
+// Sequence Match is gated: exact equality can't match across alphabets (MMseqs2
+// handles that via translated search). Hide the option only when we know the
+// assay and target alphabets differ; the workflow asserts as the hard backstop.
+const matchingApproachOptions = computed(() => {
+  const opts = [{ label: 'Alignment', value: 'alignment' }];
+  const assayAlphabet = app.model.data.importColumns
+    ?.find((c) => c.header === app.model.data.sequenceColumnHeader)?.sequenceType;
+  const targetAlphabet = app.model.outputs.targetSequenceType;
+  const knownAndDiffer = !!assayAlphabet && !!targetAlphabet && assayAlphabet !== targetAlphabet;
+  if (!knownAndDiffer) opts.push({ label: 'Sequence Match', value: 'sequence-match' });
+  return opts;
+});
+
+// Alignment sub-modes (MMseqs2 scoring).
 const similarityTypeOptions = [
   { label: 'BLOSUM', value: 'alignment-score' },
   { label: 'Exact Match', value: 'sequence-identity' },
@@ -341,40 +380,56 @@ const similarityTypeOptions = [
       />
 
       <PlSectionSeparator>Matching parameters</PlSectionSeparator>
-      <PlDropdown
-        v-model="app.model.data.settings.similarityType" :options="similarityTypeOptions"
-        label="Alignment Score"
+      <PlBtnGroup
+        :model-value="matchingApproach"
+        :options="matchingApproachOptions"
+        label="Matching mode"
+        @update:model-value="setMatchingApproach"
       >
         <template #tooltip>
-          Select the similarity metric used for matching thresholds. BLOSUM considers biochemical similarity while Exact
-          Match counts only identical residues.
+          Alignment runs MMseqs2 (BLOSUM or identity scoring, with identity and coverage thresholds).
+          Sequence Match reports targets that contain an assay sequence exactly (substring match) — no alignment, guaranteed recall, available only when the assay and target use the same alphabet.
         </template>
-      </PlDropdown>
+      </PlBtnGroup>
 
-      <PlNumberField
-        v-model="app.model.data.settings.identity"
-        label="Score threshold" :min-value="0.1" :step="0.1" :max-value="1.0"
-      >
-        <template #tooltip>
-          Sets the lowest percentage of identical residues required for a match.
-        </template>
-      </PlNumberField>
+      <template v-if="matchingApproach === 'alignment'">
+        <PlDropdown
+          v-model="app.model.data.settings.similarityType" :options="similarityTypeOptions"
+          label="Alignment Score"
+        >
+          <template #tooltip>
+            BLOSUM considers biochemical similarity; Exact Match counts only identical residues.
+          </template>
+        </PlDropdown>
 
-      <PlNumberField
-        v-model="app.model.data.settings.coverageThreshold"
-        label="Coverage threshold"
-        :min-value="0.1"
-        :step="0.1"
-        :max-value="1.0"
-      >
-        <template #tooltip>
-          Minimum fraction of residues that must align between the input sequence and the assay
-          sequence to count as a match.
-        </template>
-      </PlNumberField>
+        <PlNumberField
+          v-model="app.model.data.settings.identity"
+          label="Score threshold" :min-value="0.1" :step="0.1" :max-value="1.0"
+        >
+          <template #tooltip>
+            Sets the lowest percentage of identical residues required for a match.
+          </template>
+        </PlNumberField>
+
+        <PlNumberField
+          v-model="app.model.data.settings.coverageThreshold"
+          label="Coverage threshold"
+          :min-value="0.1"
+          :step="0.1"
+          :max-value="1.0"
+        >
+          <template #tooltip>
+            Minimum fraction of residues that must align between the input sequence and the assay
+            sequence to count as a match.
+          </template>
+        </PlNumberField>
+      </template>
 
       <PlAccordionSection :label="strings.titles.advancedSettings">
-        <PlCheckbox v-model="app.model.data.lessSensitive">
+        <PlCheckbox
+          v-if="matchingApproach === 'alignment'"
+          v-model="app.model.data.lessSensitive"
+        >
           Fast mode
           <PlTooltip class="info" position="top">
             <template #tooltip>Prioritizes speed over sensitivity. Reduces prefiltering precision, which may miss some weaker matches but significantly speeds up alignment for large datasets.</template>

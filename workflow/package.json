@@ -18,6 +18,7 @@
     "@platforma-open/milaboratories.immune-assay-data.check-content-empty": "workspace:*",
     "@platforma-open/milaboratories.immune-assay-data.split-fasta": "workspace:*",
     "@platforma-open/milaboratories.immune-assay-data.merge-results": "workspace:*",
+    "@platforma-open/milaboratories.immune-assay-data.sequence-match": "workspace:*",
     "@platforma-open/soedinglab.software-mmseqs2": "catalog:"
   },
   "devDependencies": {
