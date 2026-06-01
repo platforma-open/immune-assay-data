@@ -20,6 +20,7 @@ import {
   PlAlert,
   PlBlockPage,
   PlBtnGhost,
+  PlBtnGroup,
   PlCheckbox,
   PlDropdown,
   PlDropdownMulti,
@@ -248,24 +249,48 @@ const otherColumnOptions = computed(() => {
     }));
 });
 
-// Matching method options. The exact-equality option ("Identical sequences")
-// is gated: exact string matching cannot work across alphabets (MMseqs2 does
-// that via translated search). Hide it only when we know the assay and target
-// alphabets differ — the workflow asserts as the hard backstop.
-const similarityTypeOptions = computed(() => {
-  const opts = [
-    { label: 'BLOSUM', value: 'alignment-score' },
-    { label: 'Exact Match', value: 'sequence-identity' },
-  ];
+// Top-level matching approach: Alignment (MMseqs2) vs Sequence Match (exact,
+// byte-identical, recall-guaranteed). Derived from settings.similarityType —
+// 'exact-match' is Sequence Match; the other two are Alignment sub-modes.
+const matchingApproach = computed(() =>
+  app.model.data.settings.similarityType === 'exact-match' ? 'sequence-match' : 'alignment',
+);
+
+// Remember the last Alignment sub-mode so toggling back from Sequence Match
+// restores the user's choice instead of always resetting to BLOSUM.
+const lastAlignmentType = ref<'alignment-score' | 'sequence-identity'>(
+  app.model.data.settings.similarityType === 'sequence-identity' ? 'sequence-identity' : 'alignment-score',
+);
+watch(
+  () => app.model.data.settings.similarityType,
+  (t) => {
+    if (t === 'alignment-score' || t === 'sequence-identity') lastAlignmentType.value = t;
+  },
+);
+
+function setMatchingApproach(value: string) {
+  app.model.data.settings.similarityType
+    = value === 'sequence-match' ? 'exact-match' : lastAlignmentType.value;
+}
+
+// Sequence Match is gated: exact equality can't match across alphabets (MMseqs2
+// handles that via translated search). Hide the option only when we know the
+// assay and target alphabets differ; the workflow asserts as the hard backstop.
+const matchingApproachOptions = computed(() => {
+  const opts = [{ label: 'Alignment', value: 'alignment' }];
   const assayAlphabet = app.model.data.importColumns
     ?.find((c) => c.header === app.model.data.sequenceColumnHeader)?.sequenceType;
   const targetAlphabet = app.model.outputs.targetSequenceType;
   const knownAndDiffer = !!assayAlphabet && !!targetAlphabet && assayAlphabet !== targetAlphabet;
-  if (!knownAndDiffer) {
-    opts.push({ label: 'Identical sequences', value: 'exact-match' });
-  }
+  if (!knownAndDiffer) opts.push({ label: 'Sequence Match', value: 'sequence-match' });
   return opts;
 });
+
+// Alignment sub-modes (MMseqs2 scoring).
+const similarityTypeOptions = [
+  { label: 'BLOSUM', value: 'alignment-score' },
+  { label: 'Exact Match', value: 'sequence-identity' },
+];
 </script>
 
 <template>
@@ -355,45 +380,54 @@ const similarityTypeOptions = computed(() => {
       />
 
       <PlSectionSeparator>Matching parameters</PlSectionSeparator>
-      <PlDropdown
-        v-model="app.model.data.settings.similarityType" :options="similarityTypeOptions"
-        label="Alignment Score"
+      <PlBtnGroup
+        :model-value="matchingApproach"
+        :options="matchingApproachOptions"
+        label="Matching mode"
+        @update:model-value="setMatchingApproach"
       >
         <template #tooltip>
-          Select how assay and target sequences are matched. BLOSUM considers biochemical similarity;
-          Exact Match counts only identical residues — both run alignment (MMseqs2) and may miss some
-          matches on difficult sequences. Identical sequences reports only byte-identical sequences with
-          no alignment and guaranteed recall (same alphabet only).
+          Alignment runs MMseqs2 (BLOSUM or identity scoring, with identity and coverage thresholds).
+          Sequence Match reports only identical sequences — no alignment, available only when the assay and target use the same alphabet.
         </template>
-      </PlDropdown>
+      </PlBtnGroup>
 
-      <PlNumberField
-        v-if="app.model.data.settings.similarityType !== 'exact-match'"
-        v-model="app.model.data.settings.identity"
-        label="Score threshold" :min-value="0.1" :step="0.1" :max-value="1.0"
-      >
-        <template #tooltip>
-          Sets the lowest percentage of identical residues required for a match.
-        </template>
-      </PlNumberField>
+      <template v-if="matchingApproach === 'alignment'">
+        <PlDropdown
+          v-model="app.model.data.settings.similarityType" :options="similarityTypeOptions"
+          label="Alignment Score"
+        >
+          <template #tooltip>
+            BLOSUM considers biochemical similarity; Exact Match counts only identical residues.
+          </template>
+        </PlDropdown>
 
-      <PlNumberField
-        v-if="app.model.data.settings.similarityType !== 'exact-match'"
-        v-model="app.model.data.settings.coverageThreshold"
-        label="Coverage threshold"
-        :min-value="0.1"
-        :step="0.1"
-        :max-value="1.0"
-      >
-        <template #tooltip>
-          Minimum fraction of residues that must align between the input sequence and the assay
-          sequence to count as a match.
-        </template>
-      </PlNumberField>
+        <PlNumberField
+          v-model="app.model.data.settings.identity"
+          label="Score threshold" :min-value="0.1" :step="0.1" :max-value="1.0"
+        >
+          <template #tooltip>
+            Sets the lowest percentage of identical residues required for a match.
+          </template>
+        </PlNumberField>
+
+        <PlNumberField
+          v-model="app.model.data.settings.coverageThreshold"
+          label="Coverage threshold"
+          :min-value="0.1"
+          :step="0.1"
+          :max-value="1.0"
+        >
+          <template #tooltip>
+            Minimum fraction of residues that must align between the input sequence and the assay
+            sequence to count as a match.
+          </template>
+        </PlNumberField>
+      </template>
 
       <PlAccordionSection :label="strings.titles.advancedSettings">
         <PlCheckbox
-          v-if="app.model.data.settings.similarityType !== 'exact-match'"
+          v-if="matchingApproach === 'alignment'"
           v-model="app.model.data.lessSensitive"
         >
           Fast mode
