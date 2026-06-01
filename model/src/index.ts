@@ -206,40 +206,23 @@ export const platforma = BlockModelV3.create(blockDataModel)
   })
 
   // Alphabet of the currently-selected target sequence column. Used by the UI
-  // to gate the "Identical sequences" (exact) option: exact equality cannot
-  // match across alphabets (MMseqs2 handles that via translated search; exact
-  // mode is same-alphabet only). Returns undefined while unresolved — the UI
-  // gate is permissive and the workflow asserts as the hard backstop.
+  // to gate the Sequence Match option: substring matching cannot work across
+  // alphabets (MMseqs2 handles that via translated search; Sequence Match is
+  // same-alphabet only). Returns undefined while unresolved — the UI gate is
+  // permissive and the workflow asserts as the hard backstop.
+  //
+  // `targetRef` is an SUniversalPColumnId — a JSON-serialized anchored selector,
+  // not a PlRef — so it is resolved by parsing it and passing it straight to
+  // getAnchoredPColumns as the selector (idiom from clonotype-space). It cannot
+  // go through getPColumnSpecByRef, which takes a PlRef.
   .output('targetSequenceType', (ctx): 'nucleotide' | 'aminoacid' | undefined => {
-    const ref = ctx.data.datasetRef;
+    const datasetRef = ctx.data.datasetRef;
     const targetRef = ctx.data.targetRef;
-    if (ref === undefined || targetRef === undefined) return undefined;
+    if (datasetRef === undefined || targetRef === undefined) return undefined;
 
-    const datasetAxis = ctx.resultPool.getPColumnSpecByRef(ref)?.axesSpec[1]?.name;
-    const sequenceMatchers = [];
-    if (datasetAxis === 'pl7.app/variantKey') {
-      sequenceMatchers.push({
-        axes: [{ anchor: 'main', idx: 1 }],
-        name: 'pl7.app/sequence',
-        domain: { 'pl7.app/feature': 'peptide' },
-      });
-    } else if (datasetAxis === 'pl7.app/vdj/scClonotypeKey') {
-      sequenceMatchers.push({
-        axes: [{ anchor: 'main', idx: 1 }],
-        name: 'pl7.app/vdj/sequence',
-        domain: { 'pl7.app/vdj/scClonotypeChain/index': 'primary' },
-      });
-    } else {
-      sequenceMatchers.push({
-        axes: [{ anchor: 'main', idx: 1 }],
-        name: 'pl7.app/vdj/sequence',
-        domain: {},
-      });
-    }
-
-    const cols = ctx.resultPool.getAnchoredPColumns({ main: ref }, sequenceMatchers);
-    const alphabet = cols?.find((c) => (c.id as string) === (targetRef as string))
-      ?.spec.domain?.['pl7.app/alphabet'];
+    const colId = JSON.parse(targetRef) as never;
+    const spec = ctx.resultPool.getAnchoredPColumns({ main: datasetRef }, [colId])?.[0]?.spec;
+    const alphabet = spec?.domain?.['pl7.app/alphabet'];
     return alphabet === 'nucleotide' || alphabet === 'aminoacid' ? alphabet : undefined;
   })
 
