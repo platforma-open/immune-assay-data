@@ -11,9 +11,9 @@ export function getDefaultBlockLabel(data: {
     parts.push(data.fileName);
   }
 
-  // Exact-match mode has no identity/coverage thresholds — they are meaningless.
+  // Sequence Match mode has no identity/coverage thresholds — they are meaningless.
   if (data.similarityType === 'exact-match') {
-    parts.push('Identical sequences');
+    parts.push('Sequence match');
     return parts.filter(Boolean).join(', ');
   }
 

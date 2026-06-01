@@ -14,6 +14,7 @@ xlsxToCsvSw := assets.importSoftware("@platforma-open/milaboratories.immune-assa
 checkContentEmptySw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.check-content-empty:main")
 splitFastaSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.split-fasta:main")
 mergeResultsSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.merge-results:main")
+sequenceMatchSw := assets.importSoftware("@platforma-open/milaboratories.immune-assay-data.sequence-match:main")
 
 runAlignmentTpl := assets.importTemplate(":run-alignment")
 checkContentEmptyTpl := assets.importTemplate(":check-content-empty")
@@ -135,69 +136,37 @@ prepareAssayFile := func(file, xsvType, sequenceColumnHeader) {
 }
 
 /**
- * Exact-match ("Identical sequences") path. Reports only byte-identical
- * sequences between assay and clones — no alignment, recall guaranteed.
+ * Sequence Match (containment) path. Reports every clone whose sequence contains
+ * an assay sequence as an exact substring — the recall-guaranteed equivalent of
+ * an MMseqs2 id=1 / cov=1 search, with no alignment heuristics and no silent
+ * misses. Matching runs in a Python software package via polars' built-in
+ * Aho-Corasick scan (O(total clone length), independent of assay-set size).
  * Emits a BLAST-tab TSV with the same columns the MMseqs2 path produces, so the
- * downstream post-processing runs unchanged. Sequences are upper-cased on both
- * sides before equality so case differences in user assay files still match.
- * The join is a hash equi-join (O(N+M)) — no k-mer index, no chunking.
+ * downstream post-processing runs unchanged.
  */
-runExactMatch := func(assayTsv, clonesTsv, mem, cpu) {
-	ptw := pt.workflow()
-	ptMem := "16GiB"
+runSequenceMatch := func(assayTsv, clonesTsv, mem, cpu) {
+	matchMem := "16GiB"
 	if !is_undefined(mem) {
-		ptMem = string(mem) + "GiB"
+		matchMem = string(mem) + "GiB"
 	}
-	ptw.mem(ptMem)
+	matchCpu := 1
 	if !is_undefined(cpu) {
-		ptw.cpu(cpu)
+		matchCpu = cpu
 	}
 
-	// Assay side: seqId -> query, normalized sequence, and alignment length.
-	assayDf := ptw.frame({ file: assayTsv, xsvType: "tsv" }).
-		select(
-			pt.col("seqId").alias("query"),
-			pt.col("sequence").strToUpper().alias("assaySeq"),
-			pt.col("sequence").strLenChars().cast("Int64").alias("alnlen")
-		)
+	e := exec.builder().
+		software(sequenceMatchSw).
+		mem(matchMem).
+		cpu(matchCpu).
+		addFile("clones.tsv", clonesTsv).
+		addFile("assay.tsv", assayTsv).
+		arg("--clones").arg("clones.tsv").
+		arg("--assay").arg("assay.tsv").
+		arg("--output").arg("results_with_header.tsv").
+		saveFile("results_with_header.tsv").
+		run()
 
-	// Clones side: seqId -> target, normalized sequence.
-	clonesDf := ptw.frame({ file: clonesTsv, xsvType: "tsv" }).
-		select(
-			pt.col("seqId").alias("target"),
-			pt.col("sequence").strToUpper().alias("cloneSeq")
-		)
-
-	// Inner join on exact (normalized) sequence equality.
-	joined := assayDf.join(clonesDf, {
-		how: "inner",
-		leftOn: "assaySeq",
-		rightOn: "cloneSeq"
-	})
-
-	// Fabricate the BLAST-tab columns the downstream expects. Exact match has no
-	// alignment: 100% identity, full span, zero mismatches/gaps, best e-value.
-	// bits = alnlen keeps the downstream max-bits tiebreak well-defined.
-	joined = joined.withColumns(
-		pt.lit(100.0).cast("Float64").alias("pident"),
-		pt.lit(0).cast("Int64").alias("mismatch"),
-		pt.lit(0).cast("Int64").alias("gapopen"),
-		pt.lit(1).cast("Int64").alias("qstart"),
-		pt.lit(1).cast("Int64").alias("tstart"),
-		pt.lit(0.0).cast("Float64").alias("evalue"),
-		pt.col("alnlen").alias("qend"),
-		pt.col("alnlen").alias("tend"),
-		pt.col("alnlen").cast("Float64").alias("bits")
-	)
-
-	// Deterministic order so the output is canonical for pure-template dedup.
-	joined = joined.select(
-		"target", "query", "evalue", "bits", "pident",
-		"alnlen", "mismatch", "gapopen", "qstart", "qend", "tstart", "tend"
-	).sort(["target", "query"])
-
-	joined.save("results_with_header.tsv")
-	return ptw.run().getFile("results_with_header.tsv")
+	return e.getFile("results_with_header.tsv")
 }
 
 self.defineOutputs(
@@ -285,9 +254,10 @@ self.body(func(args) {
 	// schema, so everything downstream is identical regardless of mode.
 	mmseqsResultTsv := undefined
 	if string(similarityType) == "exact-match" {
-		// Exact ("Identical sequences") mode — recall-guaranteed string equality.
-		// No alignment, no MMseqs2: skip cov-mode calc, clone chunking, and merge.
-		mmseqsResultTsv = runExactMatch(assayTsv, clonesTsv, mem, cpu)
+		// Sequence Match mode — recall-guaranteed exact substring (containment)
+		// matching. No alignment, no MMseqs2: skip cov-mode calc, clone chunking,
+		// and merge; a Python/polars Aho-Corasick step produces the results TSV.
+		mmseqsResultTsv = runSequenceMatch(assayTsv, clonesTsv, mem, cpu)
 	} else {
 		// Prepare assay FASTA (clones FASTA already prepared upstream)
 		assayFastaRun := runTsvToFasta(assayTsv, "seqId", "sequence")

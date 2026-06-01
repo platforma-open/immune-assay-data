@@ -7,6 +7,7 @@ packages:
   - software/check-content-empty
   - software/split-fasta
   - software/merge-results
+  - software/sequence-match
   - workflow
   - model
   - ui

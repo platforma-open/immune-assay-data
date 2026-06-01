@@ -388,7 +388,7 @@ const similarityTypeOptions = [
       >
         <template #tooltip>
           Alignment runs MMseqs2 (BLOSUM or identity scoring, with identity and coverage thresholds).
-          Sequence Match reports only identical sequences — no alignment, available only when the assay and target use the same alphabet.
+          Sequence Match reports targets that contain an assay sequence exactly (substring match) — no alignment, guaranteed recall, available only when the assay and target use the same alphabet.
         </template>
       </PlBtnGroup>
 

@@ -109,13 +109,12 @@ wf.body(func(args) {
 		ll.panic("Assay sequence type is undefined")
 	}
 
-	// Backstop for the exact-match (Identical sequences) mode. String equality
-	// cannot match across alphabets — MMseqs2 handles that via translated
-	// search, exact mode does not. The UI gates the option, this guards the
-	// edge case of a persisted exact-match selection over a now-mismatched
-	// target (defence in depth).
+	// Backstop for Sequence Match mode. Substring matching cannot work across
+	// alphabets — MMseqs2 handles that via translated search, Sequence Match does
+	// not. The UI gates the option; this guards the edge case of a persisted
+	// Sequence Match selection over a now-mismatched target (defence in depth).
 	if args.settings.similarityType == "exact-match" && targetSequenceType != assaySequenceType {
-		ll.panic("Exact matching requires the assay and target to use the same alphabet (both amino acid or both nucleotide); got target=%v, assay=%v. Use an alignment mode for cross-alphabet matching.", targetSequenceType, assaySequenceType)
+		ll.panic("Sequence Match requires the assay and target to use the same alphabet (both amino acid or both nucleotide); got target=%v, assay=%v. Use an alignment mode for cross-alphabet matching.", targetSequenceType, assaySequenceType)
 	}
 
 	handleUrl := ll.parseUrl(args.fileHandle)

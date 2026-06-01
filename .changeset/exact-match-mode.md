@@ -1,8 +1,9 @@
 ---
+'@platforma-open/milaboratories.immune-assay-data.sequence-match': minor
 '@platforma-open/milaboratories.immune-assay-data.workflow': minor
 '@platforma-open/milaboratories.immune-assay-data.model': minor
 '@platforma-open/milaboratories.immune-assay-data.ui': minor
 '@platforma-open/milaboratories.immune-assay-data': minor
 ---
 
-Add "Identical sequences" matching mode — a recall-guaranteed exact (byte-identical) match that bypasses MMseqs2 alignment. Selectable in the Alignment Score dropdown; hides the MMseqs2-only controls (score/coverage thresholds, fast mode) and is gated to same-alphabet assay/target pairs.
+Add "Sequence Match" matching mode — a recall-guaranteed, alignment-free match that reports every target containing an assay sequence as an exact substring (the deterministic equivalent of an MMseqs2 id=1/cov=1 search). Implemented in a new `sequence-match` Python software package using polars' Aho-Corasick scan. Exposed via a top-level "Matching mode" control (Alignment vs Sequence Match); Sequence Match hides the MMseqs2-only controls and is gated to same-alphabet assay/target pairs.
