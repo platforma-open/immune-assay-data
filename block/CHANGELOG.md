@@ -1,5 +1,18 @@
 # @platforma-open/milaboratories.immune-assay-data
 
+## 1.5.0
+
+### Minor Changes
+
+- cd67e1a: Add "Sequence Match" matching mode — a recall-guaranteed, alignment-free match that reports every target containing an assay sequence as an exact substring (the deterministic equivalent of an MMseqs2 id=1/cov=1 search). Implemented in a new `sequence-match` Python software package using polars' Aho-Corasick scan. Exposed via a top-level "Matching mode" control (Alignment vs Sequence Match); Sequence Match hides the MMseqs2-only controls and is gated to same-alphabet assay/target pairs.
+
+### Patch Changes
+
+- Updated dependencies [cd67e1a]
+  - @platforma-open/milaboratories.immune-assay-data.workflow@1.14.0
+  - @platforma-open/milaboratories.immune-assay-data.model@1.10.0
+  - @platforma-open/milaboratories.immune-assay-data.ui@1.9.0
+
 ## 1.4.1
 
 ### Patch Changes
