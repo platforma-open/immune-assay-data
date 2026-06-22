@@ -1,11 +1,11 @@
-import { platforma } from '@platforma-open/milaboratories.immune-assay-data.model';
-import { defineAppV3 } from '@platforma-sdk/ui-vue';
-import MainPage from './pages/MainPage.vue';
+import { platforma } from "@platforma-open/milaboratories.immune-assay-data.model";
+import { defineAppV3 } from "@platforma-sdk/ui-vue";
+import MainPage from "./pages/MainPage.vue";
 
 export const sdkPlugin = defineAppV3(platforma, () => {
   return {
     routes: {
-      '/': () => MainPage,
+      "/": () => MainPage,
     },
   };
 });

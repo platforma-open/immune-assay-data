@@ -11,16 +11,16 @@ export interface FastaParseResult {
 /**
  * Detect if a sequence is nucleotide, amino acid, or unknown
  */
-function detectSequenceType(sequence: string): 'nucleotide' | 'aminoacid' | 'unknown' {
+function detectSequenceType(sequence: string): "nucleotide" | "aminoacid" | "unknown" {
   const validDnaChars = /^[ACGTNRYWSKMBDHV]+$/;
   const validAminoAcidChars = /^[ACDEFGHIKLMNPQRSTVWY]+$/;
 
   if (validDnaChars.test(sequence)) {
-    return 'nucleotide';
+    return "nucleotide";
   } else if (validAminoAcidChars.test(sequence)) {
-    return 'aminoacid';
+    return "aminoacid";
   } else {
-    return 'unknown';
+    return "unknown";
   }
 }
 
@@ -28,17 +28,17 @@ function detectSequenceType(sequence: string): 'nucleotide' | 'aminoacid' | 'unk
  * Parse FASTA content and convert to tab-delimited table format
  */
 export function parseFastaContent(content: string): FastaParseResult {
-  const lines = content.split('\n');
+  const lines = content.split("\n");
   const records: FastaRecord[] = [];
-  let currentHeader = '';
-  let currentSequence = '';
+  let currentHeader = "";
+  let currentSequence = "";
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
 
     if (!line) continue;
 
-    if (line.startsWith('>')) {
+    if (line.startsWith(">")) {
       // Save previous record if exists
       if (currentHeader && currentSequence) {
         records.push({
@@ -48,8 +48,8 @@ export function parseFastaContent(content: string): FastaParseResult {
       }
 
       // Start new record
-      currentHeader = line.substring(1).trim().replace(/\t/g, ' ');
-      currentSequence = '';
+      currentHeader = line.substring(1).trim().replace(/\t/g, " ");
+      currentSequence = "";
 
       // Validate header is not empty
       if (!currentHeader) {
@@ -68,16 +68,16 @@ export function parseFastaContent(content: string): FastaParseResult {
       }
 
       // Clean sequence for validation
-      const cleanSequence = line.toUpperCase().replace(/\s/g, '');
+      const cleanSequence = line.toUpperCase().replace(/\s/g, "");
 
       // Determine sequence type and validate accordingly
       const sequenceType = detectSequenceType(cleanSequence);
 
-      if (sequenceType === 'unknown') {
+      if (sequenceType === "unknown") {
         const invalidChars = cleanSequence.match(/[^ACGTNRYWSKMBDHVACDEFGHIKLMNPQRSTVWY]/g);
         return {
           records: [],
-          error: `Invalid characters in sequence at line ${i + 1}. Only DNA nucleotides (ACGT) with IUPAC wildcards (NRYWSKMBDHV) or amino acids (ACDEFGHIKLMNPQRSTVWY) are allowed. Invalid characters: ${invalidChars?.join(', ')}`,
+          error: `Invalid characters in sequence at line ${i + 1}. Only DNA nucleotides (ACGT) with IUPAC wildcards (NRYWSKMBDHV) or amino acids (ACDEFGHIKLMNPQRSTVWY) are allowed. Invalid characters: ${invalidChars?.join(", ")}`,
         };
       }
 
@@ -94,14 +94,16 @@ export function parseFastaContent(content: string): FastaParseResult {
   } else if (currentHeader && !currentSequence) {
     return {
       records: [],
-      error: 'FASTA content ends with a header but no sequence. Each header must be followed by sequence data.',
+      error:
+        "FASTA content ends with a header but no sequence. Each header must be followed by sequence data.",
     };
   }
 
   if (records.length === 0) {
     return {
       records: [],
-      error: 'No valid FASTA records found. Please provide sequences in FASTA format with headers starting with ">".',
+      error:
+        'No valid FASTA records found. Please provide sequences in FASTA format with headers starting with ">".',
     };
   }
 
@@ -113,11 +115,11 @@ export function parseFastaContent(content: string): FastaParseResult {
  */
 export function fastaToTable(records: FastaRecord[]): string {
   // Create header row
-  const headerRow = 'Header\tSequence';
+  const headerRow = "Header\tSequence";
 
   // Create data rows
   const dataRows = records.map((record) => `${record.header}\t${record.sequence}`);
 
   // Combine header and data
-  return [headerRow, ...dataRows].join('\n');
+  return [headerRow, ...dataRows].join("\n");
 }

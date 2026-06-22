@@ -1,17 +1,17 @@
-import { useApp } from './app';
+import { useApp } from "./app";
 
-import type { ImportColumnInfo } from '@platforma-open/milaboratories.immune-assay-data.model';
-import * as XLSX from 'xlsx';
-import { parseFastaContent, fastaToTable } from './fastaParser';
+import type { ImportColumnInfo } from "@platforma-open/milaboratories.immune-assay-data.model";
+import * as XLSX from "xlsx";
+import { parseFastaContent, fastaToTable } from "./fastaParser";
 
 // Define a more specific type for raw Excel data
 type TableRow = string[];
 type TableData = TableRow[];
 
 // Helper function to infer data type from a value
-function inferValueType(value: unknown): 'Int' | 'Double' | 'String' {
-  if (value === null || value === undefined || value === '') {
-    return 'String'; // Default to String for empty values
+function inferValueType(value: unknown): "Int" | "Double" | "String" {
+  if (value === null || value === undefined || value === "") {
+    return "String"; // Default to String for empty values
   }
 
   const stringValue = String(value).trim();
@@ -19,25 +19,29 @@ function inferValueType(value: unknown): 'Int' | 'Double' | 'String' {
   // Try to parse as integer
   const intValue = parseInt(stringValue, 10);
   if (!isNaN(intValue) && String(intValue) === stringValue) {
-    return 'Int';
+    return "Int";
   }
 
   // Try to parse as double/float
   const floatValue = parseFloat(stringValue);
-  if (!isNaN(floatValue) && isFinite(floatValue) && /^-?\d*\.?\d+([eE][+-]?\d+)?$/.test(stringValue)) {
-    return 'Double';
+  if (
+    !isNaN(floatValue) &&
+    isFinite(floatValue) &&
+    /^-?\d*\.?\d+([eE][+-]?\d+)?$/.test(stringValue)
+  ) {
+    return "Double";
   }
 
-  return 'String';
+  return "String";
 }
 
 // Helper function to infer column type from array of values
-function inferColumnType(values: unknown[]): 'Int' | 'Double' | 'String' {
+function inferColumnType(values: unknown[]): "Int" | "Double" | "String" {
   const typeCounts = { Int: 0, Double: 0, String: 0 };
   let nonEmptyCount = 0;
 
   for (const value of values) {
-    if (value !== null && value !== undefined && String(value).trim() !== '') {
+    if (value !== null && value !== undefined && String(value).trim() !== "") {
       nonEmptyCount++;
       const type = inferValueType(value);
       typeCounts[type]++;
@@ -46,27 +50,27 @@ function inferColumnType(values: unknown[]): 'Int' | 'Double' | 'String' {
 
   // If no non-empty values, default to String
   if (nonEmptyCount === 0) {
-    return 'String';
+    return "String";
   }
 
   // If any value is String, the whole column is String
   if (typeCounts.String > 0) {
-    return 'String';
+    return "String";
   }
 
   // If any value is Double, the whole column is Double
   if (typeCounts.Double > 0) {
-    return 'Double';
+    return "Double";
   }
 
   // Otherwise, it's Int
-  return 'Int';
+  return "Int";
 }
 
 // Helper function to infer sequence type from array of values
-function inferSequenceType(values: unknown[]): 'nucleotide' | 'aminoacid' | undefined {
+function inferSequenceType(values: unknown[]): "nucleotide" | "aminoacid" | undefined {
   const validSequences = values
-    .filter((v) => v !== null && v !== undefined && String(v).trim() !== '')
+    .filter((v) => v !== null && v !== undefined && String(v).trim() !== "")
     .map((v) => String(v).trim());
 
   if (validSequences.length === 0) {
@@ -81,7 +85,10 @@ function inferSequenceType(values: unknown[]): 'nucleotide' | 'aminoacid' | unde
   // Heuristic: if a column has very few unique values, it's likely categorical.
   // - Handles Yes/No cases (size=2) in even small-ish files.
   // - Handles other low-cardinality data if the ratio is low in larger files.
-  if ((uniqueValues.size <= 2 && validSequences.length > 5) || (uniqueRatio < 0.2 && validSequences.length > 10)) {
+  if (
+    (uniqueValues.size <= 2 && validSequences.length > 5) ||
+    (uniqueRatio < 0.2 && validSequences.length > 10)
+  ) {
     return undefined;
   }
 
@@ -95,14 +102,32 @@ function inferSequenceType(values: unknown[]): 'nucleotide' | 'aminoacid' | unde
   let totalCharCount = 0;
 
   // Basic nucleotide characters
-  const nucleotideChars = new Set(['A', 'T', 'G', 'C', 'N']);
+  const nucleotideChars = new Set(["A", "T", "G", "C", "N"]);
   // Standard 20 amino acids plus X and * (excluding nucleotide overlap)
-  const aminoAcidOnlyChars = new Set(['R', 'D', 'E', 'Q', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'W', 'Y', 'V', 'X', '*']);
+  const aminoAcidOnlyChars = new Set([
+    "R",
+    "D",
+    "E",
+    "Q",
+    "H",
+    "I",
+    "L",
+    "K",
+    "M",
+    "F",
+    "P",
+    "S",
+    "W",
+    "Y",
+    "V",
+    "X",
+    "*",
+  ]);
 
   for (const sequence of checkSequences) {
     const upperSeq = sequence.toUpperCase();
     for (const char of upperSeq) {
-      if (char === '-') {
+      if (char === "-") {
         // Skip gap characters
         continue;
       }
@@ -128,9 +153,9 @@ function inferSequenceType(values: unknown[]): 'nucleotide' | 'aminoacid' | unde
 
   // If nucleotide characters dominate (>90%), it's nucleotide
   if (nucleotidePercentage > 0.9) {
-    return 'nucleotide';
+    return "nucleotide";
   } else {
-    return 'aminoacid';
+    return "aminoacid";
   }
 }
 
@@ -149,7 +174,7 @@ export function processFileBytes(bytes: Uint8Array, extension: string | undefine
   let rawData: TableData;
 
   // Handle FASTA files
-  if (extension === 'fasta' || extension === 'fa') {
+  if (extension === "fasta" || extension === "fa") {
     const content = new TextDecoder().decode(bytes);
     const parseResult = parseFastaContent(content);
 
@@ -159,8 +184,8 @@ export function processFileBytes(bytes: Uint8Array, extension: string | undefine
     }
 
     const tableContent = fastaToTable(parseResult.records);
-    const lines = tableContent.split('\n');
-    rawData = lines.map((line) => line.split('\t'));
+    const lines = tableContent.split("\n");
+    rawData = lines.map((line) => line.split("\t"));
   } else {
     const wb = XLSX.read(bytes);
 
@@ -176,20 +201,20 @@ export function processFileBytes(bytes: Uint8Array, extension: string | undefine
     // Detect actual delimiter (extension may not match content).
     // XLSX auto-detects internally via guess_sep but doesn't expose the result,
     // so we check the first line of the already-in-memory data buffer.
-    if (extension === 'csv' || extension === 'tsv') {
-      const firstLine = new TextDecoder().decode(bytes.slice(0, 4096)).split('\n')[0] ?? '';
-      app.model.data.detectedXsvType = firstLine.includes('\t') ? 'tsv' : 'csv';
+    if (extension === "csv" || extension === "tsv") {
+      const firstLine = new TextDecoder().decode(bytes.slice(0, 4096)).split("\n")[0] ?? "";
+      app.model.data.detectedXsvType = firstLine.includes("\t") ? "tsv" : "csv";
     }
   }
 
   const header = rawData[0];
   if (!header) {
-    app.model.data.fileImportError = 'File does not contain any data';
+    app.model.data.fileImportError = "File does not contain any data";
     return;
   }
 
   if (new Set(header).size !== header.length) {
-    app.model.data.fileImportError = 'Headers in the input file must be unique';
+    app.model.data.fileImportError = "Headers in the input file must be unique";
     return;
   }
 
@@ -200,7 +225,7 @@ export function processFileBytes(bytes: Uint8Array, extension: string | undefine
     const columnHeader = header[colIndex];
     const columnValues = rawData.slice(1).map((row) => row[colIndex]);
     const inferredType = inferColumnType(columnValues);
-    const sequenceType = inferredType === 'String' ? inferSequenceType(columnValues) : undefined;
+    const sequenceType = inferredType === "String" ? inferSequenceType(columnValues) : undefined;
 
     importColumns.push({
       header: columnHeader,
@@ -211,7 +236,7 @@ export function processFileBytes(bytes: Uint8Array, extension: string | undefine
 
   app.model.data.importColumns = importColumns;
   if (!importColumns.some((c) => c.sequenceType !== undefined)) {
-    app.model.data.fileImportError = 'No sequence columns found';
+    app.model.data.fileImportError = "No sequence columns found";
     return;
   }
 }

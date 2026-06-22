@@ -1,27 +1,30 @@
 {
   "name": "@platforma-open/milaboratories.immune-assay-data.workflow",
   "version": "1.14.0",
-  "type": "module",
   "description": "Tengo-based template",
+  "type": "module",
   "scripts": {
-    "build": "rm -rf dist && pl-tengo check && pl-tengo build",
-    "format": "/usr/bin/env emacs --script ./format.el",
-    "do-pack": "rm -f *.tgz && pnpm pack && mv *.tgz package.tgz"
+    "build": "shx rm -rf dist && pl-tengo build",
+    "format": "/usr/bin/env emacs --script ./format.el || echo 'No emacs.'",
+    "do-pack": "rm -f *.tgz && pnpm pack && mv *.tgz package.tgz",
+    "check": "pl-tengo check"
   },
   "dependencies": {
-    "@platforma-sdk/workflow-tengo": "catalog:",
-    "@platforma-open/milaboratories.immune-assay-data.prepare-fasta": "workspace:*",
     "@platforma-open/milaboratories.immune-assay-data.add-header": "workspace:*",
+    "@platforma-open/milaboratories.immune-assay-data.check-content-empty": "workspace:*",
     "@platforma-open/milaboratories.immune-assay-data.coverage-mode-calc": "workspace:*",
     "@platforma-open/milaboratories.immune-assay-data.fasta-to-tsv": "workspace:*",
-    "@platforma-open/milaboratories.immune-assay-data.xlsx-to-csv": "workspace:*",
-    "@platforma-open/milaboratories.immune-assay-data.check-content-empty": "workspace:*",
-    "@platforma-open/milaboratories.immune-assay-data.split-fasta": "workspace:*",
     "@platforma-open/milaboratories.immune-assay-data.merge-results": "workspace:*",
+    "@platforma-open/milaboratories.immune-assay-data.prepare-fasta": "workspace:*",
     "@platforma-open/milaboratories.immune-assay-data.sequence-match": "workspace:*",
-    "@platforma-open/soedinglab.software-mmseqs2": "catalog:"
+    "@platforma-open/milaboratories.immune-assay-data.split-fasta": "workspace:*",
+    "@platforma-open/milaboratories.immune-assay-data.xlsx-to-csv": "workspace:*",
+    "@platforma-open/soedinglab.software-mmseqs2": "catalog:",
+    "@platforma-sdk/workflow-tengo": "catalog:"
   },
   "devDependencies": {
-    "@platforma-sdk/tengo-builder": "catalog:"
+    "@platforma-sdk/tengo-builder": "catalog:",
+    "@platforma-sdk/test": "catalog:",
+    "shx": "catalog:"
   }
 }

@@ -4,7 +4,7 @@ import type {
   PlMultiSequenceAlignmentModel,
   PlRef,
   SUniversalPColumnId,
-} from '@platforma-sdk/model';
+} from "@platforma-sdk/model";
 
 export type Settings = {
   /** Fraction of aligned residues required (MMseqs2 coverage). */
@@ -16,16 +16,16 @@ export type Settings = {
    * `exact-match` reports only byte-identical sequences (no alignment,
    * guaranteed recall) and ignores identity/coverage/fast-mode.
    */
-  similarityType: 'sequence-identity' | 'alignment-score' | 'exact-match';
+  similarityType: "sequence-identity" | "alignment-score" | "exact-match";
 };
 
-export type Modality = 'antibody_tcr' | 'peptide';
+export type Modality = "antibody_tcr" | "peptide";
 
 export type ImportColumnInfo = {
   header: string;
-  type: 'Int' | 'Double' | 'String';
+  type: "Int" | "Double" | "String";
   /** If this column is a sequence column, the type of the sequence. */
-  sequenceType?: 'nucleotide' | 'aminoacid';
+  sequenceType?: "nucleotide" | "aminoacid";
 };
 
 /** Unified V3 data: persisted state shaped on the UI's terms. */
@@ -35,7 +35,7 @@ export type BlockData = {
   targetRef?: SUniversalPColumnId;
   fileHandle?: ImportFileHandle;
   fileExtension?: string;
-  detectedXsvType?: 'csv' | 'tsv';
+  detectedXsvType?: "csv" | "tsv";
   importColumns?: ImportColumnInfo[];
   sequenceColumnHeader?: string;
   selectedColumns: string[];
@@ -57,7 +57,7 @@ export type BlockArgs = {
   datasetRef: PlRef;
   targetRef: SUniversalPColumnId;
   fileHandle: ImportFileHandle;
-  detectedXsvType?: 'csv' | 'tsv';
+  detectedXsvType?: "csv" | "tsv";
   importColumns: ImportColumnInfo[];
   sequenceColumnHeader: string;
   selectedColumns: string[];
@@ -84,7 +84,7 @@ export type LegacyBlockArgs = {
   targetRef?: SUniversalPColumnId;
   fileHandle?: ImportFileHandle;
   fileExtension?: string;
-  detectedXsvType?: 'csv' | 'tsv';
+  detectedXsvType?: "csv" | "tsv";
   importColumns?: ImportColumnInfo[];
   sequenceColumnHeader?: string;
   selectedColumns: string[];
