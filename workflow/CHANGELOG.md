@@ -1,5 +1,24 @@
 # @platforma-open/milaboratories.immune-assay-data.workflow
 
+## 1.14.1
+
+### Patch Changes
+
+- 2036371: Migrate onto the block-tools structurer (tool-managed layout: oxlint/oxfmt,
+  ts-builder, regenerated configs) and bump the SDK to latest (model/ui-vue
+  1.79.14, workflow-tengo 6.6.3, tengo-builder 4.0.8). No block behavior change —
+  the model was already on BlockModelV3.
+- Updated dependencies [2036371]
+  - @platforma-open/milaboratories.immune-assay-data.add-header@1.1.4
+  - @platforma-open/milaboratories.immune-assay-data.check-content-empty@1.0.2
+  - @platforma-open/milaboratories.immune-assay-data.coverage-mode-calc@1.3.1
+  - @platforma-open/milaboratories.immune-assay-data.fasta-to-tsv@1.1.4
+  - @platforma-open/milaboratories.immune-assay-data.merge-results@1.1.1
+  - @platforma-open/milaboratories.immune-assay-data.prepare-fasta@1.1.4
+  - @platforma-open/milaboratories.immune-assay-data.sequence-match@1.1.1
+  - @platforma-open/milaboratories.immune-assay-data.split-fasta@1.2.1
+  - @platforma-open/milaboratories.immune-assay-data.xlsx-to-csv@1.1.1
+
 ## 1.14.0
 
 ### Minor Changes
