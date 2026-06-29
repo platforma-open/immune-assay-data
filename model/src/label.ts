@@ -1,6 +1,6 @@
 export function getDefaultBlockLabel(data: {
   fileName?: string;
-  similarityType: 'alignment-score' | 'sequence-identity' | 'exact-match';
+  similarityType: "alignment-score" | "sequence-identity" | "exact-match";
   identity: number;
   coverageThreshold: number;
 }) {
@@ -12,13 +12,13 @@ export function getDefaultBlockLabel(data: {
   }
 
   // Sequence Match mode has no identity/coverage thresholds — they are meaningless.
-  if (data.similarityType === 'exact-match') {
-    parts.push('Sequence match');
-    return parts.filter(Boolean).join(', ');
+  if (data.similarityType === "exact-match") {
+    parts.push("Sequence match");
+    return parts.filter(Boolean).join(", ");
   }
 
   // Add similarity type label
-  const similarityLabel = data.similarityType === 'alignment-score' ? 'BLOSUM' : 'Exact Match';
+  const similarityLabel = data.similarityType === "alignment-score" ? "BLOSUM" : "Exact Match";
   if (similarityLabel) {
     parts.push(similarityLabel);
   }
@@ -29,5 +29,5 @@ export function getDefaultBlockLabel(data: {
   // Add coverage threshold
   parts.push(`cov:${data.coverageThreshold}`);
 
-  return parts.filter(Boolean).join(', ');
+  return parts.filter(Boolean).join(", ");
 }

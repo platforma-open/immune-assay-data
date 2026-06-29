@@ -1,31 +1,29 @@
 packages:
-  - software/prepare-fasta
+  - block
+  - model
   - software/add-header
+  - software/check-content-empty
   - software/coverage-mode-calc
   - software/fasta-to-tsv
-  - software/xlsx-to-csv
-  - software/check-content-empty
-  - software/split-fasta
   - software/merge-results
+  - software/prepare-fasta
   - software/sequence-match
-  - workflow
-  - model
+  - software/split-fasta
+  - software/xlsx-to-csv
   - ui
-  - block
-  - test
+  - workflow
 
 catalog:
   # SDK packages - EXACT VERSIONS (no ^ or ~)
-  '@milaboratories/ts-builder': 1.5.0
+  '@milaboratories/ts-builder': 1.5.2
   '@milaboratories/ts-configs': 1.2.3
-  '@platforma-sdk/workflow-tengo': 6.1.0
-  '@platforma-sdk/model': 1.77.17
-  '@platforma-sdk/ui-vue': 1.77.17
-  '@platforma-sdk/tengo-builder': 4.0.0
-  '@platforma-sdk/package-builder': 3.12.0
-  '@platforma-sdk/block-tools': 2.10.0
-  '@platforma-sdk/eslint-config': 1.2.0
-  '@platforma-sdk/test': 1.77.17
+  '@platforma-sdk/workflow-tengo': 6.6.5
+  '@platforma-sdk/model': 1.79.17
+  '@platforma-sdk/ui-vue': 1.79.17
+  '@platforma-sdk/tengo-builder': 4.0.10
+  '@platforma-sdk/package-builder': 3.14.0
+  '@platforma-sdk/block-tools': 2.11.3
+  '@platforma-sdk/test': 1.79.19
   '@milaboratories/helpers': 1.14.2
   '@milaboratories/graph-maker': 1.4.4
   '@milaboratories/multi-sequence-alignment': 1.47.14
@@ -33,7 +31,7 @@ catalog:
   "@platforma-sdk/blocks-deps-updater": 2.2.0
 
   # Common dependencies - can use ^ or ~
-  'vue': ^3.5.24
+  'vue': 3.5.24
   'typescript': ~5.6.3
   'turbo': ^2.6.3
   'vitest': ^4.0.7
@@ -46,3 +44,4 @@ catalog:
   "@platforma-open/soedinglab.software-mmseqs2": 1.18.3
   '@biowasm/aioli': ~3.2.1
   "sass-embedded": ^1.77.8
+  shx: ~0.4.0

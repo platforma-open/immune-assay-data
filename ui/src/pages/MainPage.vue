@@ -1,19 +1,22 @@
 <script setup lang="ts">
-import { PlMultiSequenceAlignment } from '@milaboratories/multi-sequence-alignment';
-import strings from '@milaboratories/strings';
-import { getDefaultBlockLabel, type Settings } from '@platforma-open/milaboratories.immune-assay-data.model';
+import { PlMultiSequenceAlignment } from "@milaboratories/multi-sequence-alignment";
+import strings from "@milaboratories/strings";
+import {
+  getDefaultBlockLabel,
+  type Settings,
+} from "@platforma-open/milaboratories.immune-assay-data.model";
 import type {
   AxisId,
   ImportFileHandle,
   LocalImportFileHandle,
   PlSelectionModel,
   PTableKey,
-} from '@platforma-sdk/model';
+} from "@platforma-sdk/model";
 import {
   getFileNameFromHandle,
   getRawPlatformaInstance,
   isImportFileHandleUpload,
-} from '@platforma-sdk/model';
+} from "@platforma-sdk/model";
 import {
   PlAccordionSection,
   PlAgDataTableV2,
@@ -33,23 +36,13 @@ import {
   PlTooltip,
   ReactiveFileContent,
   usePlDataTableSettingsV2,
-} from '@platforma-sdk/ui-vue';
-import {
-  computed,
-  reactive,
-  ref,
-  watch,
-} from 'vue';
-import * as XLSX from 'xlsx';
-import {
-  useApp,
-} from '../app';
+} from "@platforma-sdk/ui-vue";
+import { computed, reactive, ref, watch } from "vue";
+import * as XLSX from "xlsx";
+import { useApp } from "../app";
 
-import { processFileBytes } from '../importFile';
-import {
-  isAssayColumn,
-  isSequenceColumn,
-} from '../util';
+import { processFileBytes } from "../importFile";
+import { isAssayColumn, isSequenceColumn } from "../util";
 
 const app = useApp();
 const reactiveFileContent = ReactiveFileContent.useGlobal();
@@ -57,12 +50,22 @@ const reactiveFileContent = ReactiveFileContent.useGlobal();
 // Modality-aware threshold defaults. Applied by the watcher below when the
 // resolved modality changes; switching between two datasets of the same
 // modality preserves user-tuned thresholds.
-const ANTIBODY_DEFAULTS: Settings = { similarityType: 'alignment-score', identity: 0.9, coverageThreshold: 0.95 };
-const PEPTIDE_DEFAULTS: Settings = { similarityType: 'sequence-identity', identity: 1.0, coverageThreshold: 1.0 };
+const ANTIBODY_DEFAULTS: Settings = {
+  similarityType: "alignment-score",
+  identity: 0.9,
+  coverageThreshold: 0.95,
+};
+const PEPTIDE_DEFAULTS: Settings = {
+  similarityType: "sequence-identity",
+  identity: 1.0,
+  coverageThreshold: 1.0,
+};
 
 const defaultLabel = computed(() =>
   getDefaultBlockLabel({
-    fileName: app.model.data.fileHandle ? getFileNameFromHandle(app.model.data.fileHandle) : undefined,
+    fileName: app.model.data.fileHandle
+      ? getFileNameFromHandle(app.model.data.fileHandle)
+      : undefined,
     similarityType: app.model.data.settings.similarityType,
     identity: app.model.data.settings.identity,
     coverageThreshold: app.model.data.settings.coverageThreshold,
@@ -89,7 +92,7 @@ watch(
   (modality) => {
     if (!modality) return;
     if (app.model.data.lastAppliedModality === modality) return;
-    app.model.data.settings = modality === 'peptide' ? PEPTIDE_DEFAULTS : ANTIBODY_DEFAULTS;
+    app.model.data.settings = modality === "peptide" ? PEPTIDE_DEFAULTS : ANTIBODY_DEFAULTS;
     app.model.data.lastAppliedModality = modality;
   },
 );
@@ -112,14 +115,14 @@ const selectionAssay = ref<PlSelectionModel>({
 const assayAxis = computed<AxisId>(() => {
   if (app.model.outputs.assaySequenceSpec?.axesSpec[0] === undefined) {
     return {
-      type: 'String',
-      name: 'pl7.app/assay/sequenceId',
+      type: "String",
+      name: "pl7.app/assay/sequenceId",
       domain: {},
     };
   } else {
     return {
-      type: 'String',
-      name: 'pl7.app/assay/sequenceId',
+      type: "String",
+      name: "pl7.app/assay/sequenceId",
       domain: app.model.outputs.assaySequenceSpec.axesSpec[0].domain,
     };
   }
@@ -172,7 +175,7 @@ const setFile = async (file: ImportFileHandle | undefined) => {
   }
 
   const fileName = getFileNameFromHandle(file);
-  const extension = fileName.split('.').pop()?.toLowerCase();
+  const extension = fileName.split(".").pop()?.toLowerCase();
   app.model.data.fileExtension = extension;
   // Setting fileHandle triggers the prerun (needed for remote files and the workflow).
   app.model.data.fileHandle = file;
@@ -181,10 +184,12 @@ const setFile = async (file: ImportFileHandle | undefined) => {
   // Remote (index://) files fall through to the assayFileBytes watch above.
   if (isImportFileHandleUpload(file)) {
     try {
-      const data = await getRawPlatformaInstance().lsDriver.getLocalFileContent(file as LocalImportFileHandle);
+      const data = await getRawPlatformaInstance().lsDriver.getLocalFileContent(
+        file as LocalImportFileHandle,
+      );
       processFileBytes(data, extension);
     } catch (e) {
-      console.error('Failed to read local file content:', e);
+      console.error("Failed to read local file content:", e);
     }
   }
 };
@@ -200,7 +205,7 @@ watch(
 
     // Skip uniqueness check for FASTA — bytes are FASTA-encoded, not XLSX-parseable
     const ext = app.model.data.fileExtension;
-    if (ext === 'fasta' || ext === 'fa') return;
+    if (ext === "fasta" || ext === "fa") return;
 
     const bytes = assayFileBytes.value;
     if (!bytes) return;
@@ -208,13 +213,20 @@ watch(
     try {
       const wb = XLSX.read(bytes);
       const worksheet = wb.Sheets[wb.SheetNames[0]];
-      const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: true, blankrows: false }) as string[][];
+      const rawData = XLSX.utils.sheet_to_json(worksheet, {
+        header: 1,
+        raw: true,
+        blankrows: false,
+      }) as string[][];
 
       const headerRow = rawData[0];
       const colIndex = headerRow.indexOf(newHeader);
       if (colIndex === -1) return;
 
-      const sequences = rawData.slice(1).map((row) => row[colIndex]).filter(Boolean);
+      const sequences = rawData
+        .slice(1)
+        .map((row) => row[colIndex])
+        .filter(Boolean);
       const uniqueSequences = new Set(sequences);
 
       if (sequences.length !== uniqueSequences.size) {
@@ -223,8 +235,8 @@ watch(
         app.model.data.fileImportError = undefined;
       }
     } catch (e) {
-      console.error('Failed to validate sequence uniqueness:', e);
-      app.model.data.fileImportError = 'Could not validate sequence uniqueness.';
+      console.error("Failed to validate sequence uniqueness:", e);
+      app.model.data.fileImportError = "Could not validate sequence uniqueness.";
     }
   },
 );
@@ -253,43 +265,46 @@ const otherColumnOptions = computed(() => {
 // byte-identical, recall-guaranteed). Derived from settings.similarityType —
 // 'exact-match' is Sequence Match; the other two are Alignment sub-modes.
 const matchingApproach = computed(() =>
-  app.model.data.settings.similarityType === 'exact-match' ? 'sequence-match' : 'alignment',
+  app.model.data.settings.similarityType === "exact-match" ? "sequence-match" : "alignment",
 );
 
 // Remember the last Alignment sub-mode so toggling back from Sequence Match
 // restores the user's choice instead of always resetting to BLOSUM.
-const lastAlignmentType = ref<'alignment-score' | 'sequence-identity'>(
-  app.model.data.settings.similarityType === 'sequence-identity' ? 'sequence-identity' : 'alignment-score',
+const lastAlignmentType = ref<"alignment-score" | "sequence-identity">(
+  app.model.data.settings.similarityType === "sequence-identity"
+    ? "sequence-identity"
+    : "alignment-score",
 );
 watch(
   () => app.model.data.settings.similarityType,
   (t) => {
-    if (t === 'alignment-score' || t === 'sequence-identity') lastAlignmentType.value = t;
+    if (t === "alignment-score" || t === "sequence-identity") lastAlignmentType.value = t;
   },
 );
 
 function setMatchingApproach(value: string) {
-  app.model.data.settings.similarityType
-    = value === 'sequence-match' ? 'exact-match' : lastAlignmentType.value;
+  app.model.data.settings.similarityType =
+    value === "sequence-match" ? "exact-match" : lastAlignmentType.value;
 }
 
 // Sequence Match is gated: exact equality can't match across alphabets (MMseqs2
 // handles that via translated search). Hide the option only when we know the
 // assay and target alphabets differ; the workflow asserts as the hard backstop.
 const matchingApproachOptions = computed(() => {
-  const opts = [{ label: 'Alignment', value: 'alignment' }];
-  const assayAlphabet = app.model.data.importColumns
-    ?.find((c) => c.header === app.model.data.sequenceColumnHeader)?.sequenceType;
+  const opts = [{ label: "Alignment", value: "alignment" }];
+  const assayAlphabet = app.model.data.importColumns?.find(
+    (c) => c.header === app.model.data.sequenceColumnHeader,
+  )?.sequenceType;
   const targetAlphabet = app.model.outputs.targetSequenceType;
   const knownAndDiffer = !!assayAlphabet && !!targetAlphabet && assayAlphabet !== targetAlphabet;
-  if (!knownAndDiffer) opts.push({ label: 'Sequence Match', value: 'sequence-match' });
+  if (!knownAndDiffer) opts.push({ label: "Sequence Match", value: "sequence-match" });
   return opts;
 });
 
 // Alignment sub-modes (MMseqs2 scoring).
 const similarityTypeOptions = [
-  { label: 'BLOSUM', value: 'alignment-score' },
-  { label: 'Exact Match', value: 'sequence-identity' },
+  { label: "BLOSUM", value: "alignment-score" },
+  { label: "Exact Match", value: "sequence-identity" },
 ];
 </script>
 
@@ -300,10 +315,7 @@ const similarityTypeOptions = [
     title="Import Assay Data"
   >
     <template #append>
-      <PlBtnGhost
-        icon="dna"
-        @click.stop="() => (multipleSequenceAlignmentAssayOpen = true)"
-      >
+      <PlBtnGhost icon="dna" @click.stop="() => (multipleSequenceAlignmentAssayOpen = true)">
         Multiple Sequence Alignment
       </PlBtnGhost>
       <PlBtnGhost @click.stop="() => (settingsOpen = true)">
@@ -315,8 +327,8 @@ const similarityTypeOptions = [
     </template>
     <PlAlert v-if="app.model.outputs.emptyClonesInput === true" type="warn" icon>
       <template #title>Empty dataset selection</template>
-      The input dataset you have selected is empty or has no sequences.
-      Please choose a different dataset or check your input data.
+      The input dataset you have selected is empty or has no sequences. Please choose a different
+      dataset or check your input data.
     </PlAlert>
     <PlAgDataTableV2
       v-model="app.model.data.tableState"
@@ -339,8 +351,11 @@ const similarityTypeOptions = [
         required
       />
       <PlDropdown
-        v-model="app.model.data.targetRef" :options="app.model.outputs.targetOptions"
-        label="Sequence column to match" clearable required
+        v-model="app.model.data.targetRef"
+        :options="app.model.outputs.targetOptions"
+        label="Sequence column to match"
+        clearable
+        required
       >
         <template #tooltip>
           Select the sequence column to align against the assay sequences. If the alphabets differ
@@ -349,15 +364,22 @@ const similarityTypeOptions = [
         </template>
       </PlDropdown>
       <PlFileInput
-        v-model="app.model.data.fileHandle" label="Assay data to import" placeholder="Assay data table"
-        :extensions="['csv', 'tsv', 'fasta', 'fa', 'xlsx']" :error="app.model.data.fileImportError" required @update:model-value="setFile"
+        v-model="app.model.data.fileHandle"
+        label="Assay data to import"
+        placeholder="Assay data table"
+        :extensions="['csv', 'tsv', 'fasta', 'fa', 'xlsx']"
+        :error="app.model.data.fileImportError"
+        required
+        @update:model-value="setFile"
       >
         <template #tooltip>
-          Upload a comma-separated (.csv), tab-separated (.tsv), or FASTA (.fasta/.fa) file containing assay data. FASTA files will be converted to a table with Header and Sequence columns.
+          Upload a comma-separated (.csv), tab-separated (.tsv), or FASTA (.fasta/.fa) file
+          containing assay data. FASTA files will be converted to a table with Header and Sequence
+          columns.
         </template>
       </PlFileInput>
       <!-- @TODO: delete this after bug with not working error message in PlFileInput is fixed -->
-      <span v-if="app.model.data.fileImportError" style="color: red;">
+      <span v-if="app.model.data.fileImportError" style="color: red">
         {{ app.model.data.fileImportError }}
       </span>
 
@@ -387,14 +409,17 @@ const similarityTypeOptions = [
         @update:model-value="setMatchingApproach"
       >
         <template #tooltip>
-          Alignment runs MMseqs2 (BLOSUM or identity scoring, with identity and coverage thresholds).
-          Sequence Match reports targets that contain an assay sequence exactly (substring match) — no alignment, guaranteed recall, available only when the assay and target use the same alphabet.
+          Alignment runs MMseqs2 (BLOSUM or identity scoring, with identity and coverage
+          thresholds). Sequence Match reports targets that contain an assay sequence exactly
+          (substring match) — no alignment, guaranteed recall, available only when the assay and
+          target use the same alphabet.
         </template>
       </PlBtnGroup>
 
       <template v-if="matchingApproach === 'alignment'">
         <PlDropdown
-          v-model="app.model.data.settings.similarityType" :options="similarityTypeOptions"
+          v-model="app.model.data.settings.similarityType"
+          :options="similarityTypeOptions"
           label="Alignment Score"
         >
           <template #tooltip>
@@ -404,7 +429,10 @@ const similarityTypeOptions = [
 
         <PlNumberField
           v-model="app.model.data.settings.identity"
-          label="Score threshold" :min-value="0.1" :step="0.1" :max-value="1.0"
+          label="Score threshold"
+          :min-value="0.1"
+          :step="0.1"
+          :max-value="1.0"
         >
           <template #tooltip>
             Sets the lowest percentage of identical residues required for a match.
@@ -426,13 +454,14 @@ const similarityTypeOptions = [
       </template>
 
       <PlAccordionSection :label="strings.titles.advancedSettings">
-        <PlCheckbox
-          v-if="matchingApproach === 'alignment'"
-          v-model="app.model.data.lessSensitive"
-        >
+        <PlCheckbox v-if="matchingApproach === 'alignment'" v-model="app.model.data.lessSensitive">
           Fast mode
           <PlTooltip class="info" position="top">
-            <template #tooltip>Prioritizes speed over sensitivity. Reduces prefiltering precision, which may miss some weaker matches but significantly speeds up alignment for large datasets.</template>
+            <template #tooltip
+              >Prioritizes speed over sensitivity. Reduces prefiltering precision, which may miss
+              some weaker matches but significantly speeds up alignment for large
+              datasets.</template
+            >
           </PlTooltip>
         </PlCheckbox>
 
@@ -444,9 +473,7 @@ const similarityTypeOptions = [
           :step="1"
           :max-value="1012"
         >
-          <template #tooltip>
-            Sets the amount of memory to use for the alignment.
-          </template>
+          <template #tooltip> Sets the amount of memory to use for the alignment. </template>
         </PlNumberField>
 
         <PlNumberField
@@ -456,9 +483,7 @@ const similarityTypeOptions = [
           :step="1"
           :max-value="128"
         >
-          <template #tooltip>
-            Sets the number of CPU cores to use for the alignment.
-          </template>
+          <template #tooltip> Sets the number of CPU cores to use for the alignment. </template>
         </PlNumberField>
       </PlAccordionSection>
     </PlSlideModal>
