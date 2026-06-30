@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.fasta-to-tsv
 
+## 1.1.5
+
+### Patch Changes
+
+- ac20364: Bump everything to fix docker image
+
 ## 1.1.4
 
 ### Patch Changes

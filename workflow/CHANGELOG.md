@@ -1,5 +1,21 @@
 # @platforma-open/milaboratories.immune-assay-data.workflow
 
+## 1.14.3
+
+### Patch Changes
+
+- ac20364: Bump everything to fix docker image
+- Updated dependencies [ac20364]
+  - @platforma-open/milaboratories.immune-assay-data.add-header@1.1.5
+  - @platforma-open/milaboratories.immune-assay-data.check-content-empty@1.0.3
+  - @platforma-open/milaboratories.immune-assay-data.coverage-mode-calc@1.3.2
+  - @platforma-open/milaboratories.immune-assay-data.fasta-to-tsv@1.1.5
+  - @platforma-open/milaboratories.immune-assay-data.merge-results@1.1.2
+  - @platforma-open/milaboratories.immune-assay-data.prepare-fasta@1.1.5
+  - @platforma-open/milaboratories.immune-assay-data.sequence-match@1.1.2
+  - @platforma-open/milaboratories.immune-assay-data.split-fasta@1.2.2
+  - @platforma-open/milaboratories.immune-assay-data.xlsx-to-csv@1.1.2
+
 ## 1.14.2
 
 ### Patch Changes

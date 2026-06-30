@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.model
 
+## 1.10.3
+
+### Patch Changes
+
+- ac20364: Bump everything to fix docker image
+
 ## 1.10.2
 
 ### Patch Changes

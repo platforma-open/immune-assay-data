@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.split-fasta
 
+## 1.2.2
+
+### Patch Changes
+
+- ac20364: Bump everything to fix docker image
+
 ## 1.2.1
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.coverage-mode-calc
 
+## 1.3.2
+
+### Patch Changes
+
+- ac20364: Bump everything to fix docker image
+
 ## 1.3.1
 
 ### Patch Changes

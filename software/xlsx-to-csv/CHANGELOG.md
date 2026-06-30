@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.xlsx-to-csv
 
+## 1.1.2
+
+### Patch Changes
+
+- ac20364: Bump everything to fix docker image
+
 ## 1.1.1
 
 ### Patch Changes
