@@ -1,5 +1,20 @@
 # @platforma-open/milaboratories.immune-assay-data.workflow
 
+## 1.14.4
+
+### Patch Changes
+
+- Updated dependencies [48ac37e]
+  - @platforma-open/milaboratories.immune-assay-data.check-content-empty@1.0.4
+  - @platforma-open/milaboratories.immune-assay-data.coverage-mode-calc@1.3.3
+  - @platforma-open/milaboratories.immune-assay-data.sequence-match@1.1.3
+  - @platforma-open/milaboratories.immune-assay-data.merge-results@1.1.3
+  - @platforma-open/milaboratories.immune-assay-data.prepare-fasta@1.1.6
+  - @platforma-open/milaboratories.immune-assay-data.fasta-to-tsv@1.1.6
+  - @platforma-open/milaboratories.immune-assay-data.split-fasta@1.2.3
+  - @platforma-open/milaboratories.immune-assay-data.xlsx-to-csv@1.1.3
+  - @platforma-open/milaboratories.immune-assay-data.add-header@1.1.6
+
 ## 1.14.3
 
 ### Patch Changes

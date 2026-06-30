@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.coverage-mode-calc
 
+## 1.3.3
+
+### Patch Changes
+
+- 48ac37e: Upgrade SDK
+
 ## 1.3.2
 
 ### Patch Changes

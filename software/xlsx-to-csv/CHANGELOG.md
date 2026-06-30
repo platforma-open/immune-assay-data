@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.xlsx-to-csv
 
+## 1.1.3
+
+### Patch Changes
+
+- 48ac37e: Upgrade SDK
+
 ## 1.1.2
 
 ### Patch Changes

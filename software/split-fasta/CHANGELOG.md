@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.split-fasta
 
+## 1.2.3
+
+### Patch Changes
+
+- 48ac37e: Upgrade SDK
+
 ## 1.2.2
 
 ### Patch Changes
