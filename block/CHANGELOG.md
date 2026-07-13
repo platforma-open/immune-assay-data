@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data
 
+## 1.5.6
+
+### Patch Changes
+
+- ec0c7d6: Allow to configure mmseqs2 --max-seqs parameter to improve recall results
+
 ## 1.5.5
 
 ### Patch Changes

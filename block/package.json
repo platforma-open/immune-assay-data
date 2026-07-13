@@ -1,6 +1,6 @@
 {
   "name": "@platforma-open/milaboratories.immune-assay-data",
-  "version": "1.5.5",
+  "version": "1.5.6",
   "files": [
     "dist",
     "block-pack"
