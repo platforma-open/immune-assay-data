@@ -48,7 +48,7 @@ const blockDataModel = new DataModelBuilder()
     selectedColumns: args?.selectedColumns ?? [],
     settings: args?.settings ?? defaultSettings(),
     lessSensitive: args?.lessSensitive ?? false,
-    maxSeqs: 10000,
+    maxSeqs: args?.maxSeqs ?? 10000,
     mem: args?.mem,
     cpu: args?.cpu,
     fileImportError: uiState?.fileImportError,

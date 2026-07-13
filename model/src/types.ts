@@ -92,6 +92,7 @@ export type LegacyBlockArgs = {
   selectedColumns: string[];
   settings: Settings;
   lessSensitive: boolean;
+  maxSeqs?: number;
   mem?: number;
   cpu?: number;
 };
