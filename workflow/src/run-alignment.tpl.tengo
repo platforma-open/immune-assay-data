@@ -16,6 +16,13 @@ self.body(func(args) {
     similarityType := string(args.similarityType)
     clonesFasta := args.clonesFasta
     assayFasta := args.assayFasta
+    // maxSeqs == 0 means "No limit": pass a large value that MMseqs2 clamps
+    // internally to this chunk's target DB size (Prefiltering.cpp:169), so the
+    // prefilter keeps every candidate for the chunk (no silent truncation).
+    maxSeqs := is_undefined(args.maxSeqs) ? 10000 : args.maxSeqs
+    if maxSeqs <= 0 {
+        maxSeqs = 1000000000
+    }
 
 	baseMemGiB := 64
 	if !is_undefined(args.metaInputs.mem) {
@@ -37,7 +44,7 @@ self.body(func(args) {
 		arg("results.tsv").
 		arg("tmp").
 		arg("--threads").arg(string(cpu)).
-		arg("--max-seqs").arg("10000").
+		arg("--max-seqs").arg(string(maxSeqs)).
 		arg("--search-type").arg(mmseqsSearchType).
 		arg("--cov-mode").arg(string(covMode)).
 		arg("-c").arg(string(coverageThreshold)).

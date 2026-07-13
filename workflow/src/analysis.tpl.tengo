@@ -192,6 +192,7 @@ self.body(func(args) {
 	identityThreshold := args.identityThreshold
 	similarityType := args.similarityType
 	lessSensitive := args.lessSensitive
+	maxSeqs := args.maxSeqs
 	mem := args.metaInputs.mem
 	cpu := args.metaInputs.cpu
 
@@ -324,6 +325,7 @@ self.body(func(args) {
 			clonesFasta: chunk1Fasta,
 			assayFasta: assayFasta,
 			lessSensitive: lessSensitive,
+			maxSeqs: maxSeqs,
 			isPeptide: args.isPeptide,
 			minPeptideLength: args.minPeptideLength
 		}, {
@@ -341,6 +343,7 @@ self.body(func(args) {
 			clonesFasta: chunk2Fasta,
 			assayFasta: assayFasta,
 			lessSensitive: lessSensitive,
+			maxSeqs: maxSeqs,
 			isPeptide: args.isPeptide,
 			minPeptideLength: args.minPeptideLength
 		}, {

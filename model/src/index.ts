@@ -48,6 +48,7 @@ const blockDataModel = new DataModelBuilder()
     selectedColumns: args?.selectedColumns ?? [],
     settings: args?.settings ?? defaultSettings(),
     lessSensitive: args?.lessSensitive ?? false,
+    maxSeqs: 10000,
     mem: args?.mem,
     cpu: args?.cpu,
     fileImportError: uiState?.fileImportError,
@@ -69,6 +70,7 @@ const blockDataModel = new DataModelBuilder()
     selectedColumns: [],
     settings: defaultSettings(),
     lessSensitive: false,
+    maxSeqs: 10000,
     mem: undefined,
     cpu: undefined,
     fileImportError: undefined,
@@ -130,6 +132,7 @@ export const platforma = BlockModelV3.create(blockDataModel)
         ? { similarityType: "exact-match", identity: 1, coverageThreshold: 1 }
         : data.settings,
       lessSensitive: exact ? false : data.lessSensitive,
+      maxSeqs: exact ? 10000 : (data.maxSeqs ?? 10000),
       mem: data.mem,
       cpu: data.cpu,
     };

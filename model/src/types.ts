@@ -41,6 +41,7 @@ export type BlockData = {
   selectedColumns: string[];
   settings: Settings;
   lessSensitive: boolean;
+  maxSeqs?: number;
   mem?: number;
   cpu?: number;
   fileImportError?: string;
@@ -63,6 +64,7 @@ export type BlockArgs = {
   selectedColumns: string[];
   settings: Settings;
   lessSensitive: boolean;
+  maxSeqs: number;
   mem?: number;
   cpu?: number;
 };
