@@ -188,6 +188,7 @@ wf.body(func(args) {
 		identityThreshold: args.settings.identity,
 		similarityType: args.settings.similarityType,
 		lessSensitive: args.lessSensitive,
+		maxSeqs: args.maxSeqs,
 		importColumns: args.importColumns,
 		selectedColumns: args.selectedColumns,
 		isPeptide: isPeptide,

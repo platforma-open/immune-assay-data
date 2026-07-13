@@ -47,6 +47,17 @@ import { isAssayColumn, isSequenceColumn } from "../util";
 const app = useApp();
 const reactiveFileContent = ReactiveFileContent.useGlobal();
 
+// "No limit" for --max-seqs: 0 in data signals the workflow to pass a large
+// value that MMseqs2 clamps to each chunk's target size, so the prefilter keeps
+// every candidate (no silent truncation). Unchecking restores the default cap.
+const MAX_SEQS_DEFAULT = 10000;
+const maxSeqsNoLimit = computed<boolean>({
+  get: () => app.model.data.maxSeqs === 0,
+  set: (v) => {
+    app.model.data.maxSeqs = v ? 0 : MAX_SEQS_DEFAULT;
+  },
+});
+
 // Modality-aware threshold defaults. Applied by the watcher below when the
 // resolved modality changes; switching between two datasets of the same
 // modality preserves user-tuned thresholds.
@@ -464,6 +475,30 @@ const similarityTypeOptions = [
             >
           </PlTooltip>
         </PlCheckbox>
+
+        <PlCheckbox v-if="matchingApproach === 'alignment'" v-model="maxSeqsNoLimit">
+          Find all matching clonotypes
+          <PlTooltip class="info" position="top">
+            <template #tooltip
+              >Compares every clonotype so no true match is missed in repertoires with many highly
+              similar clonotypes (conserved frameworks, clonal expansions). Slower to run.</template
+            >
+          </PlTooltip>
+        </PlCheckbox>
+
+        <PlNumberField
+          v-if="matchingApproach === 'alignment' && !maxSeqsNoLimit"
+          v-model="app.model.data.maxSeqs"
+          label="Max clonotypes examined per sequence"
+          :min-value="1"
+          :step="1000"
+        >
+          <template #tooltip>
+            How many similar clonotypes to examine per assay sequence. Too low can miss true matches
+            when many clonotypes are highly similar (conserved frameworks, clonal expansions);
+            higher is slower.
+          </template>
+        </PlNumberField>
 
         <PlSectionSeparator>Resource allocation</PlSectionSeparator>
         <PlNumberField
