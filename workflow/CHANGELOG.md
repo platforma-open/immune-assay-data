@@ -1,5 +1,30 @@
 # @platforma-open/milaboratories.immune-assay-data.workflow
 
+## 1.14.6
+
+### Patch Changes
+
+- 52688ec: Offer scFv construct sequences as a match target
+
+  Datasets from scFv clonotyping expose the whole VH-linker-VL construct as a
+  single `pl7.app/vdj/scFv-sequence` column alongside the per-chain sequence
+  columns. It is now listed in "Sequence column to match", so an assay table
+  carrying full construct sequences can be matched directly instead of against a
+  single chain. Datasets without such columns are unaffected.
+
+  SDK Update
+
+- Updated dependencies [52688ec]
+  - @platforma-open/milaboratories.immune-assay-data.add-header@1.1.7
+  - @platforma-open/milaboratories.immune-assay-data.check-content-empty@1.0.5
+  - @platforma-open/milaboratories.immune-assay-data.coverage-mode-calc@1.3.4
+  - @platforma-open/milaboratories.immune-assay-data.fasta-to-tsv@1.1.7
+  - @platforma-open/milaboratories.immune-assay-data.merge-results@1.1.4
+  - @platforma-open/milaboratories.immune-assay-data.prepare-fasta@1.1.7
+  - @platforma-open/milaboratories.immune-assay-data.sequence-match@1.1.4
+  - @platforma-open/milaboratories.immune-assay-data.split-fasta@1.2.4
+  - @platforma-open/milaboratories.immune-assay-data.xlsx-to-csv@1.1.4
+
 ## 1.14.5
 
 ### Patch Changes
