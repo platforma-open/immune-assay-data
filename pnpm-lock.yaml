@@ -16,8 +16,8 @@ catalogs:
       specifier: 1.4.8
       version: 1.4.8
     '@milaboratories/helpers':
-      specifier: 1.14.5
-      version: 1.14.5
+      specifier: 1.14.3
+      version: 1.14.3
     '@milaboratories/multi-sequence-alignment':
       specifier: 1.47.18
       version: 1.47.18
@@ -25,11 +25,11 @@ catalogs:
       specifier: 0.1.2
       version: 0.1.2
     '@milaboratories/ts-builder':
-      specifier: 1.6.2
-      version: 1.6.2
+      specifier: 1.6.0
+      version: 1.6.0
     '@milaboratories/ts-configs':
-      specifier: 1.4.0
-      version: 1.4.0
+      specifier: 1.3.0
+      version: 1.3.0
     '@platforma-open/milaboratories.runenv-python-3':
       specifier: ^1.7.5
       version: 1.7.7
@@ -37,23 +37,26 @@ catalogs:
       specifier: 1.18.3
       version: 1.18.3
     '@platforma-sdk/block-tools':
-      specifier: 2.12.13
-      version: 2.12.13
+      specifier: 2.12.4
+      version: 2.12.4
     '@platforma-sdk/model':
-      specifier: 1.81.1
-      version: 1.81.1
+      specifier: 1.79.27
+      version: 1.79.27
+    '@platforma-sdk/package-builder':
+      specifier: 3.14.1
+      version: 3.14.1
     '@platforma-sdk/tengo-builder':
-      specifier: 4.0.22
-      version: 4.0.22
+      specifier: 4.0.16
+      version: 4.0.16
     '@platforma-sdk/test':
-      specifier: 1.81.2
-      version: 1.81.2
+      specifier: 1.79.34
+      version: 1.79.34
     '@platforma-sdk/ui-vue':
-      specifier: 1.81.1
-      version: 1.81.1
+      specifier: 1.79.34
+      version: 1.79.34
     '@platforma-sdk/workflow-tengo':
-      specifier: 6.8.2
-      version: 6.8.2
+      specifier: 6.7.1
+      version: 6.7.1
     eslint:
       specifier: ^9.25.1
       version: 9.27.0
@@ -89,10 +92,10 @@ importers:
         version: 2.29.8(@types/node@24.5.2)
       '@milaboratories/ts-builder':
         specifier: 'catalog:'
-        version: 1.6.2(@types/node@24.5.2)(rollup@4.55.1)(sass-embedded@1.89.0)(vue@3.5.24(typescript@5.6.3))(yaml@2.8.0)
+        version: 1.6.0(@types/node@24.5.2)(rollup@4.55.1)(sass-embedded@1.89.0)(vue@3.5.24(typescript@5.6.3))(yaml@2.8.0)
       '@platforma-sdk/block-tools':
         specifier: 'catalog:'
-        version: 2.12.13(@types/node@24.5.2)
+        version: 2.12.4(@types/node@24.5.2)
       shx:
         specifier: 'catalog:'
         version: 0.4.0
@@ -107,10 +110,10 @@ importers:
     devDependencies:
       '@milaboratories/ts-builder':
         specifier: 'catalog:'
-        version: 1.6.2(@types/node@24.5.2)(rollup@4.55.1)(sass-embedded@1.89.0)(vue@3.5.24(typescript@5.6.3))(yaml@2.8.0)
+        version: 1.6.0(@types/node@24.5.2)(rollup@4.55.1)(sass-embedded@1.89.0)(vue@3.5.24(typescript@5.6.3))(yaml@2.8.0)
       '@milaboratories/ts-configs':
         specifier: 'catalog:'
-        version: 1.4.0
+        version: 1.3.0
       '@platforma-open/milaboratories.immune-assay-data.model':
         specifier: workspace:*
         version: link:../model
@@ -122,10 +125,10 @@ importers:
         version: link:../workflow
       '@platforma-sdk/block-tools':
         specifier: 'catalog:'
-        version: 2.12.13(@types/node@24.5.2)
+        version: 2.12.4(@types/node@24.5.2)
       '@platforma-sdk/model':
         specifier: 'catalog:'
-        version: 1.81.1
+        version: 1.79.27
       shx:
         specifier: 'catalog:'
         version: 0.4.0
@@ -137,13 +140,13 @@ importers:
     dependencies:
       '@milaboratories/graph-maker':
         specifier: 'catalog:'
-        version: 1.4.8(@milaboratories/pl-model-common@1.47.3)(@platforma-sdk/model@1.81.1)(@platforma-sdk/ui-vue@1.81.1(@bytecodealliance/preview2-shim@0.17.8)(typescript@5.9.3))(d3-dispatch@3.0.1)(d3-path@3.1.0)(d3-scale-chromatic@3.1.0)(typescript@5.9.3)
+        version: 1.4.8(@milaboratories/pl-model-common@1.46.4)(@platforma-sdk/model@1.79.27)(@platforma-sdk/ui-vue@1.79.34(@bytecodealliance/preview2-shim@0.17.8)(typescript@5.9.3))(d3-dispatch@3.0.1)(d3-path@3.1.0)(d3-scale-chromatic@3.1.0)(typescript@5.9.3)
       '@milaboratories/helpers':
         specifier: 'catalog:'
-        version: 1.14.5
+        version: 1.14.3
       '@platforma-sdk/model':
         specifier: 'catalog:'
-        version: 1.81.1
+        version: 1.79.27
       '@types/node':
         specifier: '*'
         version: 24.5.2
@@ -153,13 +156,13 @@ importers:
     devDependencies:
       '@milaboratories/ts-builder':
         specifier: 'catalog:'
-        version: 1.6.2(@types/node@24.5.2)(rollup@4.55.1)(sass-embedded@1.89.0)(vue@3.5.24(typescript@5.9.3))(yaml@2.8.0)
+        version: 1.6.0(@types/node@24.5.2)(rollup@4.55.1)(sass-embedded@1.89.0)(vue@3.5.24(typescript@5.9.3))(yaml@2.8.0)
       '@milaboratories/ts-configs':
         specifier: 'catalog:'
-        version: 1.4.0
+        version: 1.3.0
       '@platforma-sdk/block-tools':
         specifier: 'catalog:'
-        version: 2.12.13(@types/node@24.5.2)
+        version: 2.12.4(@types/node@24.5.2)
       eslint:
         specifier: 'catalog:'
         version: 9.27.0
@@ -169,81 +172,81 @@ importers:
       '@platforma-open/milaboratories.runenv-python-3':
         specifier: 'catalog:'
         version: 1.7.7
-      '@platforma-sdk/block-tools':
+      '@platforma-sdk/package-builder':
         specifier: 'catalog:'
-        version: 2.12.13(@types/node@24.5.2)
+        version: 3.14.1
 
   software/check-content-empty:
     devDependencies:
       '@platforma-open/milaboratories.runenv-python-3':
         specifier: 'catalog:'
         version: 1.7.7
-      '@platforma-sdk/block-tools':
+      '@platforma-sdk/package-builder':
         specifier: 'catalog:'
-        version: 2.12.13(@types/node@24.5.2)
+        version: 3.14.1
 
   software/coverage-mode-calc:
     devDependencies:
       '@platforma-open/milaboratories.runenv-python-3':
         specifier: 'catalog:'
         version: 1.7.7
-      '@platforma-sdk/block-tools':
+      '@platforma-sdk/package-builder':
         specifier: 'catalog:'
-        version: 2.12.13(@types/node@24.5.2)
+        version: 3.14.1
 
   software/fasta-to-tsv:
     devDependencies:
       '@platforma-open/milaboratories.runenv-python-3':
         specifier: 'catalog:'
         version: 1.7.7
-      '@platforma-sdk/block-tools':
+      '@platforma-sdk/package-builder':
         specifier: 'catalog:'
-        version: 2.12.13(@types/node@24.5.2)
+        version: 3.14.1
 
   software/merge-results:
     devDependencies:
       '@platforma-open/milaboratories.runenv-python-3':
         specifier: 'catalog:'
         version: 1.7.7
-      '@platforma-sdk/block-tools':
+      '@platforma-sdk/package-builder':
         specifier: 'catalog:'
-        version: 2.12.13(@types/node@24.5.2)
+        version: 3.14.1
 
   software/prepare-fasta:
     devDependencies:
       '@platforma-open/milaboratories.runenv-python-3':
         specifier: 'catalog:'
         version: 1.7.7
-      '@platforma-sdk/block-tools':
+      '@platforma-sdk/package-builder':
         specifier: 'catalog:'
-        version: 2.12.13(@types/node@24.5.2)
+        version: 3.14.1
 
   software/sequence-match:
     devDependencies:
       '@platforma-open/milaboratories.runenv-python-3':
         specifier: 'catalog:'
         version: 1.7.7
-      '@platforma-sdk/block-tools':
+      '@platforma-sdk/package-builder':
         specifier: 'catalog:'
-        version: 2.12.13(@types/node@24.5.2)
+        version: 3.14.1
 
   software/split-fasta:
     devDependencies:
       '@platforma-open/milaboratories.runenv-python-3':
         specifier: 'catalog:'
         version: 1.7.7
-      '@platforma-sdk/block-tools':
+      '@platforma-sdk/package-builder':
         specifier: 'catalog:'
-        version: 2.12.13(@types/node@24.5.2)
+        version: 3.14.1
 
   software/xlsx-to-csv:
     devDependencies:
       '@platforma-open/milaboratories.runenv-python-3':
         specifier: 'catalog:'
         version: 1.7.7
-      '@platforma-sdk/block-tools':
+      '@platforma-sdk/package-builder':
         specifier: 'catalog:'
-        version: 2.12.13(@types/node@24.5.2)
+        version: 3.14.1
 
   ui:
     dependencies:
@@ -252,10 +255,10 @@ importers:
         version: 3.2.1
       '@milaboratories/graph-maker':
         specifier: 'catalog:'
-        version: 1.4.8(@milaboratories/pl-model-common@1.47.3)(@platforma-sdk/model@1.81.1)(@platforma-sdk/ui-vue@1.81.1(@bytecodealliance/preview2-shim@0.17.8)(typescript@5.9.3))(d3-dispatch@3.0.1)(d3-path@3.1.0)(d3-scale-chromatic@3.1.0)(typescript@5.9.3)
+        version: 1.4.8(@milaboratories/pl-model-common@1.46.4)(@platforma-sdk/model@1.79.27)(@platforma-sdk/ui-vue@1.79.34(@bytecodealliance/preview2-shim@0.17.8)(typescript@5.9.3))(d3-dispatch@3.0.1)(d3-path@3.1.0)(d3-scale-chromatic@3.1.0)(typescript@5.9.3)
       '@milaboratories/multi-sequence-alignment':
         specifier: 'catalog:'
-        version: 1.47.18(@milaboratories/pl-model-common@1.47.3)(@platforma-sdk/model@1.81.1)(@platforma-sdk/ui-vue@1.81.1(@bytecodealliance/preview2-shim@0.17.8)(typescript@5.9.3))(d3-dispatch@3.0.1)(d3-path@3.1.0)(d3-scale-chromatic@3.1.0)(typescript@5.9.3)
+        version: 1.47.18(@milaboratories/pl-model-common@1.46.4)(@platforma-sdk/model@1.79.27)(@platforma-sdk/ui-vue@1.79.34(@bytecodealliance/preview2-shim@0.17.8)(typescript@5.9.3))(d3-dispatch@3.0.1)(d3-path@3.1.0)(d3-scale-chromatic@3.1.0)(typescript@5.9.3)
       '@milaboratories/strings':
         specifier: 'catalog:'
         version: 0.1.2
@@ -264,10 +267,10 @@ importers:
         version: link:../model
       '@platforma-sdk/model':
         specifier: 'catalog:'
-        version: 1.81.1
+        version: 1.79.27
       '@platforma-sdk/ui-vue':
         specifier: 'catalog:'
-        version: 1.81.1(@bytecodealliance/preview2-shim@0.17.8)(typescript@5.9.3)
+        version: 1.79.34(@bytecodealliance/preview2-shim@0.17.8)(typescript@5.9.3)
       '@types/node':
         specifier: '*'
         version: 24.5.2
@@ -286,10 +289,10 @@ importers:
     devDependencies:
       '@milaboratories/ts-builder':
         specifier: 'catalog:'
-        version: 1.6.2(@types/node@24.5.2)(rollup@4.55.1)(sass-embedded@1.89.0)(vue@3.5.24(typescript@5.9.3))(yaml@2.8.0)
+        version: 1.6.0(@types/node@24.5.2)(rollup@4.55.1)(sass-embedded@1.89.0)(vue@3.5.24(typescript@5.9.3))(yaml@2.8.0)
       '@milaboratories/ts-configs':
         specifier: 'catalog:'
-        version: 1.4.0
+        version: 1.3.0
       eslint:
         specifier: 'catalog:'
         version: 9.27.0
@@ -328,14 +331,14 @@ importers:
         version: 1.18.3
       '@platforma-sdk/workflow-tengo':
         specifier: 'catalog:'
-        version: 6.8.2
+        version: 6.7.1
     devDependencies:
       '@platforma-sdk/tengo-builder':
         specifier: 'catalog:'
-        version: 4.0.22
+        version: 4.0.16
       '@platforma-sdk/test':
         specifier: 'catalog:'
-        version: 1.81.2(@bytecodealliance/preview2-shim@0.17.8)(@types/node@24.5.2)(vite@8.0.10(@types/node@24.5.2)(sass-embedded@1.89.0)(yaml@2.8.0))
+        version: 1.79.34(@bytecodealliance/preview2-shim@0.17.8)(@types/node@24.5.2)(vite@8.0.10(@types/node@24.5.2)(sass-embedded@1.89.0)(yaml@2.8.0))
       shx:
         specifier: 'catalog:'
         version: 0.4.0
@@ -856,12 +859,12 @@ packages:
     resolution: {integrity: sha512-0J+zgWxHN+xXONWIyPWKFMgVuJoZuGiIFu8yxk7RJjxkzpGmyja5wRFqZIVtjDVOQpV+Rw0iOAjYPE2eQyjr0w==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@grpc/grpc-js@1.14.4':
-    resolution: {integrity: sha512-k9Dj3DV/itK9D06Y8f190Qgop7/Ui+D0njFV3LHMPwPT75DpXLQohE9Wmz0QElrJnzsjB7KPWiKJbOl7IPDArQ==}
+  '@grpc/grpc-js@1.13.4':
+    resolution: {integrity: sha512-GsFaMXCkMqkKIvwCQjCrwH+GHbPKBjhwo/8ZuUkWHqbI73Kky9I+pQltrlT0+MWpedCoosda53lgjYfyEPgxBg==}
     engines: {node: '>=12.10.0'}
 
-  '@grpc/proto-loader@0.8.1':
-    resolution: {integrity: sha512-wtF6h+DY6M3YaDBPAmvuuA6jV8Sif9MjtOI5euKFWRgCDl5PeDpPsHR9u2l6St5ceY8AZgoNDww5+HvEsXFsGg==}
+  '@grpc/proto-loader@0.7.15':
+    resolution: {integrity: sha512-tMXdRCfYVixjuFK+Hk0Q1s38gV9zDiDJfWL3h1rv4Qc39oILCu1TRTDt7+fGUI8K4G1Fj125Hx/ru3azECWTyQ==}
     engines: {node: '>=6'}
     hasBin: true
 
@@ -1039,20 +1042,20 @@ packages:
     resolution: {integrity: sha512-+Sg6GCR/wy1oSmQDFq4LQDAhm3ETKnorxN+y5nbLULOR3P0c14f2Wurzj3/xqPXtasLFfHd5iRFQ7AJt4KH2cw==}
     engines: {node: '>=8'}
 
-  '@jitl/quickjs-ffi-types@0.32.0':
-    resolution: {integrity: sha512-v9T+GQpmk43VDJ7d72sf0Nexhk+ArvtUihW27dy7lqAl0zBObFKtSBBIm5RBjwIhE8VwsPPm9PNuvPvNqLWUEg==}
+  '@jitl/quickjs-ffi-types@0.31.0':
+    resolution: {integrity: sha512-1yrgvXlmXH2oNj3eFTrkwacGJbmM0crwipA3ohCrjv52gBeDaD7PsTvFYinlAnqU8iPME3LGP437yk05a2oejw==}
 
-  '@jitl/quickjs-wasmfile-debug-asyncify@0.32.0':
-    resolution: {integrity: sha512-EX8zbXwGqCgAE764M+qvkHtyXDi/FUoMBea0JnES7vCM3P7a2+EOZOjGv85wtZ2sJhI1oJ+nekmqpOODFDY+hw==}
+  '@jitl/quickjs-wasmfile-debug-asyncify@0.31.0':
+    resolution: {integrity: sha512-YkdzQdr1uaftFhgEnTRjTTZHk2SFZdpWO7XhOmRVbi6CEVsH9g5oNF8Ta1q3OuSJHRwwT8YsuR1YzEiEIJEk6w==}
 
-  '@jitl/quickjs-wasmfile-debug-sync@0.32.0':
-    resolution: {integrity: sha512-LeYWrPGC1uNCTBWvibo3ZLJj0CSVNYUXvJpXMCmuQ5Sap2cCACc3uvGvYV4homHHBAzfw5akoTqMMS4YFRtw+Q==}
+  '@jitl/quickjs-wasmfile-debug-sync@0.31.0':
+    resolution: {integrity: sha512-8XvloaaWBONqcHXYs5tWOjdhQVxzULilIfB2hvZfS6S+fI4m2+lFiwQy7xeP8ExHmiZ7D8gZGChNkdLgjGfknw==}
 
-  '@jitl/quickjs-wasmfile-release-asyncify@0.32.0':
-    resolution: {integrity: sha512-3oSwPfja12ICz4aIblB58cuY8JlEq5Txt8Cut4VLo+LH47QN+mzCnSgnbB03hWzg1LBcc+VyyI9UOag7a1NF+Q==}
+  '@jitl/quickjs-wasmfile-release-asyncify@0.31.0':
+    resolution: {integrity: sha512-uz0BbQYTxNsFkvkurd7vk2dOg57ElTBLCuvNtRl4rgrtbC++NIndD5qv2+AXb6yXDD3Uy1O2PCwmoaH0eXgEOg==}
 
-  '@jitl/quickjs-wasmfile-release-sync@0.32.0':
-    resolution: {integrity: sha512-BKNDI/TPBfGlLNGYpLrhcDGXmIk4xHm4MRAisOBnOzpXVn9HZWsfmMAc9WMBrAHjvvds6HOikKeaOBKdPdpVrg==}
+  '@jitl/quickjs-wasmfile-release-sync@0.31.0':
+    resolution: {integrity: sha512-hYduecOByj9AsAfsJhZh5nA6exokmuFC8cls39+lYmTCGY51bgjJJJwReEu7Ff7vBWaQCL6TeDdVlnp2WYz0jw==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -1100,11 +1103,8 @@ packages:
   '@milaboratories/biowasm-tools@2.0.2':
     resolution: {integrity: sha512-pe9bIiLni1vMr3tbM87bC2bYRYtwJWeHoZEGAN8WHLRvXW2ouNPvQT5b7LgSsnVtDXsU4L1Eu5cA4W/E94/5tA==}
 
-  '@milaboratories/columns-collection-driver@0.2.3':
-    resolution: {integrity: sha512-3rNWmuQGvEaBEzGMHIWeOi1p8j8sMDpnPKNUQvT0Ji7/ArvnfM5HK8dywxB+n3mLK8c11lW16+auM5xuydJXGw==}
-
-  '@milaboratories/computable@2.9.8':
-    resolution: {integrity: sha512-X0ZtxOnIJlAd9Y7CyBtWSKHgVuTKXbIryMwJaoYSEz0gY3JZVnsD0f59J/lwe3Key0/lSYh3EbL/pP5jACIzfQ==}
+  '@milaboratories/computable@2.9.6':
+    resolution: {integrity: sha512-Au+84jboSJMM2k39mWUFCtPl2wkislD1fLbb45du1PcAg1GSER1ThSLoBpZUQC2oiTt804WmbzhZ2yaoVZiVLQ==}
     engines: {node: '>=22.19.0'}
 
   '@milaboratories/graph-maker@1.4.8':
@@ -1117,8 +1117,8 @@ packages:
     resolution: {integrity: sha512-zOkD4aWNbembwI+AsPTz7nmWC1VPA4rwGBc+Nd5jPpKVh7rCtZwQrlOP5mVqRVMKIAjb1nU8kzzCGfqNPqfJjA==}
     engines: {node: '>=22'}
 
-  '@milaboratories/helpers@1.14.5':
-    resolution: {integrity: sha512-Kiy0g7sEmFQxDwtnmTrdJ8XdUK0IDAB5ZnPCNEbK7lPGHIa+xG3kzfeR4y44QBdrYaK0NwG63D8Fc7dlv9KItg==}
+  '@milaboratories/helpers@1.14.3':
+    resolution: {integrity: sha512-nZv+n+orVzA/GimDTNj6Yjb52+Wu5f/Kf2z6UCGXni6KTquLBfQhi3AFB1mLE7hkUYPvKU6LxuRY02CQMQiTVA==}
     engines: {node: '>=22'}
 
   '@milaboratories/miplots4@1.2.3':
@@ -1130,8 +1130,8 @@ packages:
       '@platforma-sdk/model': 1.79.14
       '@platforma-sdk/ui-vue': 1.79.14
 
-  '@milaboratories/pf-driver@1.9.0':
-    resolution: {integrity: sha512-OhMsf1jNMp31wRCrXHMU75WQj48Nc/lDeYTo4/6R6+FLYBYkK9yWgsSH+02V4WCKbUqsyF1Xy0+O+qsYjpqUDA==}
+  '@milaboratories/pf-driver@1.7.16':
+    resolution: {integrity: sha512-yujIUylT11CwM4alKVETxTnXQpcKHH1x5hZIAKTni/Q98JHs+teewNhUwpaWACwjuEhmF3EYSTgTXeUoeI9hAg==}
     engines: {node: '>=22.19.0'}
 
   '@milaboratories/pf-plots@1.4.6':
@@ -1140,77 +1140,79 @@ packages:
       '@milaboratories/pl-model-common': 1.46.1
       '@platforma-sdk/model': 1.79.14
 
-  '@milaboratories/pf-spec-driver@1.5.0':
-    resolution: {integrity: sha512-XWXrKCyCwcqS8EcukuyDqvMq0D6qt61zrkb3qGpWKyy0SVQNzXC2JL0ThCM2uGI7QQelgV0aagcg8xU5pGKWPw==}
+  '@milaboratories/pf-spec-driver@1.4.18':
+    resolution: {integrity: sha512-lXaoSyGCWUlrYZaoyRIWWT0Hpx9DWODXI7VdraNjYnCofJpYKMdAZW3sfCE9kdVup8ic29vywNPLeTjrVQ24sg==}
 
-  '@milaboratories/pf-spec@1.0.0':
-    resolution: {integrity: sha512-JIOhJdDHcKDItjlxOT4wVmnjejoazM69qK5ylu+g5q65RIcH/R5MF2OGiu9nV7QbLEXszll+EVnvx6jYhuE44w==}
-    peerDependencies:
-      '@bytecodealliance/preview2-shim': ^0.20.1
+  '@milaboratories/pframes-rs-node@1.1.52':
+    resolution: {integrity: sha512-Uu4KsQx0GiKvFASI+Cm0nMCMieUVo35mpz4j8mYUYImr7S+bVDDcHweCWrkLkSeImnOQnYHVo9RycViG6QwUQw==}
 
-  '@milaboratories/pframes-rs-node@1.1.56':
-    resolution: {integrity: sha512-H6qltcR+HHb2kAy0U0zP90rqmv/MZGGkdXIyf89FUZTpoHOlXG4Ahxq7wXp9vviUczci4cLl2L0Q+dL2XGcsUA==}
-
-  '@milaboratories/pframes-rs-serv@1.1.56':
-    resolution: {integrity: sha512-Pi0CRuvkfL+PqdgQ8im0MW5tqVjUvJ8hJbOG7v5pS45adg8tuq4TyrAoWN7un9ZWQ6KRLypUD+7eXCwhjOwADg==}
+  '@milaboratories/pframes-rs-serv@1.1.52':
+    resolution: {integrity: sha512-yVfcyLztgj5UAffj30se5G4MwxkIOFVWPHY1tZZ8zLhQQzx95R/e1toAqq3FLV7y6kpJovwmLusbefgKw9Ejcg==}
     hasBin: true
 
-  '@milaboratories/pframes-rs-wasip2@1.1.56':
-    resolution: {integrity: sha512-54bhC6XCAVO09J/sqVwEKA4hhTa27BDDNdH8BE+6+LvjBVkg/qq2/f0MzdrVijrmagbr97F1zgj5wIgUqwCSoA==}
+  '@milaboratories/pframes-rs-wasip2@1.1.52':
+    resolution: {integrity: sha512-0rb0We6Q/aqrHJ062dayvLb4RExODZdqfsVWdzeHq23alY5TjJRMWsO9aKQpPnOuUKjAimdjlp+Ldq9TVhbEtg==}
 
-  '@milaboratories/pl-client@3.14.6':
-    resolution: {integrity: sha512-IPzh5bSibr02DMKpwlCW6TuHVxaDe2o6tjaEJ4P2y5lshRbe5SBR/ne/G/N7E7KEKxmpWq7ZapOCLkLyvqFFDw==}
+  '@milaboratories/pframes-rs-wasm@1.1.52':
+    resolution: {integrity: sha512-Wn8/LJxcsvWSSpdymdebWrBnmgu9wAbzvOiHCtXz7Aqt1M2T8Xp9a7CprzCYx+EvhSuAuoxbq6naxkPsQrbkvg==}
+    peerDependencies:
+      '@bytecodealliance/preview2-shim': 0.17.9
+      '@milaboratories/pl-model-common': 1.46.2
+      '@milaboratories/pl-model-middle-layer': 1.30.7
+
+  '@milaboratories/pl-client@3.14.0':
+    resolution: {integrity: sha512-WpKN8u71VAIJ6uYAdZqNe3/Ob73noxw7GW8JFZoIMqGVLwvTAbVyffjKuuH4V9S/hA+OXpv7/Dfxqpph5eAVYg==}
     engines: {node: '>=22.19.0'}
 
-  '@milaboratories/pl-config@1.8.5':
-    resolution: {integrity: sha512-XnfYXSSkRxeImQ21k6I8y5apisvagcSgMGfEeyRxNdSGwUVJbbI8TwJk+XBEDQ4lErW8oqtLxKjFQuHJMzRUoQ==}
+  '@milaboratories/pl-config@1.8.3':
+    resolution: {integrity: sha512-JPIWG/9q7SL9QSYUhHwF9MCfGbpJyo2KxaO9IE2gEvy+oiGw1oBJvNdthC9V/uW2jHp/Qov9+x7LveHzN+bfeA==}
 
-  '@milaboratories/pl-deployments@3.0.15':
-    resolution: {integrity: sha512-+i3bdvfPCXLZ789f5fRdtrbil3/RFyzSBNMkULcnyKY5u6GRZLjWDBC5aSE75PRTWx3Fxf743Fj9L3B6loMSWw==}
+  '@milaboratories/pl-deployments@3.0.10':
+    resolution: {integrity: sha512-AEFI5gRH1quEUZPqV4wkYabVevpTRGMJXPILsYGh/In9eSw56aHIl8pHoZP5h8v3J5v//KNU7aP8sYANh8S7rA==}
     engines: {node: '>=22.19.0'}
 
-  '@milaboratories/pl-drivers@1.16.15':
-    resolution: {integrity: sha512-mVKIEHVOeAPdwSZZk+URAFD6zoyPiAARinpDfihDvkFcrlTLIzeoOvnQNPG5a8jqc0GiW+a9mnTrfjG7+n82Ww==}
+  '@milaboratories/pl-drivers@1.16.8':
+    resolution: {integrity: sha512-w8K++36KQZkDIkVz5Wk/TXBT8h+KG99eMpWjo3Esq9tK+8v9ZiswTBNuG99Wtg3vdBAaJfqf4iqeblSwZk8QcQ==}
     engines: {node: '>=22'}
 
   '@milaboratories/pl-error-like@1.12.10':
     resolution: {integrity: sha512-iHmnLG5lxJqcymUmEL8onCDGEADk1S/5RNACQ5yfTCNcCkUc+7hYrDHQpFmWXPPGC9sG+NTBxt4wr5m8UsLm2g==}
 
-  '@milaboratories/pl-errors@1.4.35':
-    resolution: {integrity: sha512-rq5Lg9G7ax+LtMPdrkZg+Pdqk28JViiS/KIcQfk0Cg1ttZoAnhDhFIh6rAFy2eGybPtlzXqM32/ODKUSMawc8Q==}
+  '@milaboratories/pl-errors@1.4.29':
+    resolution: {integrity: sha512-j1iyOgoUlyk4/HvfhRfzvYRxkN4p01XjmFtdlTu8YdRQRp7goNZXtzTOMFAvltocb+ZeRjEOxIW5+3dsbXsFmA==}
 
-  '@milaboratories/pl-healthcheck@1.0.5':
-    resolution: {integrity: sha512-ZkQti4VU2FapJBFRtZGfR5NDPXEAEFgTf/NfemypgY0aA75fFPi4/c3BpXX5K7dht+JOgHqkMrBHxKIuE2T+fA==}
+  '@milaboratories/pl-healthcheck@1.0.2':
+    resolution: {integrity: sha512-IBXQOSgJj7T/dw26AXBsR1ZaOpoqxZtSFZVPE2TonT0VaLKH4XqMFa3C+fKV1aECqbI45dBRQl/X70CUdGPWgQ==}
     engines: {node: '>=22.19.0'}
 
   '@milaboratories/pl-http@1.2.4':
     resolution: {integrity: sha512-QKmhx+WEvJCV9dUy/SBdQk/ApaJ5ewBFgm/b+XPlS10SusAdqUUTGvK5+hq8YSuUMXlHb/dk++UtI5YlDuDl2Q==}
 
-  '@milaboratories/pl-middle-layer@1.66.18':
-    resolution: {integrity: sha512-WIUQfa8Lo81d77/6blNbdQdvl9zEcTvtIP/gVmY3KN+fA97btk/t5SfHSNYg7HWdAl6u7M+X9FmIDcDjon+eCA==}
+  '@milaboratories/pl-middle-layer@1.65.9':
+    resolution: {integrity: sha512-ICbmXZRskk2RSRqthxtBzzkS1Jyc8ccUAHoxV3BplbCtzOS9M+QcebPFg+pCRE6cEDJG+DlMCTOUNL4k6MX5HQ==}
     engines: {node: '>=22.19.0'}
 
-  '@milaboratories/pl-model-backend@1.4.20':
-    resolution: {integrity: sha512-AkV+PhmQms6WPwR3E75THrkD9fFE7OpfsIUC297HvnFUoCFXR6GOMGPworA/qipXReTmv192AqBpuaLdgAngyg==}
+  '@milaboratories/pl-model-backend@1.4.14':
+    resolution: {integrity: sha512-8hn28/D59y3914PJXaOX2B5HBOYplaBhyvKPhsOjlAUhNATa9QBMMqVmYW5ZUJ8m8zZJJvOUVS8FShBMQQbjFA==}
 
   '@milaboratories/pl-model-common@1.46.2':
     resolution: {integrity: sha512-VEeauisApYScvCS8lnK3zpFJ520xuTAodKJmjR8ulHcMrWMyWMfHEdGb7j5OMD0mM/OwTgmQrrJ5eB7Xd+xoOQ==}
 
-  '@milaboratories/pl-model-common@1.47.3':
-    resolution: {integrity: sha512-tXmKujm+6ru/Fh9hr9H3iRBWbS+JE0Q7FNualtzJpijaB3SNtScR4erLTamdANv5RYNn7kbYpDWr6wAjAOajrg==}
+  '@milaboratories/pl-model-common@1.46.4':
+    resolution: {integrity: sha512-QArgLyQkf8kHSQquxStyk5Xfnau8S4M2vKEbUVQRRoZCzLU1lcDVXRwGgAzRH5NizeqYNrB/wt0/tShajH+6eA==}
+
+  '@milaboratories/pl-model-middle-layer@1.30.11':
+    resolution: {integrity: sha512-yFThwVqOTb2gJw/tp4PkZcsKI7yRRJCX3QuA6fIc2+tNxCqyEQmdpLmaIY/nhaziIp9ByBT9MrzWNIQd1T9aww==}
 
   '@milaboratories/pl-model-middle-layer@1.30.7':
     resolution: {integrity: sha512-rs9x3Ron4ujR/UOdEgB8WUB1SvZ8ZAScT1Av/e4or+iiQ/CzhmK9nqtYamHVwKV+JgwIFbXQwxGvIHDVz955dQ==}
 
-  '@milaboratories/pl-model-middle-layer@1.31.0':
-    resolution: {integrity: sha512-D1vyGABBtCYyp2IhKd9eMoZtKUj1wUYpIzz4Xz5k+bfJWGEF8GmZGiOvO4oOvrsEsXlG4NyO249MnBKmHFcppQ==}
-
-  '@milaboratories/pl-tree@1.13.6':
-    resolution: {integrity: sha512-R3wnMjbCNfAsyGJe3FQOqEyrNePd9ZCwkjDj2ps7d9oeiJ7QX6hYkIVuMlq8IQNYOJybfHc/dFEvWeYE3uAAZg==}
+  '@milaboratories/pl-tree@1.12.19':
+    resolution: {integrity: sha512-Mod4gxBFgpBrLYqB6qIhUolQRrU+PvPgpj2auP3G6KF6GExy2GkZkJ3XX4fKd3sXLWsBim3ISidmA7YWp3Zezw==}
     engines: {node: '>=22.19.0'}
 
-  '@milaboratories/ptabler-expression-js@1.2.37':
-    resolution: {integrity: sha512-urVRk4b5Jse555euNNITlOJ437McZVtBnC5h/E6O+iHm+hfNIi6OP1aAD5ai4jOpHllm85zW5Ne7hVyyd71bJw==}
+  '@milaboratories/ptabler-expression-js@1.2.33':
+    resolution: {integrity: sha512-ThB7tc0nPACE7b8cSoA0+zRVZfZHOCAcFioFDi207G5prgrIc/z2zbInjD0PRnWFHO7xOsfbWCkNRDqCmut6zQ==}
 
   '@milaboratories/resolve-helper@1.1.3':
     resolution: {integrity: sha512-38/dW/XRZQREOxAOOKtO0lzEWPCP/DH0qhB3q1kYcGoN++5V92/zbVwbYrMDeDcjTyo+D62iIep+sKXeWHa7Uw==}
@@ -1226,19 +1228,19 @@ packages:
     os: [darwin, linux, win32]
     hasBin: true
 
-  '@milaboratories/ts-builder@1.6.2':
-    resolution: {integrity: sha512-6pS36U5EL2IBLIpoP0/5oSFA9jzjcJmYhgEODzt5kglovTzJuh15nEmJMeChr0OpFtGFjQT6o37qHerDGETIpA==}
+  '@milaboratories/ts-builder@1.6.0':
+    resolution: {integrity: sha512-OlQ38jsriFf7qS5AmNIch65qQAOZBRFaLT15N/JJqe9dIytKJNS8Ff9G4vowWtFiRzyeyWRArBtgVOeAmoYuKQ==}
     hasBin: true
 
-  '@milaboratories/ts-configs@1.4.0':
-    resolution: {integrity: sha512-VzU9D+RiggsG4VYteJSBN4o8IjYae9GbZ8MofikMJQLOI1Ir9/pVyPXXGnG/TAGvmcjbK/psAiZVGSvI5MBPGg==}
+  '@milaboratories/ts-configs@1.3.0':
+    resolution: {integrity: sha512-6rZaMOJotG+v6eXoupHgPqxArpNBNl0f7sd5K+kUo1PUhPTe632eLJtEeBbFtwDGNYqL9QUacd4pT5t6oDOf0A==}
 
-  '@milaboratories/ts-helpers@1.8.6':
-    resolution: {integrity: sha512-ef01tARUl+0Urt3x8HHAByrhYHg4Rnn7WiFyJ+joZFZl1T1pUKTgfB7Zxc8Cn06HIl4i6H7s5OSymjZePIGqfQ==}
+  '@milaboratories/ts-helpers@1.8.4':
+    resolution: {integrity: sha512-YdOyANkJjFiEZgS3bfbludDo9PWOQZQ8AhGw/rpO5/7bgQ9RIVOOTAtP5/UppANoeUiYhCgJt/xvIZgnQ/PZ0w==}
     engines: {node: '>=22.19.0'}
 
-  '@milaboratories/uikit@2.15.23':
-    resolution: {integrity: sha512-FrZPJsa3jry4juVofR42IPCHv+oKPAcdBL+OidX0/S2lhIAsCIrEKBcAN3yzWd2yvyAPb3qzt0hbwpuTY0UVlw==}
+  '@milaboratories/uikit@2.15.14':
+    resolution: {integrity: sha512-alefttXyF4j1h1riJMJypgalcVSQ1KFHD2P4r6kOe2uPrrI7CjpBrrn6GCqUmLmvRe/mz8eNFvoyiZBo4pe5BQ==}
 
   '@napi-rs/wasm-runtime@1.1.6':
     resolution: {integrity: sha512-ZLv/JdUfkvOy9eCnnBaGfiO+XimbjebAeO+MRQqD/B+FR1tnRN0tpKSJHRbE8sFfS6aqsXZ67TQjfwfsxULVbg==}
@@ -1562,14 +1564,14 @@ packages:
   '@platforma-open/milaboratories.runenv-python-3@1.7.7':
     resolution: {integrity: sha512-1aJmPOS+XaArKUriwu34LfDrcf4/JQDLtCLm0O05hYAepJ/xMVJUHFeJ3rbp7QloejfD51475THhLXQWj5KB+g==}
 
-  '@platforma-open/milaboratories.software-ptabler.schema@1.15.21':
-    resolution: {integrity: sha512-3EWO64poe5VcBIgVIdIFHwN7nPi000kPuaRmlVt3xnnQZqXUYDFNZfZ2Mc9/mE1Eq3FLwQxcy/5mng7LvgWnXg==}
+  '@platforma-open/milaboratories.software-ptabler.schema@1.15.17':
+    resolution: {integrity: sha512-Qf4QpFY8bWVtEeQphWGZ67dUaXYVWSFm/AL1ErzdOYhilnDSon2Cya6K2Fkj0TxEGBLMBxOudF/kmTw728/Pag==}
 
-  '@platforma-open/milaboratories.software-ptabler@2.1.8':
-    resolution: {integrity: sha512-28dKwcKNIB/8OYH6l/li7Qa/aE2NgDVtNUmN8v6jZsLKT59ogFclz8ZrQ+OiQFzHQCLBlWBt5TdIHfHPxBaNFw==}
+  '@platforma-open/milaboratories.software-ptabler@2.1.5':
+    resolution: {integrity: sha512-bZgDa+KJyAgKKu/Ka+Hzh7thZU/PkmupMRUvXV1ruLdJoxvIcyOj9ehQuVi5DapX4sE7iQ5EkavqpK59z0oZ8w==}
 
-  '@platforma-open/milaboratories.software-ptexter@1.2.4':
-    resolution: {integrity: sha512-4ZqhqksSNVKWhEB9WwrL0rU89G+00ulzH1urYyNA4EdBVGA4mwbKbw0K/zcwce/oUYYMdRl+epXmr0w9wHyNzA==}
+  '@platforma-open/milaboratories.software-ptexter@1.2.3':
+    resolution: {integrity: sha512-5wwzvPko/tjkm6EnirsnjB+MO5mF//tgJplI+jPh3bcSHpEdHF+B9xg+S1owAnekqbimMrFZWqHSVY9ZmIHOjw==}
 
   '@platforma-open/milaboratories.software-small-binaries.hello-world-py@1.0.10':
     resolution: {integrity: sha512-16BGRLIrsVW+YIaXwWLX6Nbm80PS5mQJEclHhjNbRrRTLHPaKI4RygZfBC0lLNzvHBiTXU4Qkh1+WmdovkshDg==}
@@ -1592,33 +1594,37 @@ packages:
   '@platforma-open/soedinglab.software-mmseqs2@1.18.3':
     resolution: {integrity: sha512-npV+3LXmQNaX5/QsqtsRr5i0oLG7Uu5p51pI27WA2AbN2iyEUbHwbELhEwU26rkdzKTukCvCzs3NTuxIxQy7vQ==}
 
-  '@platforma-sdk/block-tools@2.12.13':
-    resolution: {integrity: sha512-eWUIjK6D2/Ce779uyOGw9pET6KOQ7FKHg+DDrrkGh/ZllE2f/f4mghc/FPeOJIBQXVGg7Jg01oWh08SYVBzB5w==}
+  '@platforma-sdk/block-tools@2.12.4':
+    resolution: {integrity: sha512-qIXBByWh/UjSm26GzU0pHldS3/tkT84ijsWKROT7Zq3zFbdJ/7AFCxduqReC51/+z/kLsrvjyhJUNvLozBye0A==}
     hasBin: true
 
   '@platforma-sdk/blocks-deps-updater@2.2.0':
     resolution: {integrity: sha512-p9lBxhFXM9WoRsrJO7dfkiXSK+1m63yIn1sKhBO71eMbhrLMyVYHEOeNf3w5OCdbRF5QsNhXzWuiTmFK3zHFsA==}
     hasBin: true
 
-  '@platforma-sdk/model@1.81.1':
-    resolution: {integrity: sha512-pyCcCzMu+L0ELnNQkpmYMNw+A70WWCXng29WxOVllMTvFvr6/BaH4OUOA2q8ocseUlKm6qFQiRxmZTe53AcvlQ==}
+  '@platforma-sdk/model@1.79.27':
+    resolution: {integrity: sha512-Z5WYpClTZoBtvfGsiDPNlRCxPKtUF04TV3MmL1Kfb6xAb04B5NdiqWMnqw+v78Kue/y9FKTmxrCcX9lwZgYFlw==}
 
-  '@platforma-sdk/package-builder-lib@1.2.1':
-    resolution: {integrity: sha512-H6weitj7JxbiJSlteEFLafTJ+tfty6iv/imf3ysy8oCS8AZIRJk2VMW3M/aAc+xVkQeX7oVIwMwFMYrJIoFsAg==}
+  '@platforma-sdk/package-builder-lib@1.2.0':
+    resolution: {integrity: sha512-AtSzaZ39BGlqcyYtpGREDz+YlGCDdSTQJNV/+NkTyUtoq1ECRO+iMqAX1DSSza1WqylnURX8vKVI2owS/cxntA==}
 
-  '@platforma-sdk/tengo-builder@4.0.22':
-    resolution: {integrity: sha512-8+zDYDFFI2tQS7dplTcxgQdUwzt8+IO++sJiVbwBgwSg1Giyc2qMThEYPLK3QNFArgCsIDR6wQuS8t66pJsRPQ==}
+  '@platforma-sdk/package-builder@3.14.1':
+    resolution: {integrity: sha512-slkVlHMxPuSvMTfWarFuG4AQHUdBehascrgf7xFaQwgOLbjegMg7IH4XzNzb5IEANZUQYSmHUDcIulKQGXNgog==}
+    hasBin: true
+
+  '@platforma-sdk/tengo-builder@4.0.16':
+    resolution: {integrity: sha512-08z5kIB5ZnSmvMPu3rcyGxh+yKyQ6fn6tYzq37kK+iLpXrB23fjgOAjqIF6NEq/Dkxr2dWSUa4BXa8XPBc0+SQ==}
     engines: {node: '>=22'}
     hasBin: true
 
-  '@platforma-sdk/test@1.81.2':
-    resolution: {integrity: sha512-u7+4UkQV6SfB1jsb2mINtLk+rblt/bwLN8aEq8el67jbZ0j1Bu+VAOwINPynT+cpL5p+PKtHLMBTffSrjuqWNg==}
+  '@platforma-sdk/test@1.79.34':
+    resolution: {integrity: sha512-Vo+krqfnpnI2IE3Nkbc8HOYGSqf/tp/mbuPCj/6V02WB6/LzyXWsjfp4ZbTkt+75UqSm3blNfeyi8piNg6QWJA==}
 
-  '@platforma-sdk/ui-vue@1.81.1':
-    resolution: {integrity: sha512-xFnehLOXDHYwDFrdtiU/NBjV0l6pEVLkthfnBjR+g2pSrHJGEL9JDrY3DdzoNUSxU4fal+Ak5aoAJR5v8mOeLg==}
+  '@platforma-sdk/ui-vue@1.79.34':
+    resolution: {integrity: sha512-n2u4sjtVFh5amrIXiLQ0LA8OlJdtQ+ZMAr8aqSacxfHkBSUR1my5TVOSxfZ6xA8Huief2T4ERsEeJAqyLS7v+w==}
 
-  '@platforma-sdk/workflow-tengo@6.8.2':
-    resolution: {integrity: sha512-AHR/Y+vbyfda17A7xY2uH9TlXiBpM8242tTO6+lj8phA4/KS6mez4GLu4ZEaASlZpX6YkQsUs5LUxYQU7pXeiQ==}
+  '@platforma-sdk/workflow-tengo@6.7.1':
+    resolution: {integrity: sha512-8vAXzDzDZpHncMHSuTjesuD/tOWWRhWyQIr8jH2MBgWJGkUXUtoDLBqYk6l5knHrYfrorDzXjsnsFQCzU0bI1A==}
 
   '@protobuf-ts/grpc-transport@2.11.1':
     resolution: {integrity: sha512-l6wrcFffY+tuNnuyrNCkRM8hDIsAZVLA8Mn7PKdVyYxITosYh60qW663p9kL6TWXYuDCL3oxH8ih3vLKTDyhtg==}
@@ -1645,17 +1651,20 @@ packages:
   '@protobufjs/base64@1.1.2':
     resolution: {integrity: sha512-AZkcAA5vnN/v4PDqKyMR5lx7hZttPDgClv83E//FMNhR2TMcLUhfRUBHCmSl0oi9zMgDDqRUJkSxO3wm85+XLg==}
 
-  '@protobufjs/codegen@2.0.5':
-    resolution: {integrity: sha512-zgXFLzW3Ap33e6d0Wlj4MGIm6Ce8O89n/apUaGNB/jx+hw+ruWEp7EwGUshdLKVRCxZW12fp9r40E1mQrf/34g==}
+  '@protobufjs/codegen@2.0.4':
+    resolution: {integrity: sha512-YyFaikqM5sH0ziFZCN3xDC7zeGaB/d0IUb9CATugHWbd1FRFwWwt4ld4OYMPWu5a3Xe01mGAULCdqhMlPl29Jg==}
 
-  '@protobufjs/eventemitter@1.1.1':
-    resolution: {integrity: sha512-vW1GmwMZNnL+gMRaovlh9yZX74kc+TTU3FObkkurpMaRtBfLP3ldjS9KQWlwZgraRE0+dheEEoAxdzcJQ8eXZg==}
+  '@protobufjs/eventemitter@1.1.0':
+    resolution: {integrity: sha512-j9ednRT81vYJ9OfVuXG6ERSTdEL1xVsNgqpkxMsbIabzSo3goCjDIveeGv5d03om39ML71RdmrGNjG5SReBP/Q==}
 
-  '@protobufjs/fetch@1.1.1':
-    resolution: {integrity: sha512-GpptLrs57adMSuHi3VNj0mAF8dwh36LMaYF6XyJ6JMWlVsc+t42tm1HSEDmOs3A8fC9yyeisgLhsTVQokOZ0zw==}
+  '@protobufjs/fetch@1.1.0':
+    resolution: {integrity: sha512-lljVXpqXebpsijW71PZaCYeIcE5on1w5DlQy5WH6GLbFryLUrBD4932W/E2BSpfRJWseIL4v/KPgBFxDOIdKpQ==}
 
   '@protobufjs/float@1.0.2':
     resolution: {integrity: sha512-Ddb+kVXlXst9d+R9PfTIxh1EdNkgoRe5tOX6t01f1lYWOvJnSPDBlG241QLzcyPdoNTsblLUdujGSE4RzrTZGQ==}
+
+  '@protobufjs/inquire@1.1.0':
+    resolution: {integrity: sha512-kdSefcPdruJiFMVSbn801t4vFK7KB/5gd2fYvrxhuJYg8ILrmn9SKSX2tZdV6V+ksulWqS7aXjBcRXl3wHoD9Q==}
 
   '@protobufjs/path@1.1.2':
     resolution: {integrity: sha512-6JOcJ5Tm08dOHAbdR3GrvP+yUUfkjG5ePsHYczMFLq3ZmMkAD98cDgcT2iA1lJ9NVwFd4tH/iSSoe44YWkltEA==}
@@ -1663,8 +1672,8 @@ packages:
   '@protobufjs/pool@1.1.0':
     resolution: {integrity: sha512-0kELaGSIDBKvcgS4zkjz1PeddatrjYcmMWOlAuAPwAeccUrPHdUqo/J6LiymHHEiJT5NrF1UVwxY14f+fy4WQw==}
 
-  '@protobufjs/utf8@1.1.2':
-    resolution: {integrity: sha512-b1UQwcEZ4yCnMCD8DAL1VlbvBJE9/IX4FTIp7BG1xYpf29SLazLSrqUkj4w7Y5y7cCVP6E5tcqqcI0xemPkHug==}
+  '@protobufjs/utf8@1.1.0':
+    resolution: {integrity: sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==}
 
   '@rolldown/binding-android-arm64@1.0.0-rc.17':
     resolution: {integrity: sha512-s70pVGhw4zqGeFnXWvAzJDlvxhlRollagdCCKRgOsgUOH3N1l0LIxf83AtGzmb5SiVM4Hjl5HyarMRfdfj3DaQ==}
@@ -5543,8 +5552,8 @@ packages:
   proto-list@1.2.4:
     resolution: {integrity: sha512-vtK/94akxsTMhe0/cbfpR+syPuszcuwhqVjJq26CuNDgFGj682oRBXOP5MJpv2r7JtE8MsiepGIqvvOTBwn2vA==}
 
-  protobufjs@7.6.5:
-    resolution: {integrity: sha512-/FPD0nUc9jH6rfFjji9IBqOz4pcSE3CsT1m7Ep6Mdb0LxSUMj8hgl6GomOvZzpNpAqqGaXA0P3VSrZLFzIhQrw==}
+  protobufjs@7.4.0:
+    resolution: {integrity: sha512-mRUWCc3KUU4w1jU8sGxICXH/gNS94DvI1gxqDvBzhj1JpcsimQkYiOJfwsPUykUI5ZaspFbSgmBLER8IrQ3tqw==}
     engines: {node: '>=12.0.0'}
 
   pump@3.0.4:
@@ -5570,11 +5579,11 @@ packages:
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
-  quickjs-emscripten-core@0.32.0:
-    resolution: {integrity: sha512-QFnPfjFey8EqknSrSxe1hZrf1/8z7/6s1QzGOmKo6++02r7QRRX7ZoyNaZh7JuVjWsVW87KnQrbZqnHkOAzUyg==}
+  quickjs-emscripten-core@0.31.0:
+    resolution: {integrity: sha512-oQz8p0SiKDBc1TC7ZBK2fr0GoSHZKA0jZIeXxsnCyCs4y32FStzCW4d1h6E1sE0uHDMbGITbk2zhNaytaoJwXQ==}
 
-  quickjs-emscripten@0.32.0:
-    resolution: {integrity: sha512-So0Sqw869y/S2oE3Nuc0uT3Dhqgvsj8FSrwBdsuTosVsG8ME5/OcudU1GxsrIFdFABgy17GHnTVO9TYV/bLQcA==}
+  quickjs-emscripten@0.31.0:
+    resolution: {integrity: sha512-K7Yt78aRPLjPcqv3fIuLW1jW3pvwO21B9pmFOolsjM/57ZhdVXBr51GqJpalgBlkPu9foAvhEAuuQPnvIGvLvQ==}
     engines: {node: '>=16.0.0'}
 
   quickselect@3.0.0:
@@ -7488,16 +7497,16 @@ snapshots:
       '@eslint/core': 0.14.0
       levn: 0.4.1
 
-  '@grpc/grpc-js@1.14.4':
+  '@grpc/grpc-js@1.13.4':
     dependencies:
-      '@grpc/proto-loader': 0.8.1
+      '@grpc/proto-loader': 0.7.15
       '@js-sdsl/ordered-map': 4.4.2
 
-  '@grpc/proto-loader@0.8.1':
+  '@grpc/proto-loader@0.7.15':
     dependencies:
       lodash.camelcase: 4.3.0
       long: 5.3.2
-      protobufjs: 7.6.5
+      protobufjs: 7.4.0
       yargs: 17.7.2
 
   '@humanfs/core@0.19.1': {}
@@ -7659,23 +7668,23 @@ snapshots:
 
   '@istanbuljs/schema@0.1.6': {}
 
-  '@jitl/quickjs-ffi-types@0.32.0': {}
+  '@jitl/quickjs-ffi-types@0.31.0': {}
 
-  '@jitl/quickjs-wasmfile-debug-asyncify@0.32.0':
+  '@jitl/quickjs-wasmfile-debug-asyncify@0.31.0':
     dependencies:
-      '@jitl/quickjs-ffi-types': 0.32.0
+      '@jitl/quickjs-ffi-types': 0.31.0
 
-  '@jitl/quickjs-wasmfile-debug-sync@0.32.0':
+  '@jitl/quickjs-wasmfile-debug-sync@0.31.0':
     dependencies:
-      '@jitl/quickjs-ffi-types': 0.32.0
+      '@jitl/quickjs-ffi-types': 0.31.0
 
-  '@jitl/quickjs-wasmfile-release-asyncify@0.32.0':
+  '@jitl/quickjs-wasmfile-release-asyncify@0.31.0':
     dependencies:
-      '@jitl/quickjs-ffi-types': 0.32.0
+      '@jitl/quickjs-ffi-types': 0.31.0
 
-  '@jitl/quickjs-wasmfile-release-sync@0.32.0':
+  '@jitl/quickjs-wasmfile-release-sync@0.31.0':
     dependencies:
-      '@jitl/quickjs-ffi-types': 0.32.0
+      '@jitl/quickjs-ffi-types': 0.31.0
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
@@ -7765,26 +7774,21 @@ snapshots:
 
   '@milaboratories/biowasm-tools@2.0.2': {}
 
-  '@milaboratories/columns-collection-driver@0.2.3':
-    dependencies:
-      '@milaboratories/helpers': 1.14.5
-      '@milaboratories/pl-model-common': 1.47.3
-
-  '@milaboratories/computable@2.9.8':
+  '@milaboratories/computable@2.9.6':
     dependencies:
       '@milaboratories/pl-error-like': 1.12.10
-      '@milaboratories/ts-helpers': 1.8.6
+      '@milaboratories/ts-helpers': 1.8.4
       '@types/node': 24.5.2
       utility-types: 3.11.0
 
-  '@milaboratories/graph-maker@1.4.8(@milaboratories/pl-model-common@1.47.3)(@platforma-sdk/model@1.81.1)(@platforma-sdk/ui-vue@1.81.1(@bytecodealliance/preview2-shim@0.17.8)(typescript@5.9.3))(d3-dispatch@3.0.1)(d3-path@3.1.0)(d3-scale-chromatic@3.1.0)(typescript@5.9.3)':
+  '@milaboratories/graph-maker@1.4.8(@milaboratories/pl-model-common@1.46.4)(@platforma-sdk/model@1.79.27)(@platforma-sdk/ui-vue@1.79.34(@bytecodealliance/preview2-shim@0.17.8)(typescript@5.9.3))(d3-dispatch@3.0.1)(d3-path@3.1.0)(d3-scale-chromatic@3.1.0)(typescript@5.9.3)':
     dependencies:
       '@ag-grid-community/core': 32.3.5
-      '@milaboratories/helpers': 1.14.5
+      '@milaboratories/helpers': 1.14.3
       '@milaboratories/miplots4': 1.2.3(d3-dispatch@3.0.1)(d3-path@3.1.0)(d3-scale-chromatic@3.1.0)
-      '@milaboratories/pf-plots': 1.4.6(@milaboratories/pl-model-common@1.47.3)(@platforma-sdk/model@1.81.1)
-      '@platforma-sdk/model': 1.81.1
-      '@platforma-sdk/ui-vue': 1.81.1(@bytecodealliance/preview2-shim@0.17.8)(typescript@5.9.3)
+      '@milaboratories/pf-plots': 1.4.6(@milaboratories/pl-model-common@1.46.4)(@platforma-sdk/model@1.79.27)
+      '@platforma-sdk/model': 1.79.27
+      '@platforma-sdk/ui-vue': 1.79.34(@bytecodealliance/preview2-shim@0.17.8)(typescript@5.9.3)
       '@types/d3-hierarchy': 3.1.7
       '@types/d3-scale': 4.0.9
       '@vueuse/core': 13.4.0(vue@3.5.24(typescript@5.9.3))
@@ -7803,7 +7807,7 @@ snapshots:
 
   '@milaboratories/helpers@1.14.2': {}
 
-  '@milaboratories/helpers@1.14.5': {}
+  '@milaboratories/helpers@1.14.3': {}
 
   '@milaboratories/miplots4@1.2.3(d3-dispatch@3.0.1)(d3-path@3.1.0)(d3-scale-chromatic@3.1.0)':
     dependencies:
@@ -7843,13 +7847,13 @@ snapshots:
       - d3-scale-chromatic
       - supports-color
 
-  '@milaboratories/multi-sequence-alignment@1.47.18(@milaboratories/pl-model-common@1.47.3)(@platforma-sdk/model@1.81.1)(@platforma-sdk/ui-vue@1.81.1(@bytecodealliance/preview2-shim@0.17.8)(typescript@5.9.3))(d3-dispatch@3.0.1)(d3-path@3.1.0)(d3-scale-chromatic@3.1.0)(typescript@5.9.3)':
+  '@milaboratories/multi-sequence-alignment@1.47.18(@milaboratories/pl-model-common@1.46.4)(@platforma-sdk/model@1.79.27)(@platforma-sdk/ui-vue@1.79.34(@bytecodealliance/preview2-shim@0.17.8)(typescript@5.9.3))(d3-dispatch@3.0.1)(d3-path@3.1.0)(d3-scale-chromatic@3.1.0)(typescript@5.9.3)':
     dependencies:
       '@milaboratories/biowasm-tools': 2.0.2
       '@milaboratories/miplots4': 1.2.3(d3-dispatch@3.0.1)(d3-path@3.1.0)(d3-scale-chromatic@3.1.0)
-      '@milaboratories/pf-plots': 1.4.6(@milaboratories/pl-model-common@1.47.3)(@platforma-sdk/model@1.81.1)
-      '@platforma-sdk/model': 1.81.1
-      '@platforma-sdk/ui-vue': 1.81.1(@bytecodealliance/preview2-shim@0.17.8)(typescript@5.9.3)
+      '@milaboratories/pf-plots': 1.4.6(@milaboratories/pl-model-common@1.46.4)(@platforma-sdk/model@1.79.27)
+      '@platforma-sdk/model': 1.79.27
+      '@platforma-sdk/ui-vue': 1.79.34(@bytecodealliance/preview2-shim@0.17.8)(typescript@5.9.3)
       vue: 3.5.24(typescript@5.9.3)
     transitivePeerDependencies:
       - '@milaboratories/pl-model-common'
@@ -7859,14 +7863,14 @@ snapshots:
       - supports-color
       - typescript
 
-  '@milaboratories/pf-driver@1.9.0(@bytecodealliance/preview2-shim@0.17.8)':
+  '@milaboratories/pf-driver@1.7.16(@bytecodealliance/preview2-shim@0.17.8)':
     dependencies:
-      '@milaboratories/helpers': 1.14.5
-      '@milaboratories/pf-spec': 1.0.0(@bytecodealliance/preview2-shim@0.17.8)
-      '@milaboratories/pframes-rs-node': 1.1.56
-      '@milaboratories/pl-model-common': 1.47.3
-      '@milaboratories/pl-model-middle-layer': 1.31.0
-      '@milaboratories/ts-helpers': 1.8.6
+      '@milaboratories/helpers': 1.14.3
+      '@milaboratories/pframes-rs-node': 1.1.52
+      '@milaboratories/pframes-rs-wasm': 1.1.52(@bytecodealliance/preview2-shim@0.17.8)(@milaboratories/pl-model-common@1.46.4)(@milaboratories/pl-model-middle-layer@1.30.11)
+      '@milaboratories/pl-model-common': 1.46.4
+      '@milaboratories/pl-model-middle-layer': 1.30.11
+      '@milaboratories/ts-helpers': 1.8.4
       es-toolkit: 1.39.10
       lru-cache: 11.2.2
     transitivePeerDependencies:
@@ -7874,41 +7878,36 @@ snapshots:
       - encoding
       - supports-color
 
-  '@milaboratories/pf-plots@1.4.6(@milaboratories/pl-model-common@1.47.3)(@platforma-sdk/model@1.81.1)':
+  '@milaboratories/pf-plots@1.4.6(@milaboratories/pl-model-common@1.46.4)(@platforma-sdk/model@1.79.27)':
     dependencies:
-      '@milaboratories/helpers': 1.14.5
-      '@milaboratories/pl-model-common': 1.47.3
-      '@platforma-sdk/model': 1.81.1
+      '@milaboratories/helpers': 1.14.3
+      '@milaboratories/pl-model-common': 1.46.4
+      '@platforma-sdk/model': 1.79.27
       canonicalize: 2.1.0
       lodash: 4.17.21
 
-  '@milaboratories/pf-spec-driver@1.5.0(@bytecodealliance/preview2-shim@0.17.8)':
+  '@milaboratories/pf-spec-driver@1.4.18(@bytecodealliance/preview2-shim@0.17.8)':
     dependencies:
-      '@milaboratories/helpers': 1.14.5
-      '@milaboratories/pf-spec': 1.0.0(@bytecodealliance/preview2-shim@0.17.8)
-      '@milaboratories/pl-model-common': 1.47.3
+      '@milaboratories/helpers': 1.14.3
+      '@milaboratories/pframes-rs-wasm': 1.1.52(@bytecodealliance/preview2-shim@0.17.8)(@milaboratories/pl-model-common@1.46.4)(@milaboratories/pl-model-middle-layer@1.30.11)
+      '@milaboratories/pl-model-common': 1.46.4
+      '@milaboratories/pl-model-middle-layer': 1.30.11
       '@noble/hashes': 2.0.1
     transitivePeerDependencies:
       - '@bytecodealliance/preview2-shim'
 
-  '@milaboratories/pf-spec@1.0.0(@bytecodealliance/preview2-shim@0.17.8)':
-    dependencies:
-      '@bytecodealliance/preview2-shim': 0.17.8
-      '@milaboratories/pl-model-common': 1.47.3
-      '@milaboratories/pl-model-middle-layer': 1.31.0
-
-  '@milaboratories/pframes-rs-node@1.1.56':
+  '@milaboratories/pframes-rs-node@1.1.52':
     dependencies:
       '@mapbox/node-pre-gyp': 2.0.3
       '@milaboratories/helpers': 1.14.2
-      '@milaboratories/pframes-rs-serv': 1.1.56
+      '@milaboratories/pframes-rs-serv': 1.1.52
       '@milaboratories/pl-model-common': 1.46.2
       ulid: 3.0.2
     transitivePeerDependencies:
       - encoding
       - supports-color
 
-  '@milaboratories/pframes-rs-serv@1.1.56':
+  '@milaboratories/pframes-rs-serv@1.1.52':
     dependencies:
       '@milaboratories/helpers': 1.14.2
       '@milaboratories/pl-model-common': 1.46.2
@@ -7917,15 +7916,22 @@ snapshots:
       commander: 14.0.3
       selfsigned: 5.5.0
 
-  '@milaboratories/pframes-rs-wasip2@1.1.56': {}
+  '@milaboratories/pframes-rs-wasip2@1.1.52': {}
 
-  '@milaboratories/pl-client@3.14.6':
+  '@milaboratories/pframes-rs-wasm@1.1.52(@bytecodealliance/preview2-shim@0.17.8)(@milaboratories/pl-model-common@1.46.4)(@milaboratories/pl-model-middle-layer@1.30.11)':
     dependencies:
-      '@grpc/grpc-js': 1.14.4
+      '@bytecodealliance/preview2-shim': 0.17.8
+      '@milaboratories/pframes-rs-wasip2': 1.1.52
+      '@milaboratories/pl-model-common': 1.46.4
+      '@milaboratories/pl-model-middle-layer': 1.30.11
+
+  '@milaboratories/pl-client@3.14.0':
+    dependencies:
+      '@grpc/grpc-js': 1.13.4
       '@milaboratories/pl-http': 1.2.4
-      '@milaboratories/pl-model-common': 1.47.3
-      '@milaboratories/ts-helpers': 1.8.6
-      '@protobuf-ts/grpc-transport': 2.11.1(@grpc/grpc-js@1.14.4)
+      '@milaboratories/pl-model-common': 1.46.4
+      '@milaboratories/ts-helpers': 1.8.4
+      '@protobuf-ts/grpc-transport': 2.11.1(@grpc/grpc-js@1.13.4)
       '@protobuf-ts/runtime': 2.11.1
       '@protobuf-ts/runtime-rpc': 2.11.1
       canonicalize: 2.1.0
@@ -7937,19 +7943,19 @@ snapshots:
       utility-types: 3.11.0
       yaml: 2.8.0
 
-  '@milaboratories/pl-config@1.8.5':
+  '@milaboratories/pl-config@1.8.3':
     dependencies:
-      '@milaboratories/ts-helpers': 1.8.6
+      '@milaboratories/ts-helpers': 1.8.4
       upath: 2.0.1
       yaml: 2.8.0
 
-  '@milaboratories/pl-deployments@3.0.15':
+  '@milaboratories/pl-deployments@3.0.10':
     dependencies:
-      '@milaboratories/pl-config': 1.8.5
-      '@milaboratories/pl-healthcheck': 1.0.5
+      '@milaboratories/pl-config': 1.8.3
+      '@milaboratories/pl-healthcheck': 1.0.2
       '@milaboratories/pl-http': 1.2.4
-      '@milaboratories/pl-model-common': 1.47.3
-      '@milaboratories/ts-helpers': 1.8.6
+      '@milaboratories/pl-model-common': 1.46.4
+      '@milaboratories/ts-helpers': 1.8.4
       decompress: 4.2.1
       ssh2: 1.17.0
       tar: 7.4.3
@@ -7958,16 +7964,16 @@ snapshots:
       yaml: 2.8.0
       zod: 3.25.76
 
-  '@milaboratories/pl-drivers@1.16.15':
+  '@milaboratories/pl-drivers@1.16.8':
     dependencies:
-      '@grpc/grpc-js': 1.14.4
-      '@milaboratories/computable': 2.9.8
-      '@milaboratories/helpers': 1.14.5
-      '@milaboratories/pl-client': 3.14.6
-      '@milaboratories/pl-model-common': 1.47.3
-      '@milaboratories/pl-tree': 1.13.6
-      '@milaboratories/ts-helpers': 1.8.6
-      '@protobuf-ts/grpc-transport': 2.11.1(@grpc/grpc-js@1.14.4)
+      '@grpc/grpc-js': 1.13.4
+      '@milaboratories/computable': 2.9.6
+      '@milaboratories/helpers': 1.14.3
+      '@milaboratories/pl-client': 3.14.0
+      '@milaboratories/pl-model-common': 1.46.4
+      '@milaboratories/pl-tree': 1.12.19
+      '@milaboratories/ts-helpers': 1.8.4
+      '@protobuf-ts/grpc-transport': 2.11.1(@grpc/grpc-js@1.13.4)
       '@protobuf-ts/plugin': 2.11.1
       '@protobuf-ts/runtime': 2.11.1
       '@protobuf-ts/runtime-rpc': 2.11.1
@@ -7989,17 +7995,17 @@ snapshots:
       json-stringify-safe: 5.0.1
       zod: 3.25.76
 
-  '@milaboratories/pl-errors@1.4.35':
+  '@milaboratories/pl-errors@1.4.29':
     dependencies:
-      '@milaboratories/pl-client': 3.14.6
-      '@milaboratories/ts-helpers': 1.8.6
+      '@milaboratories/pl-client': 3.14.0
+      '@milaboratories/ts-helpers': 1.8.4
       zod: 3.25.76
 
-  '@milaboratories/pl-healthcheck@1.0.5':
+  '@milaboratories/pl-healthcheck@1.0.2':
     dependencies:
-      '@grpc/grpc-js': 1.14.4
-      '@milaboratories/ts-helpers': 1.8.6
-      '@protobuf-ts/grpc-transport': 2.11.1(@grpc/grpc-js@1.14.4)
+      '@grpc/grpc-js': 1.13.4
+      '@milaboratories/ts-helpers': 1.8.4
+      '@protobuf-ts/grpc-transport': 2.11.1(@grpc/grpc-js@1.13.4)
       '@protobuf-ts/runtime': 2.11.1
       '@protobuf-ts/runtime-rpc': 2.11.1
 
@@ -8007,33 +8013,33 @@ snapshots:
     dependencies:
       undici: 7.16.0
 
-  '@milaboratories/pl-middle-layer@1.66.18(@bytecodealliance/preview2-shim@0.17.8)(@types/node@24.5.2)':
+  '@milaboratories/pl-middle-layer@1.65.9(@bytecodealliance/preview2-shim@0.17.8)(@types/node@24.5.2)':
     dependencies:
-      '@milaboratories/columns-collection-driver': 0.2.3
-      '@milaboratories/computable': 2.9.8
-      '@milaboratories/helpers': 1.14.5
-      '@milaboratories/pf-driver': 1.9.0(@bytecodealliance/preview2-shim@0.17.8)
-      '@milaboratories/pf-spec-driver': 1.5.0(@bytecodealliance/preview2-shim@0.17.8)
-      '@milaboratories/pframes-rs-node': 1.1.56
-      '@milaboratories/pl-client': 3.14.6
-      '@milaboratories/pl-deployments': 3.0.15
-      '@milaboratories/pl-drivers': 1.16.15
-      '@milaboratories/pl-errors': 1.4.35
+      '@milaboratories/computable': 2.9.6
+      '@milaboratories/helpers': 1.14.3
+      '@milaboratories/pf-driver': 1.7.16(@bytecodealliance/preview2-shim@0.17.8)
+      '@milaboratories/pf-spec-driver': 1.4.18(@bytecodealliance/preview2-shim@0.17.8)
+      '@milaboratories/pframes-rs-node': 1.1.52
+      '@milaboratories/pframes-rs-wasm': 1.1.52(@bytecodealliance/preview2-shim@0.17.8)(@milaboratories/pl-model-common@1.46.4)(@milaboratories/pl-model-middle-layer@1.30.11)
+      '@milaboratories/pl-client': 3.14.0
+      '@milaboratories/pl-deployments': 3.0.10
+      '@milaboratories/pl-drivers': 1.16.8
+      '@milaboratories/pl-errors': 1.4.29
       '@milaboratories/pl-http': 1.2.4
-      '@milaboratories/pl-model-backend': 1.4.20
-      '@milaboratories/pl-model-common': 1.47.3
-      '@milaboratories/pl-model-middle-layer': 1.31.0
-      '@milaboratories/pl-tree': 1.13.6
+      '@milaboratories/pl-model-backend': 1.4.14
+      '@milaboratories/pl-model-common': 1.46.4
+      '@milaboratories/pl-model-middle-layer': 1.30.11
+      '@milaboratories/pl-tree': 1.12.19
       '@milaboratories/resolve-helper': 1.1.3
-      '@milaboratories/ts-helpers': 1.8.6
-      '@platforma-sdk/block-tools': 2.12.13(@types/node@24.5.2)
-      '@platforma-sdk/model': 1.81.1
-      '@platforma-sdk/workflow-tengo': 6.8.2
+      '@milaboratories/ts-helpers': 1.8.4
+      '@platforma-sdk/block-tools': 2.12.4(@types/node@24.5.2)
+      '@platforma-sdk/model': 1.79.27
+      '@platforma-sdk/workflow-tengo': 6.7.1
       canonicalize: 2.1.0
       denque: 2.1.0
       es-toolkit: 1.39.10
       lru-cache: 11.2.2
-      quickjs-emscripten: 0.32.0
+      quickjs-emscripten: 0.31.0
       semver: 7.7.2
       undici: 7.16.0
       utility-types: 3.11.0
@@ -8049,9 +8055,9 @@ snapshots:
       - react-native-b4a
       - supports-color
 
-  '@milaboratories/pl-model-backend@1.4.20':
+  '@milaboratories/pl-model-backend@1.4.14':
     dependencies:
-      '@milaboratories/pl-client': 3.14.6
+      '@milaboratories/pl-client': 3.14.0
       canonicalize: 2.1.0
       zod: 3.25.76
 
@@ -8062,12 +8068,19 @@ snapshots:
       canonicalize: 2.1.0
       zod: 3.25.76
 
-  '@milaboratories/pl-model-common@1.47.3':
+  '@milaboratories/pl-model-common@1.46.4':
     dependencies:
-      '@milaboratories/helpers': 1.14.5
+      '@milaboratories/helpers': 1.14.3
       '@milaboratories/pl-error-like': 1.12.10
       canonicalize: 2.1.0
+      zod: 3.25.76
+
+  '@milaboratories/pl-model-middle-layer@1.30.11':
+    dependencies:
+      '@milaboratories/helpers': 1.14.3
+      '@milaboratories/pl-model-common': 1.46.4
       es-toolkit: 1.39.10
+      utility-types: 3.11.0
       zod: 3.25.76
 
   '@milaboratories/pl-model-middle-layer@1.30.7':
@@ -8078,27 +8091,19 @@ snapshots:
       utility-types: 3.11.0
       zod: 3.25.76
 
-  '@milaboratories/pl-model-middle-layer@1.31.0':
+  '@milaboratories/pl-tree@1.12.19':
     dependencies:
-      '@milaboratories/helpers': 1.14.5
-      '@milaboratories/pl-model-common': 1.47.3
-      es-toolkit: 1.39.10
-      utility-types: 3.11.0
-      zod: 3.25.76
-
-  '@milaboratories/pl-tree@1.13.6':
-    dependencies:
-      '@milaboratories/computable': 2.9.8
-      '@milaboratories/pl-client': 3.14.6
-      '@milaboratories/pl-errors': 1.4.35
-      '@milaboratories/ts-helpers': 1.8.6
+      '@milaboratories/computable': 2.9.6
+      '@milaboratories/pl-client': 3.14.0
+      '@milaboratories/pl-errors': 1.4.29
+      '@milaboratories/ts-helpers': 1.8.4
       denque: 2.1.0
       utility-types: 3.11.0
       zod: 3.25.76
 
-  '@milaboratories/ptabler-expression-js@1.2.37':
+  '@milaboratories/ptabler-expression-js@1.2.33':
     dependencies:
-      '@platforma-open/milaboratories.software-ptabler.schema': 1.15.21
+      '@platforma-open/milaboratories.software-ptabler.schema': 1.15.17
 
   '@milaboratories/resolve-helper@1.1.3': {}
 
@@ -8108,9 +8113,9 @@ snapshots:
 
   '@milaboratories/tengo-tester@1.6.4': {}
 
-  '@milaboratories/ts-builder@1.6.2(@types/node@24.5.2)(rollup@4.55.1)(sass-embedded@1.89.0)(vue@3.5.24(typescript@5.6.3))(yaml@2.8.0)':
+  '@milaboratories/ts-builder@1.6.0(@types/node@24.5.2)(rollup@4.55.1)(sass-embedded@1.89.0)(vue@3.5.24(typescript@5.6.3))(yaml@2.8.0)':
     dependencies:
-      '@milaboratories/ts-configs': 1.4.0
+      '@milaboratories/ts-configs': 1.3.0
       '@vitejs/plugin-vue': 6.0.6(vite@8.0.10(@types/node@24.5.2)(sass-embedded@1.89.0)(yaml@2.8.0))(vue@3.5.24(typescript@5.6.3))
       commander: 15.0.0
       jsonc-parser: 3.3.1
@@ -8149,9 +8154,9 @@ snapshots:
       - vue
       - yaml
 
-  '@milaboratories/ts-builder@1.6.2(@types/node@24.5.2)(rollup@4.55.1)(sass-embedded@1.89.0)(vue@3.5.24(typescript@5.9.3))(yaml@2.8.0)':
+  '@milaboratories/ts-builder@1.6.0(@types/node@24.5.2)(rollup@4.55.1)(sass-embedded@1.89.0)(vue@3.5.24(typescript@5.9.3))(yaml@2.8.0)':
     dependencies:
-      '@milaboratories/ts-configs': 1.4.0
+      '@milaboratories/ts-configs': 1.3.0
       '@vitejs/plugin-vue': 6.0.6(vite@8.0.10(@types/node@24.5.2)(sass-embedded@1.89.0)(yaml@2.8.0))(vue@3.5.24(typescript@5.9.3))
       commander: 15.0.0
       jsonc-parser: 3.3.1
@@ -8190,18 +8195,18 @@ snapshots:
       - vue
       - yaml
 
-  '@milaboratories/ts-configs@1.4.0': {}
+  '@milaboratories/ts-configs@1.3.0': {}
 
-  '@milaboratories/ts-helpers@1.8.6':
+  '@milaboratories/ts-helpers@1.8.4':
     dependencies:
-      '@milaboratories/helpers': 1.14.5
+      '@milaboratories/helpers': 1.14.3
       canonicalize: 2.1.0
       denque: 2.1.0
 
-  '@milaboratories/uikit@2.15.23(typescript@5.9.3)':
+  '@milaboratories/uikit@2.15.14(typescript@5.9.3)':
     dependencies:
-      '@milaboratories/helpers': 1.14.5
-      '@platforma-sdk/model': 1.81.1
+      '@milaboratories/helpers': 1.14.3
+      '@platforma-sdk/model': 1.79.27
       '@types/d3-array': 3.2.1
       '@types/d3-axis': 3.0.6
       '@types/d3-scale': 4.0.9
@@ -8497,13 +8502,13 @@ snapshots:
       '@platforma-open/milaboratories.runenv-python-3.12.10-rapids': 1.4.4
       '@platforma-open/milaboratories.runenv-python-3.12.10-sccoda': 1.3.5
 
-  '@platforma-open/milaboratories.software-ptabler.schema@1.15.21':
+  '@platforma-open/milaboratories.software-ptabler.schema@1.15.17':
     dependencies:
-      '@milaboratories/pl-model-common': 1.47.3
+      '@milaboratories/pl-model-common': 1.46.4
 
-  '@platforma-open/milaboratories.software-ptabler@2.1.8': {}
+  '@platforma-open/milaboratories.software-ptabler@2.1.5': {}
 
-  '@platforma-open/milaboratories.software-ptexter@1.2.4': {}
+  '@platforma-open/milaboratories.software-ptexter@1.2.3': {}
 
   '@platforma-open/milaboratories.software-small-binaries.hello-world-py@1.0.10': {}
 
@@ -8525,19 +8530,19 @@ snapshots:
 
   '@platforma-open/soedinglab.software-mmseqs2@1.18.3': {}
 
-  '@platforma-sdk/block-tools@2.12.13(@types/node@24.5.2)':
+  '@platforma-sdk/block-tools@2.12.4(@types/node@24.5.2)':
     dependencies:
       '@aws-sdk/client-ecr-public': 3.859.0
       '@aws-sdk/client-s3': 3.859.0
       '@inquirer/prompts': 7.10.1(@types/node@24.5.2)
       '@milaboratories/pl-http': 1.2.4
-      '@milaboratories/pl-model-backend': 1.4.20
-      '@milaboratories/pl-model-common': 1.47.3
-      '@milaboratories/pl-model-middle-layer': 1.31.0
+      '@milaboratories/pl-model-backend': 1.4.14
+      '@milaboratories/pl-model-common': 1.46.4
+      '@milaboratories/pl-model-middle-layer': 1.30.11
       '@milaboratories/resolve-helper': 1.1.3
-      '@milaboratories/ts-helpers': 1.8.6
+      '@milaboratories/ts-helpers': 1.8.4
       '@platforma-sdk/blocks-deps-updater': 2.2.0
-      '@platforma-sdk/package-builder-lib': 1.2.1
+      '@platforma-sdk/package-builder-lib': 1.2.0
       canonicalize: 2.1.0
       commander: 15.0.0
       lru-cache: 11.2.2
@@ -8556,21 +8561,20 @@ snapshots:
     dependencies:
       yaml: 2.8.0
 
-  '@platforma-sdk/model@1.81.1':
+  '@platforma-sdk/model@1.79.27':
     dependencies:
-      '@milaboratories/helpers': 1.14.5
+      '@milaboratories/helpers': 1.14.3
       '@milaboratories/pl-error-like': 1.12.10
-      '@milaboratories/pl-model-common': 1.47.3
-      '@milaboratories/pl-model-middle-layer': 1.31.0
-      '@milaboratories/ptabler-expression-js': 1.2.37
+      '@milaboratories/pl-model-common': 1.46.4
+      '@milaboratories/pl-model-middle-layer': 1.30.11
+      '@milaboratories/ptabler-expression-js': 1.2.33
       canonicalize: 2.1.0
       es-toolkit: 1.39.10
       fast-json-patch: 3.1.1
-      lru-cache: 11.2.2
       utility-types: 3.11.0
       zod: 3.25.76
 
-  '@platforma-sdk/package-builder-lib@1.2.1':
+  '@platforma-sdk/package-builder-lib@1.2.0':
     dependencies:
       '@aws-sdk/client-s3': 3.859.0
       '@aws-sdk/lib-storage': 3.859.0(@aws-sdk/client-s3@3.859.0)
@@ -8585,22 +8589,32 @@ snapshots:
       - bare-abort-controller
       - react-native-b4a
 
-  '@platforma-sdk/tengo-builder@4.0.22':
+  '@platforma-sdk/package-builder@3.14.1':
     dependencies:
-      '@milaboratories/pl-model-backend': 1.4.20
+      '@platforma-sdk/package-builder-lib': 1.2.0
+      commander: 15.0.0
+      winston: 3.17.0
+    transitivePeerDependencies:
+      - aws-crt
+      - bare-abort-controller
+      - react-native-b4a
+
+  '@platforma-sdk/tengo-builder@4.0.16':
+    dependencies:
+      '@milaboratories/pl-model-backend': 1.4.14
       '@milaboratories/resolve-helper': 1.1.3
       '@milaboratories/tengo-tester': 1.6.4
-      '@milaboratories/ts-helpers': 1.8.6
+      '@milaboratories/ts-helpers': 1.8.4
       commander: 15.0.0
       winston: 3.17.0
 
-  '@platforma-sdk/test@1.81.2(@bytecodealliance/preview2-shim@0.17.8)(@types/node@24.5.2)(vite@8.0.10(@types/node@24.5.2)(sass-embedded@1.89.0)(yaml@2.8.0))':
+  '@platforma-sdk/test@1.79.34(@bytecodealliance/preview2-shim@0.17.8)(@types/node@24.5.2)(vite@8.0.10(@types/node@24.5.2)(sass-embedded@1.89.0)(yaml@2.8.0))':
     dependencies:
-      '@milaboratories/computable': 2.9.8
-      '@milaboratories/pl-client': 3.14.6
-      '@milaboratories/pl-middle-layer': 1.66.18(@bytecodealliance/preview2-shim@0.17.8)(@types/node@24.5.2)
-      '@milaboratories/pl-tree': 1.13.6
-      '@platforma-sdk/model': 1.81.1
+      '@milaboratories/computable': 2.9.6
+      '@milaboratories/pl-client': 3.14.0
+      '@milaboratories/pl-middle-layer': 1.65.9(@bytecodealliance/preview2-shim@0.17.8)(@types/node@24.5.2)
+      '@milaboratories/pl-tree': 1.12.19
+      '@platforma-sdk/model': 1.79.27
       '@vitest/coverage-istanbul': 4.1.9(vitest@4.1.9)
       vitest: 4.1.9(@types/node@24.5.2)(@vitest/coverage-istanbul@4.1.9)(vite@8.0.10(@types/node@24.5.2)(sass-embedded@1.89.0)(yaml@2.8.0))
     transitivePeerDependencies:
@@ -8624,13 +8638,12 @@ snapshots:
       - supports-color
       - vite
 
-  '@platforma-sdk/ui-vue@1.81.1(@bytecodealliance/preview2-shim@0.17.8)(typescript@5.9.3)':
+  '@platforma-sdk/ui-vue@1.79.34(@bytecodealliance/preview2-shim@0.17.8)(typescript@5.9.3)':
     dependencies:
-      '@milaboratories/columns-collection-driver': 0.2.3
-      '@milaboratories/pf-spec-driver': 1.5.0(@bytecodealliance/preview2-shim@0.17.8)
-      '@milaboratories/pl-model-common': 1.47.3
-      '@milaboratories/uikit': 2.15.23(typescript@5.9.3)
-      '@platforma-sdk/model': 1.81.1
+      '@milaboratories/pf-spec-driver': 1.4.18(@bytecodealliance/preview2-shim@0.17.8)
+      '@milaboratories/pl-model-common': 1.46.4
+      '@milaboratories/uikit': 2.15.14(typescript@5.9.3)
+      '@platforma-sdk/model': 1.79.27
       '@types/d3-format': 3.0.4
       '@types/node': 24.5.2
       '@types/semver': 7.7.0
@@ -8661,17 +8674,17 @@ snapshots:
       - typescript
       - universal-cookie
 
-  '@platforma-sdk/workflow-tengo@6.8.2':
+  '@platforma-sdk/workflow-tengo@6.7.1':
     dependencies:
-      '@milaboratories/pframes-rs-wasip2': 1.1.56
+      '@milaboratories/pframes-rs-wasip2': 1.1.52
       '@milaboratories/software-pframes-conv': 2.2.9
-      '@platforma-open/milaboratories.software-ptabler': 2.1.8
-      '@platforma-open/milaboratories.software-ptexter': 1.2.4
+      '@platforma-open/milaboratories.software-ptabler': 2.1.5
+      '@platforma-open/milaboratories.software-ptexter': 1.2.3
       '@platforma-open/milaboratories.software-small-binaries': 2.1.1
 
-  '@protobuf-ts/grpc-transport@2.11.1(@grpc/grpc-js@1.14.4)':
+  '@protobuf-ts/grpc-transport@2.11.1(@grpc/grpc-js@1.13.4)':
     dependencies:
-      '@grpc/grpc-js': 1.14.4
+      '@grpc/grpc-js': 1.13.4
       '@protobuf-ts/runtime': 2.11.1
       '@protobuf-ts/runtime-rpc': 2.11.1
 
@@ -8698,21 +8711,24 @@ snapshots:
 
   '@protobufjs/base64@1.1.2': {}
 
-  '@protobufjs/codegen@2.0.5': {}
+  '@protobufjs/codegen@2.0.4': {}
 
-  '@protobufjs/eventemitter@1.1.1': {}
+  '@protobufjs/eventemitter@1.1.0': {}
 
-  '@protobufjs/fetch@1.1.1':
+  '@protobufjs/fetch@1.1.0':
     dependencies:
       '@protobufjs/aspromise': 1.1.2
+      '@protobufjs/inquire': 1.1.0
 
   '@protobufjs/float@1.0.2': {}
+
+  '@protobufjs/inquire@1.1.0': {}
 
   '@protobufjs/path@1.1.2': {}
 
   '@protobufjs/pool@1.1.0': {}
 
-  '@protobufjs/utf8@1.1.2': {}
+  '@protobufjs/utf8@1.1.0': {}
 
   '@rolldown/binding-android-arm64@1.0.0-rc.17':
     optional: true
@@ -13190,17 +13206,18 @@ snapshots:
 
   proto-list@1.2.4: {}
 
-  protobufjs@7.6.5:
+  protobufjs@7.4.0:
     dependencies:
       '@protobufjs/aspromise': 1.1.2
       '@protobufjs/base64': 1.1.2
-      '@protobufjs/codegen': 2.0.5
-      '@protobufjs/eventemitter': 1.1.1
-      '@protobufjs/fetch': 1.1.1
+      '@protobufjs/codegen': 2.0.4
+      '@protobufjs/eventemitter': 1.1.0
+      '@protobufjs/fetch': 1.1.0
       '@protobufjs/float': 1.0.2
+      '@protobufjs/inquire': 1.1.0
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
-      '@protobufjs/utf8': 1.1.2
+      '@protobufjs/utf8': 1.1.0
       '@types/node': 24.5.2
       long: 5.3.2
 
@@ -13223,17 +13240,17 @@ snapshots:
 
   queue-microtask@1.2.3: {}
 
-  quickjs-emscripten-core@0.32.0:
+  quickjs-emscripten-core@0.31.0:
     dependencies:
-      '@jitl/quickjs-ffi-types': 0.32.0
+      '@jitl/quickjs-ffi-types': 0.31.0
 
-  quickjs-emscripten@0.32.0:
+  quickjs-emscripten@0.31.0:
     dependencies:
-      '@jitl/quickjs-wasmfile-debug-asyncify': 0.32.0
-      '@jitl/quickjs-wasmfile-debug-sync': 0.32.0
-      '@jitl/quickjs-wasmfile-release-asyncify': 0.32.0
-      '@jitl/quickjs-wasmfile-release-sync': 0.32.0
-      quickjs-emscripten-core: 0.32.0
+      '@jitl/quickjs-wasmfile-debug-asyncify': 0.31.0
+      '@jitl/quickjs-wasmfile-debug-sync': 0.31.0
+      '@jitl/quickjs-wasmfile-release-asyncify': 0.31.0
+      '@jitl/quickjs-wasmfile-release-sync': 0.31.0
+      quickjs-emscripten-core: 0.31.0
 
   quickselect@3.0.0: {}
 
