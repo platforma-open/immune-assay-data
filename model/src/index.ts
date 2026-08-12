@@ -1,11 +1,9 @@
 import type {
-  DataInfo,
   InferOutputsType,
   PColumn,
+  PColumnDataUniversal,
   PColumnSpec,
-  PColumnValues,
   RenderCtxBase,
-  TreeNodeAccessor,
 } from "@platforma-sdk/model";
 import {
   BlockModelV3,
@@ -26,7 +24,11 @@ import type {
   Settings,
 } from "./types";
 
-type Column = PColumn<DataInfo<TreeNodeAccessor> | TreeNodeAccessor | PColumnValues>;
+// `undefined` is part of the data union on purpose: `getAnchoredPColumns` returns
+// columns whose data is not yet resolved, and `createPFrameForGraphs` accepts them
+// as-is. Filtering them out instead would drop columns from the MSA frame while
+// data is still loading. Do not narrow this to drop `undefined`.
+type Column = PColumn<PColumnDataUniversal | undefined>;
 
 const defaultSettings = (): Settings => ({
   coverageThreshold: 0.95,
@@ -253,9 +255,9 @@ export const platforma = BlockModelV3.create(blockDataModel)
     return alphabet === "nucleotide" || alphabet === "aminoacid" ? alphabet : undefined;
   })
 
-  .output("assayFileHandle", (ctx) =>
-    ctx.prerun?.resolveAny({ field: "assayFile" })?.getFileHandle(),
-  )
+  // `traverse` is the SDK's replacement for the removed `resolveAny` — it does not
+  // assert a field type, whereas `resolve` defaults to Input.
+  .output("assayFileHandle", (ctx) => ctx.prerun?.traverse({ field: "assayFile" })?.getFileHandle())
 
   .output(
     "dataImportHandle",
