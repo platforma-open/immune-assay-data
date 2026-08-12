@@ -1,11 +1,9 @@
 import type {
-  DataInfo,
   InferOutputsType,
   PColumn,
+  PColumnDataUniversal,
   PColumnSpec,
-  PColumnValues,
   RenderCtxBase,
-  TreeNodeAccessor,
 } from "@platforma-sdk/model";
 import {
   BlockModelV3,
@@ -26,7 +24,11 @@ import type {
   Settings,
 } from "./types";
 
-type Column = PColumn<DataInfo<TreeNodeAccessor> | TreeNodeAccessor | PColumnValues>;
+// `undefined` is part of the data union on purpose: `getAnchoredPColumns` returns
+// columns whose data is not yet resolved, and `createPFrameForGraphs` accepts them
+// as-is. Filtering them out instead would drop columns from the MSA frame while
+// data is still loading. Do not narrow this to drop `undefined`.
+type Column = PColumn<PColumnDataUniversal | undefined>;
 
 const defaultSettings = (): Settings => ({
   coverageThreshold: 0.95,
@@ -201,6 +203,29 @@ export const platforma = BlockModelV3.create(blockDataModel)
       });
     }
 
+    // scFv upstreams (mixcr-scfv-clonotyping) additionally expose the whole
+    // VH-linker-VL construct as one column under a distinct name, alongside the
+    // per-chain `pl7.app/vdj/sequence` columns. Offer it so an assay table that
+    // carries full construct sequences can be matched directly, instead of
+    // forcing the user to pick a single chain.
+    //
+    // Probed before the selector is added (idiom from clonotype-clustering) so
+    // datasets without such columns are unaffected. Alphabet is left
+    // unconstrained: the block resolves it from the chosen column via the
+    // `targetSequenceType` output, and both nt and aa constructs are emitted.
+    if (datasetAxis !== "pl7.app/variantKey") {
+      const scFvColumns = ctx.resultPool.getAnchoredPColumns({ main: ref }, [
+        { name: "pl7.app/vdj/scFv-sequence" },
+      ]);
+      if (scFvColumns && scFvColumns.length > 0) {
+        sequenceMatchers.push({
+          axes: [{ anchor: "main", idx: 1 }],
+          name: "pl7.app/vdj/scFv-sequence",
+          domain: {},
+        });
+      }
+    }
+
     return ctx.resultPool.getCanonicalOptions({ main: ref }, sequenceMatchers, {
       ignoreMissingDomains: true,
       labelOps: {
@@ -230,9 +255,9 @@ export const platforma = BlockModelV3.create(blockDataModel)
     return alphabet === "nucleotide" || alphabet === "aminoacid" ? alphabet : undefined;
   })
 
-  .output("assayFileHandle", (ctx) =>
-    ctx.prerun?.resolveAny({ field: "assayFile" })?.getFileHandle(),
-  )
+  // `traverse` is the SDK's replacement for the removed `resolveAny` — it does not
+  // assert a field type, whereas `resolve` defaults to Input.
+  .output("assayFileHandle", (ctx) => ctx.prerun?.traverse({ field: "assayFile" })?.getFileHandle())
 
   .output(
     "dataImportHandle",
