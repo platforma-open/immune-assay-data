@@ -37,8 +37,8 @@ catalogs:
       specifier: 1.18.3
       version: 1.18.3
     '@platforma-sdk/block-tools':
-      specifier: 2.12.13
-      version: 2.12.13
+      specifier: 2.13.0
+      version: 2.13.0
     '@platforma-sdk/model':
       specifier: 1.81.1
       version: 1.81.1
@@ -92,7 +92,7 @@ importers:
         version: 1.6.2(@types/node@24.5.2)(rollup@4.55.1)(sass-embedded@1.89.0)(vue@3.5.24(typescript@5.6.3))(yaml@2.8.0)
       '@platforma-sdk/block-tools':
         specifier: 'catalog:'
-        version: 2.12.13(@types/node@24.5.2)
+        version: 2.13.0(@types/node@24.5.2)
       shx:
         specifier: 'catalog:'
         version: 0.4.0
@@ -122,7 +122,7 @@ importers:
         version: link:../workflow
       '@platforma-sdk/block-tools':
         specifier: 'catalog:'
-        version: 2.12.13(@types/node@24.5.2)
+        version: 2.13.0(@types/node@24.5.2)
       '@platforma-sdk/model':
         specifier: 'catalog:'
         version: 1.81.1
@@ -159,7 +159,7 @@ importers:
         version: 1.4.0
       '@platforma-sdk/block-tools':
         specifier: 'catalog:'
-        version: 2.12.13(@types/node@24.5.2)
+        version: 2.13.0(@types/node@24.5.2)
       eslint:
         specifier: 'catalog:'
         version: 9.27.0
@@ -171,7 +171,7 @@ importers:
         version: 1.7.7
       '@platforma-sdk/block-tools':
         specifier: 'catalog:'
-        version: 2.12.13(@types/node@24.5.2)
+        version: 2.13.0(@types/node@24.5.2)
 
   software/check-content-empty:
     devDependencies:
@@ -180,7 +180,7 @@ importers:
         version: 1.7.7
       '@platforma-sdk/block-tools':
         specifier: 'catalog:'
-        version: 2.12.13(@types/node@24.5.2)
+        version: 2.13.0(@types/node@24.5.2)
 
   software/coverage-mode-calc:
     devDependencies:
@@ -189,7 +189,7 @@ importers:
         version: 1.7.7
       '@platforma-sdk/block-tools':
         specifier: 'catalog:'
-        version: 2.12.13(@types/node@24.5.2)
+        version: 2.13.0(@types/node@24.5.2)
 
   software/fasta-to-tsv:
     devDependencies:
@@ -198,7 +198,7 @@ importers:
         version: 1.7.7
       '@platforma-sdk/block-tools':
         specifier: 'catalog:'
-        version: 2.12.13(@types/node@24.5.2)
+        version: 2.13.0(@types/node@24.5.2)
 
   software/merge-results:
     devDependencies:
@@ -207,7 +207,7 @@ importers:
         version: 1.7.7
       '@platforma-sdk/block-tools':
         specifier: 'catalog:'
-        version: 2.12.13(@types/node@24.5.2)
+        version: 2.13.0(@types/node@24.5.2)
 
   software/prepare-fasta:
     devDependencies:
@@ -216,7 +216,7 @@ importers:
         version: 1.7.7
       '@platforma-sdk/block-tools':
         specifier: 'catalog:'
-        version: 2.12.13(@types/node@24.5.2)
+        version: 2.13.0(@types/node@24.5.2)
 
   software/sequence-match:
     devDependencies:
@@ -225,7 +225,7 @@ importers:
         version: 1.7.7
       '@platforma-sdk/block-tools':
         specifier: 'catalog:'
-        version: 2.12.13(@types/node@24.5.2)
+        version: 2.13.0(@types/node@24.5.2)
 
   software/split-fasta:
     devDependencies:
@@ -234,7 +234,7 @@ importers:
         version: 1.7.7
       '@platforma-sdk/block-tools':
         specifier: 'catalog:'
-        version: 2.12.13(@types/node@24.5.2)
+        version: 2.13.0(@types/node@24.5.2)
 
   software/xlsx-to-csv:
     devDependencies:
@@ -243,7 +243,7 @@ importers:
         version: 1.7.7
       '@platforma-sdk/block-tools':
         specifier: 'catalog:'
-        version: 2.12.13(@types/node@24.5.2)
+        version: 2.13.0(@types/node@24.5.2)
 
   ui:
     dependencies:
@@ -1596,6 +1596,10 @@ packages:
     resolution: {integrity: sha512-eWUIjK6D2/Ce779uyOGw9pET6KOQ7FKHg+DDrrkGh/ZllE2f/f4mghc/FPeOJIBQXVGg7Jg01oWh08SYVBzB5w==}
     hasBin: true
 
+  '@platforma-sdk/block-tools@2.13.0':
+    resolution: {integrity: sha512-xKiTmNLjfxCnnHRr9Q4ct3HdjLfkbLztvxpU++/pek0R8Bj/Lezeoji+eLpxAAYYUxjMr8jLj935eLK5MqKrSg==}
+    hasBin: true
+
   '@platforma-sdk/blocks-deps-updater@2.2.0':
     resolution: {integrity: sha512-p9lBxhFXM9WoRsrJO7dfkiXSK+1m63yIn1sKhBO71eMbhrLMyVYHEOeNf3w5OCdbRF5QsNhXzWuiTmFK3zHFsA==}
     hasBin: true
@@ -1605,6 +1609,9 @@ packages:
 
   '@platforma-sdk/package-builder-lib@1.2.1':
     resolution: {integrity: sha512-H6weitj7JxbiJSlteEFLafTJ+tfty6iv/imf3ysy8oCS8AZIRJk2VMW3M/aAc+xVkQeX7oVIwMwFMYrJIoFsAg==}
+
+  '@platforma-sdk/package-builder-lib@1.3.0':
+    resolution: {integrity: sha512-CdBjmNo6E1fBxKYWaXa49L/L2WLURxs2f1TAqxLIZlHRE4DZ6E1TEj3jNNKESWp+/9rwtLkTAzmTzNPrDgz+2Q==}
 
   '@platforma-sdk/tengo-builder@4.0.22':
     resolution: {integrity: sha512-8+zDYDFFI2tQS7dplTcxgQdUwzt8+IO++sJiVbwBgwSg1Giyc2qMThEYPLK3QNFArgCsIDR6wQuS8t66pJsRPQ==}
@@ -8552,6 +8559,33 @@ snapshots:
       - bare-abort-controller
       - react-native-b4a
 
+  '@platforma-sdk/block-tools@2.13.0(@types/node@24.5.2)':
+    dependencies:
+      '@aws-sdk/client-ecr-public': 3.859.0
+      '@aws-sdk/client-s3': 3.859.0
+      '@inquirer/prompts': 7.10.1(@types/node@24.5.2)
+      '@milaboratories/pl-http': 1.2.4
+      '@milaboratories/pl-model-backend': 1.4.20
+      '@milaboratories/pl-model-common': 1.47.3
+      '@milaboratories/pl-model-middle-layer': 1.31.0
+      '@milaboratories/resolve-helper': 1.1.3
+      '@milaboratories/ts-helpers': 1.8.6
+      '@platforma-sdk/blocks-deps-updater': 2.2.0
+      '@platforma-sdk/package-builder-lib': 1.3.0
+      canonicalize: 2.1.0
+      commander: 15.0.0
+      lru-cache: 11.2.2
+      mime-types: 2.1.35
+      tar: 7.4.3
+      undici: 7.16.0
+      yaml: 2.8.0
+      zod: 3.25.76
+    transitivePeerDependencies:
+      - '@types/node'
+      - aws-crt
+      - bare-abort-controller
+      - react-native-b4a
+
   '@platforma-sdk/blocks-deps-updater@2.2.0':
     dependencies:
       yaml: 2.8.0
@@ -8571,6 +8605,21 @@ snapshots:
       zod: 3.25.76
 
   '@platforma-sdk/package-builder-lib@1.2.1':
+    dependencies:
+      '@aws-sdk/client-s3': 3.859.0
+      '@aws-sdk/lib-storage': 3.859.0(@aws-sdk/client-s3@3.859.0)
+      '@milaboratories/resolve-helper': 1.1.3
+      archiver: 7.0.1
+      undici: 7.16.0
+      winston: 3.17.0
+      yaml: 2.8.0
+      zod: 3.25.76
+    transitivePeerDependencies:
+      - aws-crt
+      - bare-abort-controller
+      - react-native-b4a
+
+  '@platforma-sdk/package-builder-lib@1.3.0':
     dependencies:
       '@aws-sdk/client-s3': 3.859.0
       '@aws-sdk/lib-storage': 3.859.0(@aws-sdk/client-s3@3.859.0)
