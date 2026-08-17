@@ -5,7 +5,7 @@ import * as XLSX from "xlsx";
 import { parseFastaContent, fastaToTable } from "./fastaParser";
 
 // Define a more specific type for raw Excel data
-type TableRow = string[];
+type TableRow = (string | undefined)[];
 type TableData = TableRow[];
 
 // Helper function to infer data type from a value
@@ -213,7 +213,25 @@ export function processFileBytes(bytes: Uint8Array, extension: string | undefine
     return;
   }
 
-  if (new Set(header).size !== header.length) {
+  const namedColumns: { colIndex: number; header: string }[] = [];
+  // Data rows can be wider than the header row (trailing headerless columns)
+  const columnCount = rawData.reduce((max, row) => Math.max(max, row.length), 0);
+  for (let colIndex = 0; colIndex < columnCount; colIndex++) {
+    const columnHeader = header[colIndex];
+    if (columnHeader !== undefined && String(columnHeader).trim() !== "") {
+      namedColumns.push({ colIndex, header: columnHeader });
+      continue;
+    }
+    for (let rowIndex = 1; rowIndex < rawData.length; rowIndex++) {
+      const value = rawData[rowIndex][colIndex];
+      if (value !== undefined && String(value).trim() !== "") {
+        app.model.data.fileImportError = `Column ${colIndex + 1} has data but no header. Add a header to import it, or clear the column.`;
+        return;
+      }
+    }
+  }
+
+  if (new Set(namedColumns.map((c) => c.header)).size !== namedColumns.length) {
     app.model.data.fileImportError = "Headers in the input file must be unique";
     return;
   }
@@ -221,8 +239,7 @@ export function processFileBytes(bytes: Uint8Array, extension: string | undefine
   const importColumns: ImportColumnInfo[] = [];
 
   // Process each column to infer its type
-  for (let colIndex = 0; colIndex < header.length; colIndex++) {
-    const columnHeader = header[colIndex];
+  for (const { colIndex, header: columnHeader } of namedColumns) {
     const columnValues = rawData.slice(1).map((row) => row[colIndex]);
     const inferredType = inferColumnType(columnValues);
     const sequenceType = inferredType === "String" ? inferSequenceType(columnValues) : undefined;
