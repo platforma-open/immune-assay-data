@@ -5,6 +5,8 @@ pSpec := import("@platforma-sdk/workflow-tengo:pframes.spec")
 maps := import("@platforma-sdk/workflow-tengo:maps")
 strings := import("@platforma-sdk/workflow-tengo:strings")
 
+modality := import(":modality")
+
 self.awaitState("uniqueValuesMap", "ResourceReady")
 self.awaitState("datasetSpec", "ResourceReady")
 self.awaitState("assaySequenceType", "ResourceReady")
@@ -15,12 +17,14 @@ assayColumnName := func(header) {
 }
 
 self.body(func(inputs) {
-	// Display labels reflect what the upstream actually carries — clones for
-	// VDJ, peptides for peptide-extraction. Column/axis `name`s stay neutral
-	// (`pl7.app/assay/*`); labels diverge because the upstream-side semantics
-	// differ: queryCount counts clones vs peptides, and the linker column's
-	// `target` axis is `clonotypeKey` vs `variantKey` — different identities.
-	isPeptide := inputs.datasetSpec.axesSpec[1].name == "pl7.app/variantKey"
+	// Display labels reflect what the upstream actually carries — clones for VDJ, peptides for
+	// peptide-extraction. Column/axis `name`s stay neutral (`pl7.app/assay/*`); labels diverge
+	// because the upstream-side semantics differ: queryCount counts clones vs peptides, and the
+	// linker column's `target` axis is a different identity in each case.
+	//
+	// Which one it is comes from the axis DOMAIN, not its name: an imported receptor set is
+	// carried on `pl7.app/variantKey` too, and is clones.
+	isPeptide := modality.isPeptideDataset(inputs.datasetSpec)
 	matchedCountLabel := isPeptide ? "Matched Peptides" : "Matched Clones"
 	linkerLabel := isPeptide ? "Peptide to assay link" : "Clone to assay link"
 

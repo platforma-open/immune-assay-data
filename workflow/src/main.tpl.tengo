@@ -11,6 +11,8 @@ text := import("text")
 render := import("@platforma-sdk/workflow-tengo:render")
 strings := import("@platforma-sdk/workflow-tengo:strings")
 
+modality := import(":modality")
+
 prerunTpl := assets.importTemplate(":prerun")
 analysisTpl := assets.importTemplate(":analysis")
 processOutputsTpl := assets.importTemplate(":process-outputs")
@@ -59,7 +61,10 @@ wf.body(func(args) {
 	// Detect peptide modality and compute min peptide length when applicable.
 	// Drives the short-peptide k-mer override in run-alignment (k=5 + relaxed
 	// mmseqs2 prefilter for inputs below the auto-tune floor of ~6).
-	isPeptide := datasetSpec.axesSpec[1].name == "pl7.app/variantKey"
+	//
+	// Not the axis name: import-vdj-data's bare receptor sets share `pl7.app/variantKey` with
+	// peptide-extraction, and are neither short nor carriers of a peptide length column.
+	isPeptide := modality.isPeptideDataset(datasetSpec)
 	minPeptideLength := undefined
 	if isPeptide {
 		peptideLenCols := args.columns.getColumns("peptideSequenceLength")
