@@ -228,7 +228,6 @@ wf.body(func(args) {
 		assaySequenceType: assaySequenceType,
 		datasetSpec: datasetSpec,
 		uniqueValuesMap: uniqueValuesMap,
-		settings: args.settings,
 		customBlockLabel: args.customBlockLabel,
 		defaultBlockLabel: args.defaultBlockLabel,
 		blockId: blockId

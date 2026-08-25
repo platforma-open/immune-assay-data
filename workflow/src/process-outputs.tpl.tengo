@@ -25,7 +25,6 @@ self.body(func(args) {
 		assayDataTsv: args.assayDataTsv,
 		clonesDataTsv: args.clonesDataTsv,
 		uniqueValuesMap: args.uniqueValuesMap,
-		settings: args.settings,
 		customBlockLabel: args.customBlockLabel,
 		defaultBlockLabel: args.defaultBlockLabel,
 		blockId: args.blockId
