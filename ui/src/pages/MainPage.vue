@@ -2,7 +2,7 @@
 import { PlMultiSequenceAlignment } from "@milaboratories/multi-sequence-alignment";
 import strings from "@milaboratories/strings";
 import {
-  getDefaultBlockLabel,
+  deriveDefaultLabel,
   type Settings,
 } from "@platforma-open/milaboratories.immune-assay-data.model";
 import type {
@@ -11,6 +11,7 @@ import type {
   LocalImportFileHandle,
   PlSelectionModel,
   PTableKey,
+  SUniversalPColumnId,
 } from "@platforma-sdk/model";
 import {
   getFileNameFromHandle,
@@ -72,16 +73,7 @@ const PEPTIDE_DEFAULTS: Settings = {
   coverageThreshold: 1.0,
 };
 
-const defaultLabel = computed(() =>
-  getDefaultBlockLabel({
-    fileName: app.model.data.fileHandle
-      ? getFileNameFromHandle(app.model.data.fileHandle)
-      : undefined,
-    similarityType: app.model.data.settings.similarityType,
-    identity: app.model.data.settings.identity,
-    coverageThreshold: app.model.data.settings.coverageThreshold,
-  }),
-);
+const defaultLabel = computed(() => deriveDefaultLabel(app.model.data));
 
 const settingsOpen = ref(app.model.data.datasetRef === undefined);
 const multipleSequenceAlignmentAssayOpen = ref(false);
@@ -170,6 +162,13 @@ watch(assayFileBytes, (bytes) => {
   if (app.model.data.importColumns !== undefined) return;
   processFileBytes(bytes, app.model.data.fileExtension);
 });
+
+// Mirror the picked column's display label into data
+const setTarget = (target: SUniversalPColumnId | undefined) => {
+  app.model.data.targetColumnLabel = target
+    ? app.model.outputs.targetOptions?.find((o) => o.value === target)?.label
+    : undefined;
+};
 
 const setFile = async (file: ImportFileHandle | undefined) => {
   // Clear all dependent state so the new file's columns are detected fresh.
@@ -367,6 +366,7 @@ const similarityTypeOptions = [
         label="Sequence column to match"
         clearable
         required
+        @update:model-value="setTarget"
       >
         <template #tooltip>
           Select the sequence column to align against the assay sequences. If the alphabets differ

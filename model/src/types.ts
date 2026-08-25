@@ -33,6 +33,7 @@ export type BlockData = {
   customBlockLabel: string;
   datasetRef?: PlRef;
   targetRef?: SUniversalPColumnId;
+  targetColumnLabel?: string;
   fileHandle?: ImportFileHandle;
   fileExtension?: string;
   detectedXsvType?: "csv" | "tsv";

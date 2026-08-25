@@ -1,5 +1,6 @@
 export function getDefaultBlockLabel(data: {
   fileName?: string;
+  targetColumnLabel?: string;
   similarityType: "alignment-score" | "sequence-identity" | "exact-match";
   identity: number;
   coverageThreshold: number;
@@ -9,6 +10,11 @@ export function getDefaultBlockLabel(data: {
   // Add file name if available
   if (data.fileName) {
     parts.push(data.fileName);
+  }
+
+  // The matched sequence column
+  if (data.targetColumnLabel) {
+    parts.push(data.targetColumnLabel);
   }
 
   // Sequence Match mode has no identity/coverage thresholds — they are meaningless.

@@ -42,6 +42,7 @@ const blockDataModel = new DataModelBuilder()
     customBlockLabel: args?.customBlockLabel ?? "",
     datasetRef: args?.datasetRef,
     targetRef: args?.targetRef,
+    targetColumnLabel: undefined,
     fileHandle: args?.fileHandle,
     fileExtension: args?.fileExtension,
     detectedXsvType: args?.detectedXsvType,
@@ -64,6 +65,7 @@ const blockDataModel = new DataModelBuilder()
     customBlockLabel: "",
     datasetRef: undefined,
     targetRef: undefined,
+    targetColumnLabel: undefined,
     fileHandle: undefined,
     fileExtension: undefined,
     detectedXsvType: undefined,
@@ -81,9 +83,10 @@ const blockDataModel = new DataModelBuilder()
     lastAppliedModality: undefined,
   }));
 
-function deriveDefaultLabel(data: BlockData): string {
+export function deriveDefaultLabel(data: BlockData): string {
   return getDefaultBlockLabel({
     fileName: data.fileHandle ? getFileNameFromHandle(data.fileHandle) : undefined,
+    targetColumnLabel: data.targetColumnLabel,
     similarityType: data.settings.similarityType,
     identity: data.settings.identity,
     coverageThreshold: data.settings.coverageThreshold,
