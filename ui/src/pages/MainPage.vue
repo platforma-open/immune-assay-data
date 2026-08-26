@@ -160,14 +160,13 @@ const assayFileBytes = computed(() => {
 });
 
 // For remote files: detect columns once the prerun has imported the file and
-// bytes arrive. Guarded so it doesn't re-run if a local file already processed
-// bytes synchronously. The harness flags any `outputs → data` watcher as a
+// bytes arrive. Always reprocesses so state persisted by an older block version
+// is re-validated. The harness flags any `outputs → data` watcher as a
 // hairpin; here the multi-client write race is muted because both clients
 // compute identical `importColumns`/`detectedXsvType` from identical bytes,
 // making racing writes idempotent.
 watch(assayFileBytes, (bytes) => {
   if (!bytes || !app.model.data.fileHandle) return;
-  if (app.model.data.importColumns !== undefined) return;
   processFileBytes(bytes, app.model.data.fileExtension);
 });
 
@@ -389,10 +388,6 @@ const similarityTypeOptions = [
           columns.
         </template>
       </PlFileInput>
-      <!-- @TODO: delete this after bug with not working error message in PlFileInput is fixed -->
-      <span v-if="app.model.data.fileImportError" style="color: red">
-        {{ app.model.data.fileImportError }}
-      </span>
 
       <PlDropdown
         v-model="app.model.data.sequenceColumnHeader"
