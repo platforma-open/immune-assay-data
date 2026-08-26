@@ -6,20 +6,11 @@ import type {
   SUniversalPColumnId,
 } from "@platforma-sdk/model";
 
-export type Settings = {
-  /** Fraction of aligned residues required (MMseqs2 coverage). */
-  coverageThreshold: number;
-  /** Identity threshold (0-1). */
-  identity: number;
-  /**
-   * Matching method. `alignment-score`/`sequence-identity` run MMseqs2;
-   * `exact-match` reports only byte-identical sequences (no alignment,
-   * guaranteed recall) and ignores identity/coverage/fast-mode.
-   */
-  similarityType: "sequence-identity" | "alignment-score" | "exact-match";
-};
+// Settings is part of the init-params contract, so it is defined in the kind (the layer the
+// model depends on) and re-exported here to keep one import site for block code.
+import type { Modality, Settings } from "@platforma-open/milaboratories.immune-assay-data.kind";
 
-export type Modality = "antibody_tcr" | "peptide";
+export type { Modality, Settings };
 
 export type ImportColumnInfo = {
   header: string;

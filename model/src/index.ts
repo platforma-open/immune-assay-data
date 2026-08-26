@@ -1,3 +1,4 @@
+import { kind } from "@platforma-open/milaboratories.immune-assay-data.kind";
 import type {
   InferOutputsType,
   PColumn,
@@ -12,6 +13,7 @@ import {
   createPlDataTableV2,
   DataModelBuilder,
   getFileNameFromHandle,
+  isImportFileHandleIndex,
 } from "@platforma-sdk/model";
 import { getDefaultBlockLabel } from "./label";
 import type {
@@ -36,7 +38,7 @@ const defaultSettings = (): Settings => ({
   similarityType: "alignment-score",
 });
 
-const blockDataModel = new DataModelBuilder()
+const blockDataModel = new DataModelBuilder({ kind })
   .from<BlockData>("V20260519")
   .upgradeLegacy<LegacyBlockArgs, LegacyBlockUiState>(({ args, uiState }) => ({
     customBlockLabel: args?.customBlockLabel ?? "",
@@ -61,27 +63,35 @@ const blockDataModel = new DataModelBuilder()
     // the modality-reset watcher from clobbering user-tuned thresholds on reopen.
     lastAppliedModality: "antibody_tcr",
   }))
-  .init(() => ({
-    customBlockLabel: "",
-    datasetRef: undefined,
-    targetRef: undefined,
-    targetColumnLabel: undefined,
-    fileHandle: undefined,
-    fileExtension: undefined,
+  // `params` is absent when a block is created by hand rather than from a
+  // template, so every field the contract carries keeps its own default.
+  .init(({ params }) => ({
+    customBlockLabel: params?.customBlockLabel ?? "",
+    datasetRef: params?.datasetRef,
+    targetRef: params?.targetRef,
+    targetColumnLabel: params?.targetColumnLabel,
+    fileHandle: params?.fileHandle,
+    fileExtension: params?.fileExtension,
     detectedXsvType: undefined,
     importColumns: undefined,
-    sequenceColumnHeader: undefined,
-    selectedColumns: [],
-    settings: defaultSettings(),
-    lessSensitive: false,
-    maxSeqs: 10000,
+    sequenceColumnHeader: params?.sequenceColumnHeader,
+    selectedColumns: params?.selectedColumns ?? [],
+    settings: params?.settings ?? defaultSettings(),
+    lessSensitive: params?.lessSensitive ?? false,
+    maxSeqs: params?.maxSeqs ?? 10000,
     mem: undefined,
     cpu: undefined,
     fileImportError: undefined,
     tableState: createPlDataTableStateV2(),
     alignmentModel: {},
-    lastAppliedModality: undefined,
+    lastAppliedModality: params?.lastAppliedModality,
   }));
+
+/** The block's file handle when it can resolve on another machine, else undefined. */
+function shareableFileHandle(data: BlockData): BlockData["fileHandle"] {
+  const handle = data.fileHandle;
+  return handle !== undefined && isImportFileHandleIndex(handle) ? handle : undefined;
+}
 
 export function deriveDefaultLabel(data: BlockData): string {
   return getDefaultBlockLabel({
@@ -124,7 +134,7 @@ function getAnchoredClonotypeProps(
   ).filter((p) => p.spec.annotations?.["pl7.app/sequence/isAnnotation"] !== "true");
 }
 
-export const platforma = BlockModelV3.create(blockDataModel)
+export const platforma = BlockModelV3.create({ dataModel: blockDataModel, kind })
 
   .args<BlockArgs>((data) => {
     if (data.datasetRef === undefined) throw new Error("Dataset is required");
@@ -157,6 +167,31 @@ export const platforma = BlockModelV3.create(blockDataModel)
       maxSeqs: exact ? 10000 : (data.maxSeqs ?? 10000),
       mem: data.mem,
       cpu: data.cpu,
+    };
+  })
+
+  // The inverse of `init`: exactly the fields BlockParams declares, so exporting a block to
+  // a template and applying that template round-trip.
+  .templateParams((data) => {
+    // The assay file and everything describing it travel together, or not at all. An
+    // `upload://` handle is signed by the desktop that opened the file dialog and resolves
+    // nowhere else, so it is dropped — and with it the extension read off its filename and the
+    // column picks. Sending them alone would land picks that `setFile` wipes the moment a
+    // file is chosen.
+    const file = shareableFileHandle(data);
+    return {
+      customBlockLabel: data.customBlockLabel,
+      datasetRef: data.datasetRef,
+      targetRef: data.targetRef,
+      targetColumnLabel: data.targetColumnLabel,
+      fileHandle: file,
+      fileExtension: file === undefined ? undefined : data.fileExtension,
+      sequenceColumnHeader: file === undefined ? undefined : data.sequenceColumnHeader,
+      selectedColumns: file === undefined ? undefined : data.selectedColumns,
+      settings: data.settings,
+      lessSensitive: data.lessSensitive,
+      maxSeqs: data.maxSeqs,
+      lastAppliedModality: data.lastAppliedModality,
     };
   })
 
