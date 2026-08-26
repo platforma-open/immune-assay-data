@@ -1,0 +1,40 @@
+// Which modality a selected dataset is, from its row axis.
+//
+// Single source of truth, shared by `main` (which uses it to decide whether the short-peptide
+// k-mer override applies) and `build-outputs` (which uses it to label the outputs). The two
+// used to test the axis name independently, and a test that disagreed between them would send
+// a dataset down the peptide alignment path while labelling its outputs as clones.
+//
+// Mirrors `isPeptideAxis` in model/src/index.ts, which decides the same question for the
+// sequence-column picker and the UI's threshold defaults.
+
+ll := import("@platforma-sdk/workflow-tengo:ll")
+
+/**
+ * Whether the dataset holds peptides.
+ *
+ * `pl7.app/variantKey` is shared by three producers and the axis name alone does not say which:
+ * peptide-extraction stamps `pl7.app/peptide/extractionRunId`, synthetic-repertoire-profiler
+ * stamps `pl7.app/repertoire/extractionRunId`, and import-vdj-data's bare receptor sets stamp
+ * `pl7.app/vdj/clonotypingRunId`. Only the first is peptide.
+ *
+ * Reading the axis name alone sent an imported receptor set down the peptide path, where it
+ * was required to carry a `pl7.app/sequenceLength` column it does not emit — so the run died
+ * on a panic naming a column the scientist never chose.
+ */
+isPeptideDataset := func(datasetSpec) {
+	ll.assert(!is_undefined(datasetSpec), "modality: datasetSpec is required")
+	axis := datasetSpec.axesSpec[1]
+	if is_undefined(axis) || axis.name != "pl7.app/variantKey" {
+		return false
+	}
+	domain := axis.domain
+	if is_undefined(domain) {
+		return true
+	}
+	return is_undefined(domain["pl7.app/vdj/clonotypingRunId"])
+}
+
+export ll.toStrict({
+	isPeptideDataset: isPeptideDataset
+})
