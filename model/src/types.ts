@@ -6,11 +6,8 @@ import type {
   SUniversalPColumnId,
 } from "@platforma-sdk/model";
 
-// Settings is part of the init-params contract, so it is defined in the kind (the layer the
-// model depends on) and re-exported here to keep one import site for block code.
+// Part of the init-params contract, so defined in the kind — the layer the model depends on.
 import type { Modality, Settings } from "@platforma-open/milaboratories.immune-assay-data.kind";
-
-export type { Modality, Settings };
 
 export type ImportColumnInfo = {
   header: string;

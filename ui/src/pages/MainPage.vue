@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { PlMultiSequenceAlignment } from "@milaboratories/multi-sequence-alignment";
 import strings from "@milaboratories/strings";
-import {
-  deriveDefaultLabel,
-  type Settings,
-} from "@platforma-open/milaboratories.immune-assay-data.model";
+import type { Settings } from "@platforma-open/milaboratories.immune-assay-data.kind";
+import { deriveDefaultLabel } from "@platforma-open/milaboratories.immune-assay-data.model";
 import type {
   AxisId,
   ImportFileHandle,

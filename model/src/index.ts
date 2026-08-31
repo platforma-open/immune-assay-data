@@ -1,3 +1,4 @@
+import type { Modality, Settings } from "@platforma-open/milaboratories.immune-assay-data.kind";
 import { kind } from "@platforma-open/milaboratories.immune-assay-data.kind";
 import type {
   InferOutputsType,
@@ -22,8 +23,6 @@ import type {
   BlockPrerunArgs,
   LegacyBlockArgs,
   LegacyBlockUiState,
-  Modality,
-  Settings,
 } from "./types";
 
 // `undefined` is part of the data union on purpose: `getAnchoredPColumns` returns
