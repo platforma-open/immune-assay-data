@@ -293,6 +293,9 @@ importers:
       '@milaboratories/strings':
         specifier: 'catalog:'
         version: 0.1.2
+      '@platforma-open/milaboratories.immune-assay-data.kind':
+        specifier: workspace:*
+        version: link:../kind
       '@platforma-open/milaboratories.immune-assay-data.model':
         specifier: workspace:*
         version: link:../model
@@ -1146,11 +1149,6 @@ packages:
 
   '@milaboratories/pf-spec-driver@1.5.1':
     resolution: {integrity: sha512-K7BuQCUXqpUOAwgJ1aIO8SSQbE8RSEVb8J5e6vIpI6PqV7Uc8LHFswTguOSgSuacpMgQmEP9jmIKyafJdJ7PDw==}
-
-  '@milaboratories/pf-spec@1.0.1':
-    resolution: {integrity: sha512-UbLycglulwrFgil6n1By17YGOVHzZXeb+tAVUej6ZFOmpRtAMQYVLOXAX4FN2tc98eDTJ+YrYdZCa7qWi1gBxw==}
-    peerDependencies:
-      '@bytecodealliance/preview2-shim': ^0.20.1
 
   '@milaboratories/pf-spec@1.0.1':
     resolution: {integrity: sha512-UbLycglulwrFgil6n1By17YGOVHzZXeb+tAVUej6ZFOmpRtAMQYVLOXAX4FN2tc98eDTJ+YrYdZCa7qWi1gBxw==}
@@ -3874,8 +3872,6 @@ packages:
     peerDependencies:
       typescript: '*'
 
-  '@vitejs/plugin-vue@6.0.8':
-    resolution: {integrity: sha512-0ZjgOg7oO6farnNGup7yvoM/YXZV84OZxHAwtflItNa/6zzQyVb5LNxyea3FEKEX2XlagIKzrlH7wwxkKgtiew==}
   '@vitejs/plugin-vue@6.0.8':
     resolution: {integrity: sha512-0ZjgOg7oO6farnNGup7yvoM/YXZV84OZxHAwtflItNa/6zzQyVb5LNxyea3FEKEX2XlagIKzrlH7wwxkKgtiew==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -11804,17 +11800,13 @@ snapshots:
       - supports-color
 
   '@vitejs/plugin-vue@6.0.8(vite@8.0.10(@types/node@24.5.2)(sass-embedded@1.89.0)(yaml@2.8.0))(vue@3.5.24(typescript@5.6.3))':
-  '@vitejs/plugin-vue@6.0.8(vite@8.0.10(@types/node@24.5.2)(sass-embedded@1.89.0)(yaml@2.8.0))(vue@3.5.24(typescript@5.6.3))':
     dependencies:
-      '@rolldown/pluginutils': 1.0.1
       '@rolldown/pluginutils': 1.0.1
       vite: 8.0.10(@types/node@24.5.2)(sass-embedded@1.89.0)(yaml@2.8.0)
       vue: 3.5.24(typescript@5.6.3)
 
   '@vitejs/plugin-vue@6.0.8(vite@8.0.10(@types/node@24.5.2)(sass-embedded@1.89.0)(yaml@2.8.0))(vue@3.5.24(typescript@5.9.3))':
-  '@vitejs/plugin-vue@6.0.8(vite@8.0.10(@types/node@24.5.2)(sass-embedded@1.89.0)(yaml@2.8.0))(vue@3.5.24(typescript@5.9.3))':
     dependencies:
-      '@rolldown/pluginutils': 1.0.1
       '@rolldown/pluginutils': 1.0.1
       vite: 8.0.10(@types/node@24.5.2)(sass-embedded@1.89.0)(yaml@2.8.0)
       vue: 3.5.24(typescript@5.9.3)
@@ -11835,7 +11827,7 @@ snapshots:
       istanbul-lib-report: 3.0.1
       istanbul-reports: 3.2.0
       magicast: 0.5.3
-      obug: 2.1.4
+      obug: 2.1.3
       tinyrainbow: 3.1.0
       vitest: 4.1.9(@types/node@24.5.2)(@vitest/coverage-istanbul@4.1.9)(vite@8.0.10(@types/node@24.5.2)(sass-embedded@1.89.0)(yaml@2.8.0))
     transitivePeerDependencies:
@@ -13757,7 +13749,6 @@ snapshots:
       dts-resolver: 3.0.0
       get-tsconfig: 5.0.0-beta.5
       obug: 2.1.4
-      obug: 2.1.4
       rolldown: 1.1.3
       yuku-ast: 0.8.7
       yuku-codegen: 0.8.7
@@ -14462,7 +14453,7 @@ snapshots:
       es-module-lexer: 2.1.0
       expect-type: 1.3.0
       magic-string: 0.30.21
-      obug: 2.1.4
+      obug: 2.1.3
       pathe: 2.0.3
       picomatch: 4.0.4
       std-env: 4.1.0
