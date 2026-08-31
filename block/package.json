@@ -26,6 +26,7 @@
   "devDependencies": {
     "@milaboratories/ts-builder": "catalog:",
     "@milaboratories/ts-configs": "catalog:",
+    "@platforma-open/milaboratories.immune-assay-data.kind": "workspace:*",
     "@platforma-open/milaboratories.immune-assay-data.model": "workspace:*",
     "@platforma-open/milaboratories.immune-assay-data.ui": "workspace:*",
     "@platforma-open/milaboratories.immune-assay-data.workflow": "workspace:*",

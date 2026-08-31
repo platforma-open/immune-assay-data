@@ -6,20 +6,8 @@ import type {
   SUniversalPColumnId,
 } from "@platforma-sdk/model";
 
-export type Settings = {
-  /** Fraction of aligned residues required (MMseqs2 coverage). */
-  coverageThreshold: number;
-  /** Identity threshold (0-1). */
-  identity: number;
-  /**
-   * Matching method. `alignment-score`/`sequence-identity` run MMseqs2;
-   * `exact-match` reports only byte-identical sequences (no alignment,
-   * guaranteed recall) and ignores identity/coverage/fast-mode.
-   */
-  similarityType: "sequence-identity" | "alignment-score" | "exact-match";
-};
-
-export type Modality = "antibody_tcr" | "peptide";
+// Part of the init-params contract, so defined in the kind — the layer the model depends on.
+import type { Modality, Settings } from "@platforma-open/milaboratories.immune-assay-data.kind";
 
 export type ImportColumnInfo = {
   header: string;
@@ -33,6 +21,7 @@ export type BlockData = {
   customBlockLabel: string;
   datasetRef?: PlRef;
   targetRef?: SUniversalPColumnId;
+  targetColumnLabel?: string;
   fileHandle?: ImportFileHandle;
   fileExtension?: string;
   detectedXsvType?: "csv" | "tsv";

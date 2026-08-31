@@ -238,14 +238,8 @@ self.body(func(inputs) {
 		{ cpu: 1, mem: "16GiB" }
 	)
 
-	// Create informative label with relevant matching parameters
-	identityStr := string(inputs.settings.identity)
-	coverageStr := string(inputs.settings.coverageThreshold)
-	similarityTypeStr := inputs.settings.similarityType == "sequence-identity" ? "Exact Match" : "BLOSUM"
-	
-	// Use block label if provided, otherwise fall back to default technical label
-	blockLabel := inputs.customBlockLabel || inputs.defaultBlockLabel || ""
-	traceLabel := blockLabel != "" ? blockLabel : "Assay Data (sim:" + similarityTypeStr + ", ident:" + identityStr + ", cov:" + coverageStr + ")"
+	// Block name as the user sees it: theirs if set, else the model-derived default
+	traceLabel := inputs.customBlockLabel || inputs.defaultBlockLabel
 	
 	trace := pSpec.makeTrace(inputs.datasetSpec,
 		{

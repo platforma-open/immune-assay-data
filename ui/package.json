@@ -13,9 +13,9 @@
   },
   "dependencies": {
     "@biowasm/aioli": "catalog:",
-    "@milaboratories/graph-maker": "catalog:",
     "@milaboratories/multi-sequence-alignment": "catalog:",
     "@milaboratories/strings": "catalog:",
+    "@platforma-open/milaboratories.immune-assay-data.kind": "workspace:*",
     "@platforma-open/milaboratories.immune-assay-data.model": "workspace:*",
     "@platforma-sdk/model": "catalog:",
     "@platforma-sdk/ui-vue": "catalog:",
