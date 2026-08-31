@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data
 
+## 1.7.0
+
+### Minor Changes
+
+- 3ced003: Fix trace gap
+
 ## 1.6.1
 
 ### Patch Changes

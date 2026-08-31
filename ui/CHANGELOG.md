@@ -1,5 +1,17 @@
 # @platforma-open/milaboratories.immune-assay-data.ui
 
+## 1.10.0
+
+### Minor Changes
+
+- 3ced003: Fix trace gap
+
+### Patch Changes
+
+- Updated dependencies [3ced003]
+  - @platforma-open/milaboratories.immune-assay-data.model@1.12.0
+  - @platforma-open/milaboratories.immune-assay-data.kind@1.1.0
+
 ## 1.9.7
 
 ### Patch Changes

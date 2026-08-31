@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.workflow
 
+## 1.16.0
+
+### Minor Changes
+
+- 3ced003: Fix trace gap
+
 ## 1.15.0
 
 ### Minor Changes
