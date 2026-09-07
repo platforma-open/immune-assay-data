@@ -1,5 +1,10 @@
 import type { ImportFileHandle, PlRef, SUniversalPColumnId } from "@milaboratories/pl-model-common";
-import { isColumnUniversalId, isPlRef } from "@milaboratories/pl-model-common";
+import {
+  isAnchoredPColumnId,
+  isColumnUniversalId,
+  isPlRef,
+  parseJsonSafely,
+} from "@milaboratories/pl-model-common";
 import { assertParamsObject, defineBlockKind } from "@platforma-sdk/block-kind";
 import { isBoolean, isPlainObject, isString } from "es-toolkit";
 import { isArray, isNumber } from "es-toolkit/compat";
@@ -74,6 +79,16 @@ function check<T>(is: Guard<T>, must: string): Check<T> {
 const isImportFileHandle: Guard<ImportFileHandle> = (v): v is ImportFileHandle =>
   isString(v) && (v.startsWith("upload://") || v.startsWith("index://"));
 
+/**
+ * A column identifier as this block stores it: a canonically serialized JSON key.
+ * `isColumnUniversalId` covers the key forms the SDK's id encoding uses, but `targetRef`
+ * comes from `resultPool.getCanonicalOptions`, which mints an *anchored* key -- a shape
+ * none of those recognizes even though the SDK types it `SUniversalPColumnId`. Both forms
+ * are accepted, or the kind would refuse the ids the block itself writes into a template.
+ */
+const isColumnId: Guard<SUniversalPColumnId> = (v): v is SUniversalPColumnId =>
+  isString(v) && (isColumnUniversalId(v) || isAnchoredPColumnId(parseJsonSafely(v)));
+
 const isStringArray: Guard<string[]> = (v): v is string[] => isArray(v) && v.every(isString);
 
 const isModality: Guard<Modality> = (v): v is Modality => v === "antibody_tcr" || v === "peptide";
@@ -106,7 +121,7 @@ const isSettings: Guard<Settings> = (v): v is Settings =>
 const CONTRACT = {
   customBlockLabel: check(isString, "a string"),
   datasetRef: check(isPlRef, "a reference to an input dataset"),
-  targetRef: check(isColumnUniversalId, "a sequence column identifier"),
+  targetRef: check(isColumnId, "a sequence column identifier"),
   targetColumnLabel: check(isString, "a string"),
   fileHandle: check(isImportFileHandle, "an upload:// or index:// file handle"),
   fileExtension: check(isString, "a string"),
