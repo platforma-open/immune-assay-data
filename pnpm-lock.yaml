@@ -75,6 +75,9 @@ catalogs:
     typescript:
       specifier: ~5.6.3
       version: 5.6.3
+    vitest:
+      specifier: ^4.0.7
+      version: 4.1.9
     vue:
       specifier: 3.5.24
       version: 3.5.24
@@ -169,6 +172,9 @@ importers:
       '@platforma-sdk/block-tools':
         specifier: 'catalog:'
         version: 2.14.3(@types/node@24.5.2)
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.9(@types/node@24.5.2)(@vitest/coverage-istanbul@4.1.9)(vite@8.0.10(@types/node@24.5.2)(sass-embedded@1.89.0)(yaml@2.8.0))
 
   model:
     dependencies:
@@ -14453,7 +14459,7 @@ snapshots:
       es-module-lexer: 2.1.0
       expect-type: 1.3.0
       magic-string: 0.30.21
-      obug: 2.1.3
+      obug: 2.1.4
       pathe: 2.0.3
       picomatch: 4.0.4
       std-env: 4.1.0
