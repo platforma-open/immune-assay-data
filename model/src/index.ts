@@ -231,6 +231,9 @@ export const platforma = BlockModelV3.create({ dataModel: blockDataModel, kind }
     { retentive: true },
   )
 
+  // The options carry the dataset ref they were computed for. After a dataset change the UI
+  // compares that ref with the selected one and holds the dropdown in a loading state instead
+  // of showing the old list.
   .output("targetOptions", (ctx) => {
     const ref = ctx.data.datasetRef;
     if (ref === undefined) return undefined;
@@ -302,12 +305,14 @@ export const platforma = BlockModelV3.create({ dataModel: blockDataModel, kind }
       }
     }
 
-    return ctx.resultPool.getCanonicalOptions({ main: ref }, sequenceMatchers, {
+    const options = ctx.resultPool.getCanonicalOptions({ main: ref }, sequenceMatchers, {
       ignoreMissingDomains: true,
       labelOps: {
         includeNativeLabel: true,
       },
     });
+    if (options === undefined) return undefined;
+    return { datasetRef: ref, options };
   })
 
   // Alphabet of the currently-selected target sequence column. Used by the UI
