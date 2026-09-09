@@ -1,5 +1,18 @@
 # @platforma-open/milaboratories.immune-assay-data.ui
 
+## 1.10.1
+
+### Patch Changes
+
+- c85abca: Show a loading state in "Sequence column to match" while the options update. After a dataset
+  change the dropdown showed the old dataset's options until the new list arrived. The model now
+  returns the options with the dataset ref they belong to. The UI disables the dropdown and shows
+  a spinner until the options for the selected dataset arrive. A target that is not in the new
+  list is cleared. Without a dataset the dropdown is disabled with a hint.
+- Updated dependencies [c85abca]
+- Updated dependencies [c85abca]
+  - @platforma-open/milaboratories.immune-assay-data.model@1.12.1
+
 ## 1.10.0
 
 ### Minor Changes

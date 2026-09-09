@@ -1,5 +1,22 @@
 # @platforma-open/milaboratories.immune-assay-data.model
 
+## 1.12.1
+
+### Patch Changes
+
+- c85abca: Fix an empty "Sequence column to match" dropdown for bulk datasets. The probe that decides
+  whether a dataset is paired searched the whole result pool for a `pl7.app/vdj/sequence`
+  column with `pl7.app/vdj/scClonotypeChain/index: "primary"`. In a project with a single-cell
+  MiXCR block, the probe matched that block's columns and marked every bulk dataset as paired.
+  The paired matcher then found no sequence column on the bulk `clonotypeKey` axis, so
+  `targetOptions` was empty and Run stayed disabled. The probe and the scFv probe are now
+  scoped to the dataset's clonotype axis, in the same way as the matchers that follow them.
+- c85abca: Show a loading state in "Sequence column to match" while the options update. After a dataset
+  change the dropdown showed the old dataset's options until the new list arrived. The model now
+  returns the options with the dataset ref they belong to. The UI disables the dropdown and shows
+  a spinner until the options for the selected dataset arrive. A target that is not in the new
+  list is cleared. Without a dataset the dropdown is disabled with a hint.
+
 ## 1.12.0
 
 ### Minor Changes
