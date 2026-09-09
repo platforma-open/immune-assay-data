@@ -231,6 +231,9 @@ export const platforma = BlockModelV3.create({ dataModel: blockDataModel, kind }
     { retentive: true },
   )
 
+  // The options carry the dataset ref they were computed for. After a dataset change the UI
+  // compares that ref with the selected one and holds the dropdown in a loading state instead
+  // of showing the old list.
   .output("targetOptions", (ctx) => {
     const ref = ctx.data.datasetRef;
     if (ref === undefined) return undefined;
@@ -242,10 +245,14 @@ export const platforma = BlockModelV3.create({ dataModel: blockDataModel, kind }
     // Whether records carry two chains in one frame, in the `pl7.app/vdj/scClonotypeChain`
     // COLUMN domain. Legacy MiXCR single-cell says so on the axis name; an imported paired set
     // says it only on the columns, so ask for such a column rather than trusting the axis.
+    // The probe is scoped to the dataset's clonotype axis. Without the axis, a single-cell
+    // block anywhere in the project marks every bulk dataset as paired, and the paired matcher
+    // below then finds no sequence columns on the bulk axis.
     const perChainColumns = isPeptide
       ? undefined
       : ctx.resultPool.getAnchoredPColumns({ main: ref }, [
           {
+            axes: [{ anchor: "main", idx: 1 }],
             name: "pl7.app/vdj/sequence",
             domain: { "pl7.app/vdj/scClonotypeChain/index": "primary" },
           },
@@ -287,7 +294,7 @@ export const platforma = BlockModelV3.create({ dataModel: blockDataModel, kind }
     // `targetSequenceType` output, and both nt and aa constructs are emitted.
     if (!isPeptide) {
       const scFvColumns = ctx.resultPool.getAnchoredPColumns({ main: ref }, [
-        { name: "pl7.app/vdj/scFv-sequence" },
+        { axes: [{ anchor: "main", idx: 1 }], name: "pl7.app/vdj/scFv-sequence" },
       ]);
       if (scFvColumns && scFvColumns.length > 0) {
         sequenceMatchers.push({
@@ -298,12 +305,14 @@ export const platforma = BlockModelV3.create({ dataModel: blockDataModel, kind }
       }
     }
 
-    return ctx.resultPool.getCanonicalOptions({ main: ref }, sequenceMatchers, {
+    const options = ctx.resultPool.getCanonicalOptions({ main: ref }, sequenceMatchers, {
       ignoreMissingDomains: true,
       labelOps: {
         includeNativeLabel: true,
       },
     });
+    if (options === undefined) return undefined;
+    return { datasetRef: ref, options };
   })
 
   // Alphabet of the currently-selected target sequence column. Used by the UI

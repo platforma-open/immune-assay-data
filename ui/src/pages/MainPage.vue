@@ -7,6 +7,7 @@ import type {
   AxisId,
   ImportFileHandle,
   LocalImportFileHandle,
+  PlRef,
   PlSelectionModel,
   PTableKey,
   SUniversalPColumnId,
@@ -160,12 +161,51 @@ watch(assayFileBytes, (bytes) => {
   processFileBytes(bytes, app.model.data.fileExtension);
 });
 
+const isSameRef = (a: PlRef | undefined, b: PlRef | undefined) =>
+  a !== undefined && b !== undefined && a.blockId === b.blockId && a.name === b.name;
+
+// Options for "Sequence column to match". `undefined` puts the dropdown into the loading
+// state (spinner, disabled). The model returns the options with the dataset ref they belong
+// to. Between a dataset change and the new result, the old list still sits in the outputs,
+// so the ref check hides it.
+const targetOptions = computed(() => {
+  const datasetRef = app.model.data.datasetRef;
+  if (datasetRef === undefined) return [];
+  const out = app.model.outputs.targetOptions;
+  if (out === undefined || !isSameRef(out.datasetRef, datasetRef)) return undefined;
+  return out.options;
+});
+
+const targetOptionsHelper = computed(() => {
+  if (app.model.data.datasetRef === undefined) return "Select a dataset first";
+  if (targetOptions.value?.length === 0) return "The selected dataset has no sequence columns";
+  return undefined;
+});
+
 // Mirror the picked column's display label into data
 const setTarget = (target: SUniversalPColumnId | undefined) => {
   app.model.data.targetColumnLabel = target
-    ? app.model.outputs.targetOptions?.find((o) => o.value === target)?.label
+    ? targetOptions.value?.find((o) => o.value === target)?.label
     : undefined;
 };
+
+// When the options for the selected dataset arrive, drop a target that is not in the list.
+// A dataset change usually invalidates the target. A template can set both at once and keeps
+// a valid target. The label is refreshed in both cases.
+watch(targetOptions, (options) => {
+  if (options === undefined) return;
+  const target = app.model.data.targetRef;
+  if (target === undefined) return;
+  const option = options.find((o) => o.value === target);
+  if (option === undefined) {
+    app.model.data.targetRef = undefined;
+    app.model.data.targetColumnLabel = undefined;
+    return;
+  }
+  if (app.model.data.targetColumnLabel !== option.label) {
+    app.model.data.targetColumnLabel = option.label;
+  }
+});
 
 const setFile = async (file: ImportFileHandle | undefined) => {
   // Clear all dependent state so the new file's columns are detected fresh.
@@ -359,7 +399,9 @@ const similarityTypeOptions = [
       />
       <PlDropdown
         v-model="app.model.data.targetRef"
-        :options="app.model.outputs.targetOptions"
+        :options="targetOptions"
+        :disabled="app.model.data.datasetRef === undefined"
+        :helper="targetOptionsHelper"
         label="Sequence column to match"
         clearable
         required
