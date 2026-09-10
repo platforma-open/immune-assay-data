@@ -1,8 +1,8 @@
 ---
-'@platforma-open/milaboratories.immune-assay-data.kind': minor
-'@platforma-open/milaboratories.immune-assay-data.model': minor
-'@platforma-open/milaboratories.immune-assay-data.workflow': minor
-'@platforma-open/milaboratories.immune-assay-data': minor
+'@platforma-open/milaboratories.immune-assay-data.kind': patch
+'@platforma-open/milaboratories.immune-assay-data.model': patch
+'@platforma-open/milaboratories.immune-assay-data.workflow': patch
+'@platforma-open/milaboratories.immune-assay-data': patch
 ---
 
 Accept synthetic-repertoire-profiler datasets
