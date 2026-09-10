@@ -44,6 +44,22 @@ describe("targetRef", () => {
   });
 });
 
+describe("lastAppliedModality", () => {
+  it.each(["antibody_tcr", "peptide", "amplicon"])("accepts %s", (lastAppliedModality) => {
+    expect(parse({ lastAppliedModality })).toEqual({ lastAppliedModality });
+  });
+
+  it.each([
+    ["a value the contract does not name", "vdj"],
+    ["the empty string", ""],
+    ["a number", 3],
+  ])("rejects %s", (_label, lastAppliedModality) => {
+    expect(() => parse({ lastAppliedModality })).toThrow(
+      "'lastAppliedModality' must be one of antibody_tcr, peptide, amplicon.",
+    );
+  });
+});
+
 describe("the params envelope", () => {
   it("accepts an absent targetRef, like every other optional field", () => {
     expect(parse({})).toEqual({});

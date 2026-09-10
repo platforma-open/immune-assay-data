@@ -23,8 +23,17 @@ export type Settings = {
   similarityType: "sequence-identity" | "alignment-score" | "exact-match";
 };
 
-/** Which upstream the block is pointed at. Lives here for the same reason as {@link Settings}. */
-export type Modality = "antibody_tcr" | "peptide";
+/**
+ * Which kind of data the block is pointed at. Lives here for the same reason as
+ * {@link Settings}.
+ *
+ * `amplicon` is the designed-library case — synthetic-repertoire-profiler variants from
+ * phage pools, designed libraries and deep mutational scans. It is its own value rather
+ * than folded into `peptide` because the two want opposite matching regimes: peptides are
+ * short enough to need a relaxed k-mer search, amplicon variants are as long as an
+ * antibody.
+ */
+export type Modality = "antibody_tcr" | "peptide" | "amplicon";
 
 /**
  * This block's init-params contract — everything a creator or a project template chooses,
@@ -91,7 +100,9 @@ const isColumnId: Guard<SUniversalPColumnId> = (v): v is SUniversalPColumnId =>
 
 const isStringArray: Guard<string[]> = (v): v is string[] => isArray(v) && v.every(isString);
 
-const isModality: Guard<Modality> = (v): v is Modality => v === "antibody_tcr" || v === "peptide";
+const MODALITIES: readonly Modality[] = ["antibody_tcr", "peptide", "amplicon"];
+
+const isModality: Guard<Modality> = (v): v is Modality => MODALITIES.includes(v as Modality);
 
 /**
  * A whole number of at least `min`. `Number.isInteger` rather than es-toolkit's `isInteger`,
@@ -130,7 +141,7 @@ const CONTRACT = {
   settings: check(isSettings, "an object with coverageThreshold, identity and similarityType"),
   lessSensitive: check(isBoolean, "a boolean"),
   maxSeqs: check(isIntAtLeast(0), "a whole number of 0 or more, where 0 means no limit"),
-  lastAppliedModality: check(isModality, '"antibody_tcr" or "peptide"'),
+  lastAppliedModality: check(isModality, `one of ${MODALITIES.join(", ")}`),
 } satisfies { [K in keyof Required<BlockParams>]: Check<NonNullable<BlockParams[K]>> };
 
 /**

@@ -1,0 +1,127 @@
+// Unit tests for modality detection. Pure Tengo — no backend, no resources.
+// Run with `pl-tengo test` from workflow/.
+
+test := import("@platforma-sdk/workflow-tengo:test")
+modality := import(":modality")
+
+// A dataset spec as a producer emits it. The detector reads axis 1 only, so axis 0 is a
+// stand-in sample axis and only the entity axis's name and domain matter.
+dataset := func(name, dom) {
+	return {
+		axesSpec: [
+			{ name: "pl7.app/sampleId", type: "String" },
+			{ name: name, type: "String", domain: dom }
+		]
+	}
+}
+
+PROFILER_RUN := "abcd1234"
+
+// ---------------------------------------------------------------------------
+// synthetic-repertoire-profiler — the declaration
+// ---------------------------------------------------------------------------
+
+// A designed-library run is its own modality: long variants, so no short-peptide k-mer
+// override, and outputs labelled variants rather than peptides.
+Test_declaredAmpliconIsAmplicon := func() {
+	test.isEqual(
+		"amplicon",
+		modality.datasetModality(dataset("pl7.app/variantKey", {
+			"pl7.app/alphabet": "aminoacid",
+			"pl7.app/repertoire/extractionRunId": PROFILER_RUN,
+			"pl7.app/modality": "amplicon"
+		})),
+		"a declared amplicon profiler run must be amplicon"
+	)
+}
+
+// A VDJ profiler run keeps the same repertoire/extractionRunId as an amplicon one, so the
+// declaration is the only thing separating the two and has to be read before the run-id checks.
+Test_declaredVdjIsAntibodyTcr := func() {
+	test.isEqual(
+		"antibody_tcr",
+		modality.datasetModality(dataset("pl7.app/variantKey", {
+			"pl7.app/alphabet": "aminoacid",
+			"pl7.app/repertoire/extractionRunId": PROFILER_RUN,
+			"pl7.app/modality": "vdj"
+		})),
+		"a declared vdj profiler run must be antibody/TCR"
+	)
+}
+
+// Runs made before the declaration landed carry the run-id key alone.
+Test_undeclaredProfilerRunIsAmplicon := func() {
+	test.isEqual(
+		"amplicon",
+		modality.datasetModality(dataset("pl7.app/variantKey", {
+			"pl7.app/alphabet": "nucleotide",
+			"pl7.app/repertoire/extractionRunId": PROFILER_RUN
+		})),
+		"a profiler run without a declaration must be amplicon"
+	)
+}
+
+// ---------------------------------------------------------------------------
+// The other producers on the shared variant axis
+// ---------------------------------------------------------------------------
+
+Test_peptideExtractionIsPeptide := func() {
+	test.isEqual(
+		"peptide",
+		modality.datasetModality(dataset("pl7.app/variantKey", {
+			"pl7.app/alphabet": "aminoacid",
+			"pl7.app/peptide/extractionRunId": "ef567890"
+		})),
+		"a peptide-extraction dataset must be peptide"
+	)
+}
+
+// This is the case that first broke: the peptide path demands a pl7.app/sequenceLength
+// column an imported receptor set does not emit, so the run panicked.
+Test_importedReceptorSetIsAntibodyTcr := func() {
+	test.isEqual(
+		"antibody_tcr",
+		modality.datasetModality(dataset("pl7.app/variantKey", {
+			"pl7.app/vdj/clonotypingRunId": "0f0f0f0f"
+		})),
+		"an imported bare receptor set must be antibody/TCR"
+	)
+}
+
+// A variant axis with no run-id key at all. peptide-extraction is the only producer that
+// ever shipped one, so it stays peptide.
+Test_bareVariantAxisIsPeptide := func() {
+	test.isEqual(
+		"peptide",
+		modality.datasetModality(dataset("pl7.app/variantKey", {})),
+		"a bare variant axis must stay peptide"
+	)
+}
+
+Test_variantAxisWithoutDomainIsPeptide := func() {
+	test.isEqual(
+		"peptide",
+		modality.datasetModality(dataset("pl7.app/variantKey", undefined)),
+		"a variant axis with no domain at all must stay peptide"
+	)
+}
+
+// ---------------------------------------------------------------------------
+// The VDJ axis names carry their own modality
+// ---------------------------------------------------------------------------
+
+Test_bulkClonotypeAxisIsAntibodyTcr := func() {
+	test.isEqual(
+		"antibody_tcr",
+		modality.datasetModality(dataset("pl7.app/vdj/clonotypeKey", {})),
+		"a bulk MiXCR clonotype axis must be antibody/TCR"
+	)
+}
+
+Test_singleCellClonotypeAxisIsAntibodyTcr := func() {
+	test.isEqual(
+		"antibody_tcr",
+		modality.datasetModality(dataset("pl7.app/vdj/scClonotypeKey", {})),
+		"a single-cell MiXCR clonotype axis must be antibody/TCR"
+	)
+}

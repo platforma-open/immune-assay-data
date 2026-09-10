@@ -18,15 +18,23 @@ assayColumnName := func(header) {
 
 self.body(func(inputs) {
 	// Display labels reflect what the upstream actually carries — clones for VDJ, peptides for
-	// peptide-extraction. Column/axis `name`s stay neutral (`pl7.app/assay/*`); labels diverge
-	// because the upstream-side semantics differ: queryCount counts clones vs peptides, and the
-	// linker column's `target` axis is a different identity in each case.
+	// peptide-extraction, variants for a designed library. Column/axis `name`s stay neutral
+	// (`pl7.app/assay/*`); labels diverge because the upstream-side semantics differ:
+	// queryCount counts clones vs peptides vs variants, and the linker column's `target` axis
+	// is a different identity in each case.
 	//
-	// Which one it is comes from the axis DOMAIN, not its name: an imported receptor set is
-	// carried on `pl7.app/variantKey` too, and is clones.
-	isPeptide := modality.isPeptideDataset(inputs.datasetSpec)
-	matchedCountLabel := isPeptide ? "Matched Peptides" : "Matched Clones"
-	linkerLabel := isPeptide ? "Peptide to assay link" : "Clone to assay link"
+	// Which one it is comes from the axis DOMAIN, not its name: an imported receptor set and a
+	// profiler run are both carried on `pl7.app/variantKey` too.
+	mod := modality.datasetModality(inputs.datasetSpec)
+	matchedCountLabel := "Matched Clones"
+	linkerLabel := "Clone to assay link"
+	if mod == "peptide" {
+		matchedCountLabel = "Matched Peptides"
+		linkerLabel = "Peptide to assay link"
+	} else if mod == "amplicon" {
+		matchedCountLabel = "Matched Variants"
+		linkerLabel = "Variant to assay link"
+	}
 
 	//////// Building outputs & exports ////////
 	assayColumns := [

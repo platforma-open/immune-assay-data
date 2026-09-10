@@ -62,9 +62,10 @@ wf.body(func(args) {
 	// Drives the short-peptide k-mer override in run-alignment (k=5 + relaxed
 	// mmseqs2 prefilter for inputs below the auto-tune floor of ~6).
 	//
-	// Not the axis name: import-vdj-data's bare receptor sets share `pl7.app/variantKey` with
-	// peptide-extraction, and are neither short nor carriers of a peptide length column.
-	isPeptide := modality.isPeptideDataset(datasetSpec)
+	// Not the axis name: import-vdj-data's bare receptor sets and synthetic-repertoire-profiler
+	// variants share `pl7.app/variantKey` with peptide-extraction, and neither is short nor a
+	// carrier of a peptide length column.
+	isPeptide := modality.datasetModality(datasetSpec) == "peptide"
 	minPeptideLength := undefined
 	if isPeptide {
 		peptideLenCols := args.columns.getColumns("peptideSequenceLength")

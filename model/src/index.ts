@@ -17,6 +17,7 @@ import {
   isImportFileHandleIndex,
 } from "@platforma-sdk/model";
 import { getDefaultBlockLabel } from "./label";
+import { classifyDataset } from "./modality";
 import type {
   BlockArgs,
   BlockData,
@@ -100,23 +101,6 @@ export function deriveDefaultLabel(data: BlockData): string {
     identity: data.settings.identity,
     coverageThreshold: data.settings.coverageThreshold,
   });
-}
-
-/**
- * Whether a dataset's row axis holds peptides.
- *
- * `pl7.app/variantKey` is shared by three producers and the axis name alone does not say which:
- * peptide-extraction stamps `pl7.app/peptide/extractionRunId`, synthetic-repertoire-profiler
- * stamps `pl7.app/repertoire/extractionRunId`, and import-vdj-data's bare receptor sets stamp
- * `pl7.app/vdj/clonotypingRunId`. Only the first is peptide.
- *
- * This is the block's one modality question, and it decides three things that used to be read
- * off the axis name: which sequence columns are offered, which threshold defaults the UI
- * applies, and — in the workflow — whether the short-peptide k-mer override is switched on.
- */
-export function isPeptideAxis(axis: PColumnSpec["axesSpec"][number] | undefined): boolean {
-  if (axis?.name !== "pl7.app/variantKey") return false;
-  return axis.domain?.["pl7.app/vdj/clonotypingRunId"] === undefined;
 }
 
 function getAnchoredClonotypeProps(
@@ -226,7 +210,7 @@ export const platforma = BlockModelV3.create({ dataModel: blockDataModel, kind }
       if (ctx.data.datasetRef === undefined) return undefined;
       const spec = ctx.resultPool.getPColumnSpecByRef(ctx.data.datasetRef);
       if (spec === undefined) return undefined;
-      return isPeptideAxis(spec.axesSpec[1]) ? "peptide" : "antibody_tcr";
+      return classifyDataset(spec.axesSpec[1]).modality;
     },
     { retentive: true },
   )
@@ -240,45 +224,50 @@ export const platforma = BlockModelV3.create({ dataModel: blockDataModel, kind }
 
     const datasetSpec = ctx.resultPool.getPColumnSpecByRef(ref);
     const datasetAxis = datasetSpec?.axesSpec[1];
-    const isPeptide = isPeptideAxis(datasetAxis);
-
-    // Whether records carry two chains in one frame, in the `pl7.app/vdj/scClonotypeChain`
-    // COLUMN domain. Legacy MiXCR single-cell says so on the axis name; an imported paired set
-    // says it only on the columns, so ask for such a column rather than trusting the axis.
-    // The probe is scoped to the dataset's clonotype axis. Without the axis, a single-cell
-    // block anywhere in the project marks every bulk dataset as paired, and the paired matcher
-    // below then finds no sequence columns on the bulk axis.
-    const perChainColumns = isPeptide
-      ? undefined
-      : ctx.resultPool.getAnchoredPColumns({ main: ref }, [
-          {
-            axes: [{ anchor: "main", idx: 1 }],
-            name: "pl7.app/vdj/sequence",
-            domain: { "pl7.app/vdj/scClonotypeChain/index": "primary" },
-          },
-        ]);
-    const isPaired =
-      datasetAxis?.name === "pl7.app/vdj/scClonotypeKey" || (perChainColumns?.length ?? 0) > 0;
+    const { sequences } = classifyDataset(datasetAxis);
 
     const sequenceMatchers = [];
-    if (isPeptide) {
+    if (sequences === "peptide") {
       sequenceMatchers.push({
         axes: [{ anchor: "main", idx: 1 }],
         name: "pl7.app/sequence",
         domain: { "pl7.app/feature": "peptide" },
       });
-    } else if (isPaired) {
-      // Primary allele only — a secondary would offer the same chain twice.
+    } else if (sequences === "universal") {
+      // synthetic-repertoire-profiler keys its sequences on the variant axis and tags each
+      // one with a feature: the whole variant under "amplicon-sequence", and one column per
+      // region under the region's own name. Left feature-agnostic so all of them are offered
+      // — each carries its distinct feature in the derived id, so the workflow's
+      // `addSingle(targetRef)` still resolves the picked column uniquely.
       sequenceMatchers.push({
         axes: [{ anchor: "main", idx: 1 }],
-        name: "pl7.app/vdj/sequence",
-        domain: { "pl7.app/vdj/scClonotypeChain/index": "primary" },
+        name: "pl7.app/sequence",
+        domain: {},
       });
     } else {
+      // Whether records carry two chains in one frame, in the `pl7.app/vdj/scClonotypeChain`
+      // COLUMN domain. Legacy MiXCR single-cell says so on the axis name; an imported paired
+      // set says it only on the columns, so ask for such a column rather than trusting the
+      // axis. The probe is scoped to the dataset's clonotype axis. Without the axis, a
+      // single-cell block anywhere in the project marks every bulk dataset as paired, and the
+      // paired matcher below then finds no sequence columns on the bulk axis.
+      const perChainColumns = ctx.resultPool.getAnchoredPColumns({ main: ref }, [
+        {
+          axes: [{ anchor: "main", idx: 1 }],
+          name: "pl7.app/vdj/sequence",
+          domain: { "pl7.app/vdj/scClonotypeChain/index": "primary" },
+        },
+      ]);
+      const isPaired =
+        datasetAxis?.name === "pl7.app/vdj/scClonotypeKey" || (perChainColumns?.length ?? 0) > 0;
+
       sequenceMatchers.push({
         axes: [{ anchor: "main", idx: 1 }],
         name: "pl7.app/vdj/sequence",
-        domain: {},
+        domain: isPaired
+          ? // Primary allele only — a secondary would offer the same chain twice.
+            { "pl7.app/vdj/scClonotypeChain/index": "primary" }
+          : {},
       });
     }
 
@@ -292,7 +281,7 @@ export const platforma = BlockModelV3.create({ dataModel: blockDataModel, kind }
     // datasets without such columns are unaffected. Alphabet is left
     // unconstrained: the block resolves it from the chosen column via the
     // `targetSequenceType` output, and both nt and aa constructs are emitted.
-    if (!isPeptide) {
+    if (sequences === "vdj") {
       const scFvColumns = ctx.resultPool.getAnchoredPColumns({ main: ref }, [
         { axes: [{ anchor: "main", idx: 1 }], name: "pl7.app/vdj/scFv-sequence" },
       ]);
@@ -412,4 +401,5 @@ export type Platforma = typeof platforma;
 export type BlockOutputs = InferOutputsType<typeof platforma>;
 
 export { getDefaultBlockLabel } from "./label";
+export * from "./modality";
 export * from "./types";
