@@ -1,40 +1,74 @@
-// Which modality a selected dataset is, from its row axis.
+// Which modality a selected dataset is, from its entity axis.
 //
 // Single source of truth, shared by `main` (which uses it to decide whether the short-peptide
 // k-mer override applies) and `build-outputs` (which uses it to label the outputs). The two
 // used to test the axis name independently, and a test that disagreed between them would send
 // a dataset down the peptide alignment path while labelling its outputs as clones.
 //
-// Mirrors `isPeptideAxis` in model/src/index.ts, which decides the same question for the
-// sequence-column picker and the UI's threshold defaults.
+// Mirrors `classifyDataset` in model/src/modality.ts, which answers this same question plus
+// the one the model needs on top of it: which family of sequence columns to offer the user.
+// The model needs both because a profiler run that declares itself `vdj` is antibody/TCR data
+// whose sequences still sit under `pl7.app/sequence`, not `pl7.app/vdj/sequence`.
 
 ll := import("@platforma-sdk/workflow-tengo:ll")
 
+// Entity-axis domain key by which a producer declares which kind of repertoire it made.
+MODALITY_DOMAIN_KEY := "pl7.app/modality"
+
 /**
- * Whether the dataset holds peptides.
+ * Which kind of data the dataset holds: "peptide", "amplicon" or "antibody_tcr".
  *
- * `pl7.app/variantKey` is shared by three producers and the axis name alone does not say which:
- * peptide-extraction stamps `pl7.app/peptide/extractionRunId`, synthetic-repertoire-profiler
- * stamps `pl7.app/repertoire/extractionRunId`, and import-vdj-data's bare receptor sets stamp
- * `pl7.app/vdj/clonotypingRunId`. Only the first is peptide.
+ * `pl7.app/variantKey` is shared by three producers and the axis name alone does not say
+ * which. The axis domain does:
+ *
+ *   pl7.app/modality                     synthetic-repertoire-profiler, either modality
+ *   pl7.app/peptide/extractionRunId      peptide-extraction
+ *   pl7.app/repertoire/extractionRunId   synthetic-repertoire-profiler, no declaration
+ *   pl7.app/vdj/clonotypingRunId         import-vdj-data's bare receptor sets
+ *
+ * The declaration is read first. A profiler run carries the same
+ * `pl7.app/repertoire/extractionRunId` in both of its modalities, so nothing else separates
+ * a designed library from an antibody/TCR one.
  *
  * Reading the axis name alone sent an imported receptor set down the peptide path, where it
  * was required to carry a `pl7.app/sequenceLength` column it does not emit — so the run died
- * on a panic naming a column the scientist never chose.
+ * on a panic naming a column the scientist never chose. A profiler run hit the same panic.
  */
-isPeptideDataset := func(datasetSpec) {
+datasetModality := func(datasetSpec) {
 	ll.assert(!is_undefined(datasetSpec), "modality: datasetSpec is required")
 	axis := datasetSpec.axesSpec[1]
 	if is_undefined(axis) || axis.name != "pl7.app/variantKey" {
-		return false
+		return "antibody_tcr"
 	}
-	domain := axis.domain
-	if is_undefined(domain) {
-		return true
+	dom := axis.domain
+	if is_undefined(dom) {
+		return "peptide"
 	}
-	return is_undefined(domain["pl7.app/vdj/clonotypingRunId"])
+
+	declared := dom[MODALITY_DOMAIN_KEY]
+	if declared == "vdj" {
+		return "antibody_tcr"
+	}
+	if declared == "amplicon" {
+		return "amplicon"
+	}
+
+	if !is_undefined(dom["pl7.app/peptide/extractionRunId"]) {
+		return "peptide"
+	}
+	if !is_undefined(dom["pl7.app/repertoire/extractionRunId"]) {
+		return "amplicon"
+	}
+	if !is_undefined(dom["pl7.app/vdj/clonotypingRunId"]) {
+		return "antibody_tcr"
+	}
+
+	// A bare variant axis with no run-id key at all. peptide-extraction is the only producer
+	// that ever shipped one, so it keeps being read as peptide.
+	return "peptide"
 }
 
 export ll.toStrict({
-	isPeptideDataset: isPeptideDataset
+	MODALITY_DOMAIN_KEY: MODALITY_DOMAIN_KEY,
+	datasetModality: datasetModality
 })
