@@ -1,5 +1,13 @@
 # @platforma-open/milaboratories.immune-assay-data.ui
 
+## 1.10.3
+
+### Patch Changes
+
+- Updated dependencies [1465cbb]
+  - @platforma-open/milaboratories.immune-assay-data.kind@1.1.2
+  - @platforma-open/milaboratories.immune-assay-data.model@1.12.3
+
 ## 1.10.2
 
 ### Patch Changes
