@@ -9,7 +9,7 @@
     "test": "pl-tengo test",
     "format": "/usr/bin/env emacs --script ./format.el || echo 'No emacs.'",
     "do-pack": "rm -f *.tgz && pnpm pack && mv *.tgz package.tgz",
-    "check": "pl-tengo check"
+    "check": "pl-tengo imports && pl-tengo check"
   },
   "dependencies": {
     "@platforma-open/milaboratories.immune-assay-data.add-header": "workspace:*",
