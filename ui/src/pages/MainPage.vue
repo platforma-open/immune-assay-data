@@ -362,7 +362,11 @@ const similarityTypeOptions = [
     title="Import Assay Data"
   >
     <template #append>
-      <PlBtnGhost icon="dna" @click.stop="() => (multipleSequenceAlignmentAssayOpen = true)">
+      <PlBtnGhost
+        v-if="app.model.outputs.modality !== 'peptide'"
+        icon="dna"
+        @click.stop="() => (multipleSequenceAlignmentAssayOpen = true)"
+      >
         Multiple Sequence Alignment
       </PlBtnGhost>
       <PlBtnGhost @click.stop="() => (settingsOpen = true)">
@@ -385,7 +389,9 @@ const similarityTypeOptions = [
       :not-ready-text="strings.callToActions.configureSettingsAndRun"
       :no-rows-text="strings.states.noDataAvailable"
       show-export-button
-      :show-cell-button-for-axis-id="assayAxis"
+      :show-cell-button-for-axis-id="
+        app.model.outputs.modality === 'peptide' ? undefined : assayAxis
+      "
       @cell-button-clicked="onRowDoubleClicked"
     />
     <PlSlideModal v-model="settingsOpen" :close-on-outside-click="false">
