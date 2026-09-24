@@ -9,7 +9,6 @@ path := import("@platforma-sdk/workflow-tengo:path")
 json := import("json")
 text := import("text")
 render := import("@platforma-sdk/workflow-tengo:render")
-strings := import("@platforma-sdk/workflow-tengo:strings")
 
 modality := import(":modality")
 
