@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.workflow
 
+## 1.16.2
+
+### Patch Changes
+
+- da3074b: Bump tengo-builder to 4.1.1 and block-tools to 2.16.1.
+
 ## 1.16.1
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.ui
 
+## 1.11.0
+
+### Minor Changes
+
+- e4f8069: Hide the multiple sequence alignment entry point for peptide datasets, including the table cell button.
+
 ## 1.10.3
 
 ### Patch Changes
