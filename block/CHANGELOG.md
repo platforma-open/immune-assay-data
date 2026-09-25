@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data
 
+## 1.8.1
+
+### Patch Changes
+
+- f031f92: Update SDK: PlAgDataTable no longer recreates its grid in an endless loop
+
 ## 1.8.0
 
 ### Minor Changes
