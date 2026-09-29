@@ -34,8 +34,8 @@ catalogs:
       specifier: ^1.7.5
       version: 1.7.7
     '@platforma-open/soedinglab.software-mmseqs2':
-      specifier: 1.18.3
-      version: 1.18.3
+      specifier: 1.19.0
+      version: 1.19.0
     '@platforma-sdk/block-kind':
       specifier: 1.1.0
       version: 1.1.0
@@ -368,7 +368,7 @@ importers:
         version: link:../software/xlsx-to-csv
       '@platforma-open/soedinglab.software-mmseqs2':
         specifier: 'catalog:'
-        version: 1.18.3
+        version: 1.19.0
       '@platforma-sdk/workflow-tengo':
         specifier: 'catalog:'
         version: 6.12.1
@@ -1605,8 +1605,8 @@ packages:
   '@platforma-open/milaboratories.software-small-binaries@2.1.1':
     resolution: {integrity: sha512-KN1PR7YgUUfx1dxh/TtcoWpSZbOXbRxXzQuJ505qHuXuE0spYwC7bXnvJsEYbEwRcPMa0foTrjBnPNORE4yr+Q==}
 
-  '@platforma-open/soedinglab.software-mmseqs2@1.18.3':
-    resolution: {integrity: sha512-npV+3LXmQNaX5/QsqtsRr5i0oLG7Uu5p51pI27WA2AbN2iyEUbHwbELhEwU26rkdzKTukCvCzs3NTuxIxQy7vQ==}
+  '@platforma-open/soedinglab.software-mmseqs2@1.19.0':
+    resolution: {integrity: sha512-8kwRUseBs8zpdcVTmoeBu8NK1QPQjPjwg2eGSKouVdMW/VFkuPCwjenXyW+IeHdAbni3lBAAy8JyZ6rBrvvo+w==}
 
   '@platforma-sdk/block-kind@1.1.0':
     resolution: {integrity: sha512-4uh+40o6BGfQcPPhkYGCjng8EXR9qn+6i5Fuc3RJ5QGfPYfcwbxT35G2V7ALUxmsqjLZ5SGL+JcW6Lm2v0cZHA==}
@@ -8757,7 +8757,7 @@ snapshots:
       '@platforma-open/milaboratories.software-small-binaries.mnz-client': 1.6.5
       '@platforma-open/milaboratories.software-small-binaries.table-converter': 1.3.5
 
-  '@platforma-open/soedinglab.software-mmseqs2@1.18.3': {}
+  '@platforma-open/soedinglab.software-mmseqs2@1.19.0': {}
 
   '@platforma-sdk/block-kind@1.1.0': {}
 
