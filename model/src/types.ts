@@ -20,6 +20,8 @@ export type ImportColumnInfo = {
 export type BlockData = {
   customBlockLabel: string;
   datasetRef?: PlRef;
+  // Optional `pl7.app/isSubset` column picked alongside the dataset.
+  filterRef?: PlRef;
   targetRef?: SUniversalPColumnId;
   targetColumnLabel?: string;
   fileHandle?: ImportFileHandle;
@@ -45,6 +47,9 @@ export type BlockArgs = {
   defaultBlockLabel: string;
   customBlockLabel: string;
   datasetRef: PlRef;
+  /** `filterRef` as its column id: the workflow stamps this string as the outputs'
+   *  `pl7.app/inputSubset. */
+  inputFilter?: string;
   targetRef: SUniversalPColumnId;
   fileHandle: ImportFileHandle;
   detectedXsvType?: "csv" | "tsv";

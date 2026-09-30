@@ -60,6 +60,23 @@ describe("lastAppliedModality", () => {
   });
 });
 
+describe("filterRef", () => {
+  const filterRef = { __isRef: true, blockId: "labeling", name: "labels.IgG" };
+
+  it("accepts a reference", () => {
+    expect(parse({ filterRef })).toEqual({ filterRef });
+  });
+
+  it.each([
+    ["a column id string rather than a reference", JSON.stringify(filterRef)],
+    ["an object without __isRef", { blockId: "labeling", name: "labels.IgG" }],
+  ])("rejects %s", (_label, value) => {
+    expect(() => parse({ filterRef: value })).toThrow(
+      "'filterRef' must be a reference to a subset column of the dataset.",
+    );
+  });
+});
+
 describe("the params envelope", () => {
   it("accepts an absent targetRef, like every other optional field", () => {
     expect(parse({})).toEqual({});

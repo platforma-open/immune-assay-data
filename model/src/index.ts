@@ -1,6 +1,7 @@
 import type { Modality, Settings } from "@platforma-open/milaboratories.immune-assay-data.kind";
 import { kind } from "@platforma-open/milaboratories.immune-assay-data.kind";
 import type {
+  DatasetOption,
   InferOutputsType,
   PColumn,
   PColumnDataUniversal,
@@ -9,12 +10,16 @@ import type {
 } from "@platforma-sdk/model";
 import {
   BlockModelV3,
+  buildDatasetOptions,
+  createGlobalPObjectId,
   createPFrameForGraphs,
   createPlDataTableStateV2,
   createPlDataTableV2,
   DataModelBuilder,
   getFileNameFromHandle,
   isImportFileHandleIndex,
+  isPColumnSpec,
+  plRefsEqual,
 } from "@platforma-sdk/model";
 import { getDefaultBlockLabel } from "./label";
 import { classifyDataset } from "./modality";
@@ -43,6 +48,7 @@ const blockDataModel = new DataModelBuilder({ kind })
   .upgradeLegacy<LegacyBlockArgs, LegacyBlockUiState>(({ args, uiState }) => ({
     customBlockLabel: args?.customBlockLabel ?? "",
     datasetRef: args?.datasetRef,
+    filterRef: undefined,
     targetRef: args?.targetRef,
     targetColumnLabel: undefined,
     fileHandle: args?.fileHandle,
@@ -68,6 +74,7 @@ const blockDataModel = new DataModelBuilder({ kind })
   .init(({ params }) => ({
     customBlockLabel: params?.customBlockLabel ?? "",
     datasetRef: params?.datasetRef,
+    filterRef: params?.filterRef,
     targetRef: params?.targetRef,
     targetColumnLabel: params?.targetColumnLabel,
     fileHandle: params?.fileHandle,
@@ -137,6 +144,11 @@ export const platforma = BlockModelV3.create({ dataModel: blockDataModel, kind }
       defaultBlockLabel: deriveDefaultLabel(data),
       customBlockLabel: data.customBlockLabel,
       datasetRef: data.datasetRef,
+      // Column-id form: the workflow stamps this exact string as the outputs'
+      // `pl7.app/inputSubset`. Absent without a filter.
+      ...(data.filterRef !== undefined && {
+        inputFilter: createGlobalPObjectId(data.filterRef.blockId, data.filterRef.name),
+      }),
       targetRef: data.targetRef,
       fileHandle: data.fileHandle,
       detectedXsvType: data.detectedXsvType,
@@ -165,6 +177,7 @@ export const platforma = BlockModelV3.create({ dataModel: blockDataModel, kind }
     return {
       customBlockLabel: data.customBlockLabel,
       datasetRef: data.datasetRef,
+      filterRef: data.filterRef,
       targetRef: data.targetRef,
       targetColumnLabel: data.targetColumnLabel,
       fileHandle: file,
@@ -184,8 +197,8 @@ export const platforma = BlockModelV3.create({ dataModel: blockDataModel, kind }
     }),
   )
 
-  .output("datasetOptions", (ctx) =>
-    ctx.resultPool.getOptions(
+  .output("datasetOptions", (ctx): DatasetOption[] => {
+    const options = ctx.resultPool.getOptions(
       [
         {
           axes: [{ name: "pl7.app/sampleId" }, { name: "pl7.app/vdj/clonotypeKey" }],
@@ -201,8 +214,32 @@ export const platforma = BlockModelV3.create({ dataModel: blockDataModel, kind }
         },
       ],
       {},
-    ),
-  )
+    );
+
+    // Subset columns (`pl7.app/isSubset`) on each dataset's axes, e.g. repertoire-labeling
+    // labels or Lead Selection picks. Only the filters are taken from here: its primary refs
+    // carry `requireEnrichments`, which would make this block depend on every block between
+    // it and the dataset. The primary predicate only has to cover the datasets above: results
+    // are matched to them by ref.
+    const withFilters =
+      buildDatasetOptions(ctx, {
+        primary: (spec) =>
+          isPColumnSpec(spec) &&
+          spec.annotations?.["pl7.app/isAnchor"] === "true" &&
+          spec.axesSpec[0]?.name === "pl7.app/sampleId",
+        // Only subsets keyed by the clonotype axis alone: matching is per clonotype.
+        filter: (spec) =>
+          isPColumnSpec(spec) &&
+          spec.axesSpec.length === 1 &&
+          spec.axesSpec[0]?.name !== "pl7.app/sampleId",
+      }) ?? [];
+    return options.map((primary) => {
+      const filters = withFilters.find((o) =>
+        plRefsEqual(o.primary.ref, primary.ref, true),
+      )?.filters;
+      return filters === undefined ? { primary } : { primary, filters };
+    });
+  })
 
   .output(
     "modality",

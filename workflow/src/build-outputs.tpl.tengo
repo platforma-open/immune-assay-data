@@ -190,6 +190,10 @@ self.body(func(inputs) {
 		col.spec.domain = maps.deepMerge(col.spec.domain, {
 			"pl7.app/blockId": inputs.blockId
 		})
+		// A run on a subset says so: its outputs cover only the subset's clonotypes.
+		if !is_undefined(inputs.subset) {
+			col.spec.domain["pl7.app/inputSubset"] = inputs.subset
+		}
 	}
 
 	cloneImportResults := xsv.importFile(
@@ -249,7 +253,9 @@ self.body(func(inputs) {
 	// Block name as the user sees it: theirs if set, else the model-derived default
 	traceLabel := inputs.customBlockLabel || inputs.defaultBlockLabel
 	
-	trace := pSpec.makeTrace(inputs.datasetSpec,
+	// A subset run roots the trace in the filter (dataset -> the block that made the subset).
+	traceSpec := is_undefined(inputs.traceSpec) ? inputs.datasetSpec : inputs.traceSpec
+	trace := pSpec.makeTrace(traceSpec,
 		{
 			type: "milaboratories.immune-assay-data",
 			importance: 40,
