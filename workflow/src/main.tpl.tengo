@@ -32,7 +32,7 @@ wf.prepare(func(args){
 		axes: [{ anchor: "main", idx: 1 }],
 		name: "pl7.app/sequenceLength",
 		domain: { "pl7.app/feature": "peptide" }
-	}, "peptideSequenceLength")
+		}, "peptideSequenceLength")
 	// Optional subset column picked alongside the dataset (PlDatasetSelector)
 	if !is_undefined(args.inputFilter) {
 		bundleBuilder.addRef(json.decode(args.inputFilter))
@@ -54,19 +54,15 @@ prepareClonesTsv := func(args, filterColumn) {
 			__isPrimaryRef: "v1",
 			column: columns.getColumn(args.targetRef),
 			filter: filterColumn
-		}, {header: "sequence"})
-		cloneTable.mem("16GiB")
-		cloneTable.cpu(1)
+			}, {header: "sequence"})
 		return cloneTable.build()
 	}
 
 	cloneTable := pframes.tsvFileBuilder()
-	
+
 	cloneTable.setAxisHeader(datasetSpec.axesSpec[1].name, "seqId")
 	cloneTable.add(columns.getColumn(args.targetRef), {header: "sequence"})
 
-	cloneTable.mem("16GiB")
-	cloneTable.cpu(1)
 	return cloneTable.build()
 }
 
@@ -122,7 +118,7 @@ wf.body(func(args) {
 		minLenResult := minLenWf.run()
 		minPeptideLength = minLenResult.getFileContent("min_len.ndjson")
 	}
-	
+
 	// aminoacid or nucleotide
 	sequenceColumnInfo := undefined
 	for col in args.importColumns {
@@ -139,7 +135,7 @@ wf.body(func(args) {
 	if targetSequenceType == undefined {
 		ll.panic("Target sequence type is undefined")
 	}
-	
+
 	if assaySequenceType == undefined {
 		ll.panic("Assay sequence type is undefined")
 	}
@@ -228,16 +224,16 @@ wf.body(func(args) {
 		selectedColumns: args.selectedColumns,
 		isPeptide: isPeptide,
 		minPeptideLength: minPeptideLength
-	}, {
-		metaInputs: {
-			mem: args.mem,
-			cpu: args.cpu
-		}
+		}, {
+			metaInputs: {
+				mem: args.mem,
+				cpu: args.cpu
+			}
 	})
 
 	emptyResults := analysisResult.output("emptyResults")
 	mmseqsOutput := analysisResult.output("mmseqsOutput")
-	
+
 	blockId := wf.blockId().getDataAsJson()
 
 	bestAlignmentTsv := analysisResult.output("bestAlignmentTsv")
