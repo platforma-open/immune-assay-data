@@ -5,6 +5,7 @@ import type { Settings } from "@platforma-open/milaboratories.immune-assay-data.
 import { deriveDefaultLabel } from "@platforma-open/milaboratories.immune-assay-data.model";
 import type {
   AxisId,
+  DatasetSelection,
   ImportFileHandle,
   LocalImportFileHandle,
   PlRef,
@@ -13,6 +14,8 @@ import type {
   SUniversalPColumnId,
 } from "@platforma-sdk/model";
 import {
+  createDatasetSelection,
+  createPrimaryRef,
   getFileNameFromHandle,
   getRawPlatformaInstance,
   isImportFileHandleUpload,
@@ -25,9 +28,9 @@ import {
   PlBtnGhost,
   PlBtnGroup,
   PlCheckbox,
+  PlDatasetSelector,
   PlDropdown,
   PlDropdownMulti,
-  PlDropdownRef,
   PlFileInput,
   PlMaskIcon24,
   PlNumberField,
@@ -75,6 +78,20 @@ const PEPTIDE_DEFAULTS: Settings = {
 const defaultLabel = computed(() => deriveDefaultLabel(app.model.data));
 
 const settingsOpen = ref(app.model.data.datasetRef === undefined);
+
+// The selector picks a dataset, or a dataset narrowed by one of its subset columns. Clearing
+// it clears both.
+const datasetSelection = computed<DatasetSelection | undefined>({
+  get: () => {
+    const { datasetRef, filterRef } = app.model.data;
+    if (datasetRef === undefined) return undefined;
+    return createDatasetSelection(createPrimaryRef(datasetRef, filterRef));
+  },
+  set: (selection) => {
+    app.model.data.datasetRef = selection?.primary.column;
+    app.model.data.filterRef = selection?.primary.filter;
+  },
+});
 const multipleSequenceAlignmentAssayOpen = ref(false);
 const multipleSequenceAlignmentClonotypesOpen = ref(false);
 
@@ -396,8 +413,8 @@ const similarityTypeOptions = [
     />
     <PlSlideModal v-model="settingsOpen" :close-on-outside-click="false">
       <template #title>{{ strings.titles.settings }}</template>
-      <PlDropdownRef
-        v-model="app.model.data.datasetRef"
+      <PlDatasetSelector
+        v-model="datasetSelection"
         :options="app.model.outputs.datasetOptions"
         label="Dataset"
         clearable

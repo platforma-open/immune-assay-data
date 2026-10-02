@@ -11,12 +11,12 @@ self.defineOutputs("uniqueValuesMap")
 self.body(func(inputs) {
 	assayDataTsv := inputs.assayDataTsv
 	stringColumns := inputs.stringColumns
-	
+
 	if len(stringColumns) == 0 {
 		return { uniqueValuesMap: {} }
 	}
 
-	uniqueValuesWf := pt.workflow().mem("4GiB").cpu(1)
+	uniqueValuesWf := pt.workflow()
 	baseDf := uniqueValuesWf.frame({
 		file: assayDataTsv,
 		xsvType: "tsv"
@@ -37,7 +37,7 @@ self.body(func(inputs) {
 
 	// Run once and collect all results
 	uniqueValuesResult := uniqueValuesWf.run()
-	
+
 	fileContentsMap := {}
 	for colHeader in stringColumns {
 		fileName := "unique_values_" + strings.substituteSpecialCharacters(colHeader) + ".csv"

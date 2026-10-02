@@ -58,6 +58,10 @@ export type Modality = "antibody_tcr" | "peptide" | "amplicon";
 export type BlockParams = {
   customBlockLabel?: string;
   datasetRef?: PlRef;
+  /**
+   * Optional subset column of the dataset.
+   */
+  filterRef?: PlRef;
   targetRef?: SUniversalPColumnId;
   targetColumnLabel?: string;
   fileHandle?: ImportFileHandle;
@@ -132,6 +136,7 @@ const isSettings: Guard<Settings> = (v): v is Settings =>
 const CONTRACT = {
   customBlockLabel: check(isString, "a string"),
   datasetRef: check(isPlRef, "a reference to an input dataset"),
+  filterRef: check(isPlRef, "a reference to a subset column of the dataset"),
   targetRef: check(isColumnId, "a sequence column identifier"),
   targetColumnLabel: check(isString, "a string"),
   fileHandle: check(isImportFileHandle, "an upload:// or index:// file handle"),

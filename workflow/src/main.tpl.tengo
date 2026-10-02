@@ -32,23 +32,37 @@ wf.prepare(func(args){
 		axes: [{ anchor: "main", idx: 1 }],
 		name: "pl7.app/sequenceLength",
 		domain: { "pl7.app/feature": "peptide" }
-	}, "peptideSequenceLength")
+		}, "peptideSequenceLength")
+	// Optional subset column picked alongside the dataset (PlDatasetSelector)
+	if !is_undefined(args.inputFilter) {
+		bundleBuilder.addRef(json.decode(args.inputFilter))
+	}
 	return {
 		columns: bundleBuilder.build()
 	}
 })
 
-prepareClonesTsv := func(args) {
+prepareClonesTsv := func(args, filterColumn) {
 	columns := args.columns
 	datasetSpec := columns.getSpec(args.datasetRef)
 
+	if !is_undefined(filterColumn) {
+		// Only the subset's clonotypes: the target column enters as a primary carrying the filter.
+		cloneTable := pframes.tableBuilder("tsv")
+		cloneTable.setAxisHeader(datasetSpec.axesSpec[1].name, "seqId")
+		cloneTable.addPrimary("sequence", {
+			__isPrimaryRef: "v1",
+			column: columns.getColumn(args.targetRef),
+			filter: filterColumn
+			}, {header: "sequence"})
+		return cloneTable.build()
+	}
+
 	cloneTable := pframes.tsvFileBuilder()
-	
+
 	cloneTable.setAxisHeader(datasetSpec.axesSpec[1].name, "seqId")
 	cloneTable.add(columns.getColumn(args.targetRef), {header: "sequence"})
 
-	cloneTable.mem("16GiB")
-	cloneTable.cpu(1)
 	return cloneTable.build()
 }
 
@@ -56,6 +70,13 @@ wf.body(func(args) {
 	importFile := file.importFile(args.fileHandle)
 	datasetSpec := args.columns.getSpec(args.datasetRef)
 	targetSpec := args.columns.getSpec(args.targetRef)
+
+	// Optional subset filter: only its clonotypes are matched, and the outputs say so.
+	filterColumn := undefined
+	if !is_undefined(args.inputFilter) {
+		f := args.columns.getColumn(json.decode(args.inputFilter))
+		filterColumn = { spec: f.spec, data: f.data }
+	}
 
 	// Detect peptide modality and compute min peptide length when applicable.
 	// Drives the short-peptide k-mer override in run-alignment (k=5 + relaxed
@@ -85,14 +106,19 @@ wf.body(func(args) {
 		if is_undefined(matchedLenCol) {
 			ll.panic("No peptide length column matches target alphabet: ", targetAlphabet)
 		}
+		// On a subset run, the minimum over the subset's peptides only.
+		lenFrame := pt.p.column("len", { spec: matchedLenCol.spec, data: matchedLenCol.data })
+		if !is_undefined(filterColumn) {
+			lenFrame = pt.p.inner(lenFrame, pt.p.column("subsetFilter", filterColumn))
+		}
 		minLenWf := pt.workflow()
-		minLenWf.frame(pt.p.column("len", { spec: matchedLenCol.spec, data: matchedLenCol.data })).
+		minLenWf.frame(lenFrame).
 			select(pt.col("len").min().alias("min_len")).
 			saveContent("min_len.ndjson")
 		minLenResult := minLenWf.run()
 		minPeptideLength = minLenResult.getFileContent("min_len.ndjson")
 	}
-	
+
 	// aminoacid or nucleotide
 	sequenceColumnInfo := undefined
 	for col in args.importColumns {
@@ -109,7 +135,7 @@ wf.body(func(args) {
 	if targetSequenceType == undefined {
 		ll.panic("Target sequence type is undefined")
 	}
-	
+
 	if assaySequenceType == undefined {
 		ll.panic("Assay sequence type is undefined")
 	}
@@ -146,7 +172,7 @@ wf.body(func(args) {
 		xsvType = args.detectedXsvType
 	}
 
-	clonesTsv := prepareClonesTsv(args)
+	clonesTsv := prepareClonesTsv(args, filterColumn)
 
 	// Convert clones TSV to FASTA and check if empty
 	clonesFastaRun := exec.builder().
@@ -198,16 +224,16 @@ wf.body(func(args) {
 		selectedColumns: args.selectedColumns,
 		isPeptide: isPeptide,
 		minPeptideLength: minPeptideLength
-	}, {
-		metaInputs: {
-			mem: args.mem,
-			cpu: args.cpu
-		}
+		}, {
+			metaInputs: {
+				mem: args.mem,
+				cpu: args.cpu
+			}
 	})
 
 	emptyResults := analysisResult.output("emptyResults")
 	mmseqsOutput := analysisResult.output("mmseqsOutput")
-	
+
 	blockId := wf.blockId().getDataAsJson()
 
 	bestAlignmentTsv := analysisResult.output("bestAlignmentTsv")
@@ -217,7 +243,7 @@ wf.body(func(args) {
 	columnsToImport := analysisResult.output("columnsToImport")
 
 	//////// Build outputs  ////////
-	processOutputsResult := render.create(processOutputsTpl, {
+	processOutputsInputs := {
 		emptyClonesInput: emptyClonesInput,
 		assayDataTsv: assayDataTsv,
 		bestAlignmentTsv: bestAlignmentTsv,
@@ -231,7 +257,13 @@ wf.body(func(args) {
 		customBlockLabel: args.customBlockLabel,
 		defaultBlockLabel: args.defaultBlockLabel,
 		blockId: blockId
-	})
+	}
+	// Only for a subset run, so a full-data run keeps exactly its previous inputs
+	if !is_undefined(filterColumn) {
+		processOutputsInputs.subset = args.inputFilter
+		processOutputsInputs.traceSpec = filterColumn.spec
+	}
+	processOutputsResult := render.create(processOutputsTpl, processOutputsInputs)
 	assayPframe := processOutputsResult.output("assayPframe")
 	epf := processOutputsResult.output("epf")
 	assayLinkerPframe := processOutputsResult.output("assayLinkerPframe")
