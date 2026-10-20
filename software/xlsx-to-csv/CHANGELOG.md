@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.xlsx-to-csv
 
+## 1.1.5
+
+### Patch Changes
+
+- a81833a: Release every package through npm trusted publishing (OIDC) so each package's trusted publisher is used before it expires.
+
 ## 1.1.4
 
 ### Patch Changes

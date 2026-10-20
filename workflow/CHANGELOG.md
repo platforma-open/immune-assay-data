@@ -1,5 +1,21 @@
 # @platforma-open/milaboratories.immune-assay-data.workflow
 
+## 1.17.1
+
+### Patch Changes
+
+- a81833a: Release every package through npm trusted publishing (OIDC) so each package's trusted publisher is used before it expires.
+- Updated dependencies [a81833a]
+  - @platforma-open/milaboratories.immune-assay-data.add-header@1.1.8
+  - @platforma-open/milaboratories.immune-assay-data.check-content-empty@1.0.6
+  - @platforma-open/milaboratories.immune-assay-data.coverage-mode-calc@1.3.5
+  - @platforma-open/milaboratories.immune-assay-data.fasta-to-tsv@1.1.8
+  - @platforma-open/milaboratories.immune-assay-data.merge-results@1.1.5
+  - @platforma-open/milaboratories.immune-assay-data.prepare-fasta@1.1.8
+  - @platforma-open/milaboratories.immune-assay-data.sequence-match@1.1.5
+  - @platforma-open/milaboratories.immune-assay-data.split-fasta@1.2.5
+  - @platforma-open/milaboratories.immune-assay-data.xlsx-to-csv@1.1.5
+
 ## 1.17.0
 
 ### Minor Changes

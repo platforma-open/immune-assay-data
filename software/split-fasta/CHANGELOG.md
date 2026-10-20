@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.split-fasta
 
+## 1.2.5
+
+### Patch Changes
+
+- a81833a: Release every package through npm trusted publishing (OIDC) so each package's trusted publisher is used before it expires.
+
 ## 1.2.4
 
 ### Patch Changes

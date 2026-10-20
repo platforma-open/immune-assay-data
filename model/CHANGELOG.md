@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.model
 
+## 1.13.1
+
+### Patch Changes
+
+- a81833a: Release every package through npm trusted publishing (OIDC) so each package's trusted publisher is used before it expires.
+
 ## 1.13.0
 
 ### Minor Changes

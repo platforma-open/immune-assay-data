@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data.check-content-empty
 
+## 1.0.6
+
+### Patch Changes
+
+- a81833a: Release every package through npm trusted publishing (OIDC) so each package's trusted publisher is used before it expires.
+
 ## 1.0.5
 
 ### Patch Changes
