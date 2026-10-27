@@ -261,7 +261,8 @@ wf.body(func(args) {
 	// Only for a subset run, so a full-data run keeps exactly its previous inputs
 	if !is_undefined(filterColumn) {
 		processOutputsInputs.subset = args.inputFilter
-		processOutputsInputs.traceSpec = filterColumn.spec
+		// Only the trace annotation, so unrelated filter spec edits don't re-run the sub-template
+		processOutputsInputs.traceSpec = { annotations: { "pl7.app/trace": filterColumn.spec.annotations["pl7.app/trace"] } }
 	}
 	processOutputsResult := render.create(processOutputsTpl, processOutputsInputs)
 	assayPframe := processOutputsResult.output("assayPframe")
