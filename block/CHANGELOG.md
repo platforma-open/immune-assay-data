@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data
 
+## 1.17.2
+
+### Patch Changes
+
+- 3195888: Update the SDK and build the dataset list with buildDatasetOptions (requireEnrichments: false), replacing the custom merge of datasets and their subset filters.
+
 ## 1.9.1
 
 ### Patch Changes
