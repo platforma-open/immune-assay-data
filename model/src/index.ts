@@ -197,11 +197,9 @@ export const platforma = BlockModelV3.create({ dataModel: blockDataModel, kind }
     };
   })
 
-  .prerunArgs(
-    (data): BlockPrerunArgs => ({
-      fileHandle: data.fileHandle,
-    }),
-  )
+  .prerunArgs((data): BlockPrerunArgs => ({
+    fileHandle: data.fileHandle,
+  }))
 
   // Datasets, each with its subset columns (`pl7.app/isSubset`, e.g. repertoire-labeling labels
   // or Lead Selection picks) as filters.
