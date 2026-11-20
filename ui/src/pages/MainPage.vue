@@ -454,6 +454,7 @@ const similarityTypeOptions = [
 
       <PlDropdown
         v-model="app.model.data.sequenceColumnHeader"
+        data-testid="assay-sequence-column"
         :options="sequenceColumnOptions"
         label="Assay sequence column"
         placeholder="Sequence column"
