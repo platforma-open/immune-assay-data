@@ -1,5 +1,7 @@
 # @platforma-open/milaboratories.immune-assay-data.workflow
 
+## 1.17.3
+
 ## 1.17.2
 
 ## 1.17.1

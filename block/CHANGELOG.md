@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.immune-assay-data
 
+## 1.17.3
+
+### Patch Changes
+
+- 9c8c7c9: Give the "Assay sequence column" dropdown a `data-testid` (`assay-sequence-column`), so end-to-end tests can find it among the other dropdowns of the settings.
+
 ## 1.17.2
 
 ### Patch Changes
